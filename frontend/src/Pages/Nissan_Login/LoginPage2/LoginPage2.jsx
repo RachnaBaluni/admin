@@ -25,6 +25,10 @@ const LoginPage2 = ({
   const [errors, setErrors] = useState({});
   const params = useParams();
 
+  const sortPlayersByName = (list) => {
+    return [...list].sort((a, b) => a.name.localeCompare(b.name));
+  };
+
   useEffect(() => {
     // It's generally better to pass player with the correct _id directly.
     // If player._id isn't guaranteed to be available from props, this line ensures it.
@@ -112,10 +116,12 @@ const LoginPage2 = ({
 
       if (initialFormData.event1) {
         setPlayersEvent1List(
-          getPartnersForEvent(
-            initialFormData.event1,
-            player._id,
-            currentPartner1
+          sortPlayersByName(
+            getPartnersForEvent(
+              initialFormData.event1,
+              player._id,
+              currentPartner1
+            )
           )
         );
       } else {
@@ -126,10 +132,12 @@ const LoginPage2 = ({
       if (initialFormData.event2) {
         setIsEvent2Selected(true);
         setPlayersEvent2List(
-          getPartnersForEvent(
-            initialFormData.event2,
-            player._id,
-            currentPartner2
+          sortPlayersByName(
+            getPartnersForEvent(
+              initialFormData.event2,
+              player._id,
+              currentPartner2
+            )
           )
         );
       } else {
@@ -183,9 +191,9 @@ const LoginPage2 = ({
             .map((item) => [item["_id"], item])
         ).values(),
       ];
-      setPlayersEvent1List(uniquePlayers);
+      setPlayersEvent1List(sortPlayersByName(uniquePlayers));
     } else {
-      setPlayersEvent1List([]);
+      setPlayersEvent2List(sortPlayersByName(uniquePlayers));
     }
     setErrors((prev) => ({ ...prev, event1: null }));
   };
@@ -274,7 +282,9 @@ const LoginPage2 = ({
   return (
     <div className={styles.loginPage2Container}>
       <section className={styles.formSection}>
-        <label htmlFor="event1" className={styles.label}>Choose Event 1</label>
+        <label htmlFor="event1" className={styles.label}>
+          Choose Event 1
+        </label>
         <select
           id="event1"
           value={formData.event1 || ""} // Ensure value is "" for default option
@@ -292,7 +302,9 @@ const LoginPage2 = ({
       </section>
 
       <section className={styles.formSection}>
-        <label htmlFor="partner1" className={styles.label}>Partner for Event 1</label>
+        <label htmlFor="partner1" className={styles.label}>
+          Partner for Event 1
+        </label>
         <select
           id="partner1"
           value={formData.partner1 || ""} // CORRECTED: Bind directly to formData.partner1
@@ -314,7 +326,9 @@ const LoginPage2 = ({
       </section>
 
       <section className={styles.formSection}>
-        <label htmlFor="event2" className={styles.label}>Choose Event 2</label>
+        <label htmlFor="event2" className={styles.label}>
+          Choose Event 2
+        </label>
         <select
           id="event2"
           value={formData.event2 || ""} // Ensure value is "" for default option
@@ -332,7 +346,9 @@ const LoginPage2 = ({
 
       {isEvent2Selected && (
         <section className={styles.formSection}>
-          <label htmlFor="partner2" className={styles.label}>Partner for Event 2</label>
+          <label htmlFor="partner2" className={styles.label}>
+            Partner for Event 2
+          </label>
           <select
             id="partner2"
             value={formData.partner2 || ""} // Ensure value is "" for default option
