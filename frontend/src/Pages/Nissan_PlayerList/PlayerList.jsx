@@ -56,7 +56,7 @@ const PlayerList = () => {
     <>
       <Header />
       <div className={styles.playerList}>
-        <h1 className={styles.pageTitle}>"Player List</h1>
+        <h1 className={styles.pageTitle}>Player List</h1>
 
         {/* --- Loading State Display --- */}
         {loading ? (
@@ -95,7 +95,7 @@ const PlayerList = () => {
                       <th>Event 2</th>
                       <th>Event 2 Partner</th>
                       <th>Whatsapp Number</th>
-                      <th>Date Of Birth</th>
+                      <th>Year Of Birth</th>
                       <th>City</th>
                     </tr>
                   </thead>
@@ -116,9 +116,7 @@ const PlayerList = () => {
                           {player.whatsappNumber || "N/A"}
                         </td>
                         <td data-label="Date Of Birth">
-                          {player.dob
-                            ? new Date(player.dob).toLocaleDateString()
-                            : "N/A"}
+                          {player.dob ? player.dob : "N/A"}
                         </td>
                         <td data-label="City">{player.city || "N/A"}</td>
                       </tr>

@@ -21,35 +21,35 @@ const KeyPersonnelTable = () => (
         <tbody>
           <tr className={styles.tableRow}>
             <td className={`${styles.tableCell} ${styles.colName}`}>
-              S. P. Singh
+              Ashok Kumar
             </td>
             <td className={`${styles.tableCell} ${styles.colPosition}`}>
               President
             </td>
             <td className={`${styles.tableCell} ${styles.colContact}`}>
-              spsingh@bccinfra.com
+              ashokkumar@bccinfra.com
             </td>
           </tr>
           <tr className={styles.tableRow}>
             <td className={`${styles.tableCell} ${styles.colName}`}>
-              Vijendra Chauhan
+              Sumit Goel
             </td>
             <td className={`${styles.tableCell} ${styles.colPosition}`}>
               Secretary
             </td>
             <td className={`${styles.tableCell} ${styles.colContact}`}>
-              vijendrachauhan@gmail.com
+              sumitgoel@gmail.com
             </td>
           </tr>
           <tr className={styles.tableRow}>
             <td className={`${styles.tableCell} ${styles.colName}`}>
-              Shailendra Kumar Sharma
+              Dinesh Nagpal
             </td>
             <td className={`${styles.tableCell} ${styles.colPosition}`}>
               Treasurer
             </td>
             <td className={`${styles.tableCell} ${styles.colContact}`}>
-              jaimatadi_sk@yahoo.com
+              dineshnagpal@yahoo.com
             </td>
           </tr>
         </tbody>

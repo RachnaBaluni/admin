@@ -20,8 +20,8 @@ const Register = () => {
     whatsappNumber: "",
     dob: "",
     city: "",
-    shirtSize: "M",
-    shortSize: "M",
+    shirtSize: "",
+    shortSize: "",
     foodPref: "Veg",
     stay: false,
     feePaid: false,
@@ -92,7 +92,7 @@ const Register = () => {
           <Link to="/tournaments">Back to Home</Link>
         </div>
       </header> */}
-      <Header/>
+      <Header />
       <section className={styles.formContainer}>
         <div className={styles.stepIndicator}>
           <div

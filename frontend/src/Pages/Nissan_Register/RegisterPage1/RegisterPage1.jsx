@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styles from "./RegisterPage1.module.css"; // Import the CSS module
 
 const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
-  // const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL"];
+  const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL"];
   const foodOptions = ["Veg", "Non-Veg", "I Won't Be There"];
 
   const [errors, setErrors] = useState({});
@@ -23,12 +23,12 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
     if (!formData.city.trim()) {
       newErrors.city = "City is required.";
     }
-    // if (!formData.shirtSize) {
-    //   newErrors.shirtSize = "Shirt Size is required.";
-    // }
-    // if (!formData.shortSize) {
-    //   newErrors.shortSize = "Short Size is required.";
-    // }
+    if (!formData.shirtSize) {
+      newErrors.shirtSize = "Shirt Size is required.";
+    }
+    if (!formData.shortSize) {
+      newErrors.shortSize = "Short Size is required.";
+    }
     if (!formData.foodPref) {
       newErrors.foodPref = "Food Preference is required.";
     }
@@ -118,7 +118,7 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
         />
         {errors.city && <span className={styles.errorText}>{errors.city}</span>}
       </section>
-      {/* <section className={styles.formSection}>
+      <section className={styles.formSection}>
         <label htmlFor="shirtSize" className={styles.label}>
           Shirt Size
         </label>
@@ -141,8 +141,8 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
         {errors.shirtSize && (
           <span className={styles.errorText}>{errors.shirtSize}</span>
         )}
-      </section> */}
-      {/* <section className={styles.formSection}>
+      </section>
+      <section className={styles.formSection}>
         <label htmlFor="shortSize" className={styles.label}>
           Short Size
         </label>
@@ -165,7 +165,7 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
         {errors.shortSize && (
           <span className={styles.errorText}>{errors.shortSize}</span>
         )}
-      </section> */}
+      </section>
       <section className={styles.formSection}>
         <label htmlFor="foodPref" className={styles.label}>
           Food Preference
@@ -190,7 +190,15 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
           <span className={styles.errorText}>{errors.foodPref}</span>
         )}
       </section>
-      <section className={styles.formSection} style={{display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center'}}>
+      <section
+        className={styles.formSection}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "10px",
+          alignItems: "center",
+        }}
+      >
         <label htmlFor="stay" className={styles.checkboxLabel}>
           {" "}
           {/* Applied checkbox label class */}
@@ -215,8 +223,8 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
           checked={formData.stay === true}
           onChange={() => setFormData({ ...formData, stay: true })}
         />
-        <label htmlFor="yes" style={{margin: '0 10px 0 0 '}}>
-        Yes
+        <label htmlFor="yes" style={{ margin: "0 10px 0 0 " }}>
+          Yes
         </label>
 
         <input
@@ -227,12 +235,19 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
           checked={formData.stay === false}
           onChange={() => setFormData({ ...formData, stay: false })}
         />
-        <label htmlFor="no" style={{margin: 0}}>
-        No
+        <label htmlFor="no" style={{ margin: 0 }}>
+          No
         </label>
-        
       </section>
-      <section className={styles.formSection} style={{display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center'}}>
+      <section
+        className={styles.formSection}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "10px",
+          alignItems: "center",
+        }}
+      >
         <label htmlFor="feePaid" className={styles.checkboxLabel}>
           {/* <input
             type="checkbox"
@@ -255,8 +270,8 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
           checked={formData.feePaid === true}
           onChange={() => setFormData({ ...formData, feePaid: true })}
         />
-        <label htmlFor="paidyes" style={{margin: '0 10px 0 0 '}}>
-        Yes
+        <label htmlFor="paidyes" style={{ margin: "0 10px 0 0 " }}>
+          Yes
         </label>
 
         <input
@@ -267,12 +282,10 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
           checked={formData.feePaid === false}
           onChange={() => setFormData({ ...formData, feePaid: false })}
         />
-        <label htmlFor="paidno" style={{margin: 0}}>
-        No
+        <label htmlFor="paidno" style={{ margin: 0 }}>
+          No
         </label>
-
       </section>
-
       {formData.feePaid && (
         <section className={styles.formSection}>
           <label htmlFor="transactionDetails" className={styles.label}>

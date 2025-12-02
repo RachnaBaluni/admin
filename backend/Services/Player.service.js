@@ -891,50 +891,77 @@ const getPlayersWithDetails = async () => {
   }
   return players;
 };
+
 const getPlayersWithDetailsFrontend = async () => {
+  // 1. Fetch all players
   const players = await Player.find({}).lean();
 
+  // 2. Fetch all teams ONCE (not inside loop)
+  const teams = await Team.find({})
+    .populate("eventId", "name")
+    .populate("partner1", "name")
+    .populate("partner2", "name")
+    .lean();
+
+  // 3. Build a map: playerId -> list of teams they are part of
+  const teamsByPlayer = {};
+
+  for (const team of teams) {
+    const partners = [team.partner1?._id, team.partner2?._id];
+
+    for (const pid of partners) {
+      if (!pid) continue;
+
+      const key = pid.toString();
+      if (!teamsByPlayer[key]) teamsByPlayer[key] = [];
+      teamsByPlayer[key].push(team);
+    }
+  }
+
+  // 4. Build the final players list
   const finalPlayersList = [];
 
   for (const player of players) {
-    const teams = await Team.find({
-      $or: [{ partner1: player._id }, { partner2: player._id }],
-    })
-      .populate("eventId", "name")
-      .populate("partner1", "name")
-      .populate("partner2", "name");
+    const pId = player._id.toString();
+    const playerTeams = teamsByPlayer[pId] || [];
 
-    if (teams.length > 0) {
-      const team1 = teams[0];
-      player.event1 = team1.eventId.name;
-      if (team1.partner1._id.toString() === player._id.toString()) {
-        player.event1Partner = team1.partner2 ? team1.partner2.name : "N/A";
-      } else {
-        player.event1Partner = team1.partner1.name;
-      }
+    let event1 = null;
+    let event1Partner = null;
+    let event2 = null;
+    let event2Partner = null;
+
+    if (playerTeams[0]) {
+      const t = playerTeams[0];
+      event1 = t.eventId?.name;
+
+      event1Partner =
+        t.partner1?._id?.toString() === pId
+          ? t.partner2?.name || "N/A"
+          : t.partner1?.name || "N/A";
     }
-    if (teams.length > 1) {
-      const team2 = teams[1];
-      player.event2 = team2.eventId.name;
-      if (team2.partner1._id.toString() === player._id.toString()) {
-        player.event2Partner = team2.partner2 ? team2.partner2.name : "N/A";
-      } else {
-        player.event2Partner = team2.partner1.name;
-      }
+
+    if (playerTeams[1]) {
+      const t = playerTeams[1];
+      event2 = t.eventId?.name;
+
+      event2Partner =
+        t.partner1?._id?.toString() === pId
+          ? t.partner2?.name || "N/A"
+          : t.partner1?.name || "N/A";
     }
-    const finalPlayer = {
+
+    finalPlayersList.push({
       name: player.name,
-      event1: player.event1,
-      event1Partner: player.event1Partner,
-      event2: player.event2,
-      event2Partner: player.event2Partner,
+      event1,
+      event1Partner,
+      event2,
+      event2Partner,
       whatsappNumber: player.whatsappNumber,
-      dob: player.dob,
+      dob: player.dob ? String(new Date(player.dob).getFullYear()) : null, // Only Year
       city: player.city,
-    };
-
-    finalPlayersList.push(finalPlayer);
+    });
   }
+
   return finalPlayersList;
 };
 

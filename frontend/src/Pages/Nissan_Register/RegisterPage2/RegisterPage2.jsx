@@ -19,9 +19,9 @@ const RegisterPage2 = ({
     setFormData({ ...formData, event1: event1Id, partner1: null });
     setEvent2List(events.filter((event) => event._id !== event1Id));
     setPlayersEvent1List(
-      players.filter(
-        (player) => player.eventId._id === event1Id && !player.partner2
-      )
+      players
+        .filter((player) => player.eventId._id === event1Id && !player.partner2)
+        .sort((a, b) => a.partner1.name.localeCompare(b.partner1.name))
     );
     setErrors((prev) => ({ ...prev, event1: null }));
   };
@@ -30,9 +30,9 @@ const RegisterPage2 = ({
     setFormData({ ...formData, event2: event2Id, partner2: null });
     setIsEvent2Selected(!!event2Id);
     setPlayersEvent2List(
-      players.filter(
-        (player) => player.eventId._id === event2Id && !player.partner2
-      )
+      players
+        .filter((player) => player.eventId._id === event2Id && !player.partner2)
+        .sort((a, b) => a.partner1.name.localeCompare(b.partner1.name))
     );
   };
 
