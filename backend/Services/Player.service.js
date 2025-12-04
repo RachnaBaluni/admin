@@ -957,6 +957,7 @@ const getPlayersWithDetailsFrontend = async () => {
       event2,
       event2Partner,
       whatsappNumber: player.whatsappNumber,
+      //dob: "This is Working",
       dob: player.dob ? String(new Date(player.dob).getFullYear()) : null, // Only Year
       city: player.city,
     });

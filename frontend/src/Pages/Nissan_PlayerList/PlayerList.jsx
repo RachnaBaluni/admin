@@ -25,6 +25,11 @@ const PlayerList = () => {
     }
   };
 
+ useEffect(() => {
+   console.log("Players after update:", players);
+ }, [players]);
+
+
   useEffect(() => {
     fetchPlayers();
   }, []);

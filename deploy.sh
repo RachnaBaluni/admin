@@ -4,17 +4,14 @@ set -e
 # Base directory
 BASE_DIR="/var/www/html/UTA"
 
-# Domains
 FRONTEND_DIR="$BASE_DIR/frontend"
 ADMIN_DIR="$BASE_DIR/admin"
 BACKEND_DIR="$BASE_DIR/backend"
 
-# Backend process
 BACKEND_PROCESS="utennisa-backend"
 
 echo "Starting deployment..."
 
-# Deploy
 deploy_node_app() {
   APP_DIR=$1
   BUILD=$2
@@ -24,25 +21,31 @@ deploy_node_app() {
   echo "Deploying $APP_DIR ..."
   cd "$APP_DIR"
 
-  # Cleanup old installs
-  echo "Removing old node_modules and lock files..."
-  rm -rf node_modules package-lock.json yarn.lock
+  # Install dependencies only if node_modules missing
+  if [ ! -d "node_modules" ]; then
+    echo "Installing dependencies (fresh install)..."
+    npm install --legacy-peer-deps
+  else
+    echo "Dependencies exist, running npm install to update..."
+    npm install --legacy-peer-deps
+  fi
 
-  # Install fresh dependencies
-  echo "Installing dependencies..."
-  npm install --legacy-peer-deps
-  # Build if required
+  # Build if required (frontend, admin)
   if [ "$BUILD" == "y" ]; then
     echo "Running build..."
     npm run build
   fi
 
-  # Start backend with pm2
+  # Backend specific restart
   if [ -n "$PM2_NAME" ]; then
-    echo "Restarting $PM2_NAME with PM2..."
+    echo "Restarting backend via PM2 properly..."
+
     pm2 stop "$PM2_NAME" || true
     pm2 delete "$PM2_NAME" || true
-    pm2 start npm --name "$PM2_NAME" -- run start
+
+    # 👇 Start backend directly, NOT via npm
+    pm2 start index.js --name "$PM2_NAME"
+
     pm2 save
   fi
 
@@ -50,11 +53,14 @@ deploy_node_app() {
   echo "---------------------------------------"
 }
 
-# Deploy Apps
+# Deploy frontend & admin with build
 deploy_node_app "$FRONTEND_DIR" "y"
 deploy_node_app "$ADMIN_DIR" "y"
-deploy_node_app "$BACKEND_DIR" "n" "$BACKEND_PROCESS"
-# Nginx
-sudo systemctl restart nginx
-echo "Deployment completed successfully!"
 
+# Deploy backend without build
+deploy_node_app "$BACKEND_DIR" "n" "$BACKEND_PROCESS"
+
+# Restart nginx after builds
+sudo systemctl restart nginx
+
+echo "Deployment completed successfully!"
