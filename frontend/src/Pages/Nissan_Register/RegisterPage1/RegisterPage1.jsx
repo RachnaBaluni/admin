@@ -26,9 +26,9 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
     if (!formData.shirtSize) {
       newErrors.shirtSize = "Shirt Size is required.";
     }
-    if (!formData.shortSize) {
-      newErrors.shortSize = "Short Size is required.";
-    }
+    // if (!formData.shortSize) {
+    //   newErrors.shortSize = "Short Size is required.";
+    // }
     if (!formData.foodPref) {
       newErrors.foodPref = "Food Preference is required.";
     }
@@ -142,7 +142,7 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
           <span className={styles.errorText}>{errors.shirtSize}</span>
         )}
       </section>
-      <section className={styles.formSection}>
+      {/* <section className={styles.formSection}>
         <label htmlFor="shortSize" className={styles.label}>
           Short Size
         </label>
@@ -165,7 +165,7 @@ const RegisterPage1 = ({ formData, setFormData, handleNext }) => {
         {errors.shortSize && (
           <span className={styles.errorText}>{errors.shortSize}</span>
         )}
-      </section>
+      </section> */}
       <section className={styles.formSection}>
         <label htmlFor="foodPref" className={styles.label}>
           Food Preference

@@ -9,9 +9,12 @@ const ViewPlayerList = () => {
 
   const fetchPlayers = async () => {
     try {
-      const res = await api.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/player/details`, {
-        withCredentials: true,
-      });
+      const res = await api.get(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/player/details`,
+        {
+          withCredentials: true,
+        }
+      );
       setPlayers(res.data.data);
       setLoading(false);
     } catch (error) {
@@ -83,7 +86,7 @@ const ViewPlayerList = () => {
               <th>DOB</th>
               <th>City</th>
               <th>Shirt Size</th>
-              <th>Short Size</th>
+              {/* <th>Short Size</th> */}
               <th>Food</th>
               <th>Stay</th>
               <th>Fee Paid</th>
@@ -111,7 +114,7 @@ const ViewPlayerList = () => {
                 </td>
                 <td data-label="City">{player.city}</td>
                 <td data-label="Shirt Size">{player.shirtSize}</td>
-                <td data-label="Short Size">{player.shortSize}</td>
+                {/* <td data-label="Short Size">{player.shortSize}</td> */}
                 <td data-label="Food">{player.foodPref}</td>
                 <td data-label="Stay">{player.stay ? "Yes" : "No"}</td>
                 <td data-label="Fee Paid">{player.feePaid ? "Yes" : "No"}</td>

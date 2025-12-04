@@ -52,7 +52,7 @@ const Home = () => {
     {
       name: "Sumit Goel",
       position: "Secretary",
-      contact: "sumitgoel@gmail.com",
+      contact: "goelsumit3@rediffmail.com",
     },
     {
       name: "Dinesh Nagpal",

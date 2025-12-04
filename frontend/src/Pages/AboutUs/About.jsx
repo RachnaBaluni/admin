@@ -38,7 +38,7 @@ const KeyPersonnelTable = () => (
               Secretary
             </td>
             <td className={`${styles.tableCell} ${styles.colContact}`}>
-              sumitgoel@gmail.com
+              goelsumit3@rediffmail.com
             </td>
           </tr>
           <tr className={styles.tableRow}>
