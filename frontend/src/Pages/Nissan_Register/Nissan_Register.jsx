@@ -21,7 +21,7 @@ const Register = () => {
     dob: "",
     city: "",
     shirtSize: "",
-    shortSize: "",
+    shortSize: "M",
     foodPref: "Veg",
     stay: false,
     feePaid: false,

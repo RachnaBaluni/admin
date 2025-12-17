@@ -241,7 +241,7 @@ const LoginPage2 = ({
             .map((item) => [item["_id"], item])
         ).values(),
       ];
-      setPlayersEvent2List(uniquePlayers);
+      setPlayersEvent2List(sortPlayersByName(uniquePlayers));
     } else {
       setPlayersEvent2List([]);
       // This is the crucial part: if event2Id is null, clear partner2
