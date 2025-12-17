@@ -134,7 +134,7 @@ const LoginPage1 = ({ player, handleNext, setPlayer, id }) => {
           ))}
         </select>
       </section>
-      <section className={styles.formSection}>
+      {/* <section className={styles.formSection}>
         <label htmlFor="shortSize" className={styles.label}>
           Short Size
         </label>
@@ -154,7 +154,7 @@ const LoginPage1 = ({ player, handleNext, setPlayer, id }) => {
             </option>
           ))}
         </select>
-      </section>
+      </section>*/}
       <section className={styles.formSection}>
         <label htmlFor="foodPref" className={styles.label}>
           Food Preference
