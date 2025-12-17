@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import api from "../../../api";
 import styles from "./ViewPlayerList.module.css";
 import { FiTrash2 } from "react-icons/fi";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 const ViewPlayerList = () => {
   const [players, setPlayers] = useState([]);
@@ -22,6 +25,45 @@ const ViewPlayerList = () => {
       setLoading(false);
     }
   };
+
+
+  const handleExportExcel = () => {
+    const formattedData = players.map((player, index) => ({
+      "S.No": index + 1,
+      Name: player.name,
+      "Event 1": player.event1 || "N/A",
+      "Event 1 Partner": player.event1Partner || "N/A",
+      "Event 2": player.event2 || "N/A",
+      "Event 2 Partner": player.event2Partner || "N/A",
+      "Whatsapp Number": player.whatsappNumber,
+      DOB: new Date(player.dob).toLocaleDateString(),
+      City: player.city,
+      "Shirt Size": player.shirtSize,
+      Food: player.foodPref,
+      Stay: player.stay ? "Yes" : "No",
+      "Fee Paid (User)": player.feePaid ? "Yes" : "No",
+      "Fee Paid (Admin)": player.feePaidAdmin ? "Yes" : "No",
+      "Transaction Id":
+        player.transactionDetails || "No Transaction Id Provided",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Players");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const data = new Blob([excelBuffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+    });
+
+    saveAs(data, "Player_List.xlsx");
+  };
+
 
   useEffect(() => {
     fetchPlayers();
@@ -71,7 +113,18 @@ const ViewPlayerList = () => {
       <div className={styles.stats}>
         <p>Total Players: {totalPlayers}</p>
         <p>Fee Paid: {feePaidPlayers}</p>
+
+        <button
+          className={styles.exportButton}
+          onClick={handleExportExcel}
+        >
+          Export to Excel
+      </button>
+
+      
       </div>
+      
+
       <div className={styles.tableContainer}>
         <table>
           <thead>
