@@ -9,8 +9,8 @@ const RegisteredPlayers = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null); // State for active event filter
-  const [searchTerm, setSearchTerm] = useState(""); // State for search bar
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const getPlayers = async () => {
     try {
@@ -59,40 +59,51 @@ const RegisteredPlayers = () => {
     if (events.length > 0 && selectedEvent === null) {
       setSelectedEvent(events[0]._id);
     }
-  }, [events]);
+  }, [events, selectedEvent]);
 
-  // Filtered players based on selectedEvent and searchTerm
+  /* ============================= */
+  /* FILTER + SORT LOGIC           */
+  /* ============================= */
+
   const filteredPlayers = players.filter((player) => {
     const matchesEvent = selectedEvent
-      ? player.eventId?._id === selectedEvent // Assuming eventId is ObjectId from backend
+      ? player.eventId?._id === selectedEvent
       : true;
 
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =
-      player.partner1?.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-      player.partner2?.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-      player.eventId?.name.toLowerCase().includes(lowerCaseSearchTerm); // Also allow searching by event name
+      player.partner1?.name?.toLowerCase().includes(lowerSearch) ||
+      player.partner2?.name?.toLowerCase().includes(lowerSearch) ||
+      player.eventId?.name?.toLowerCase().includes(lowerSearch);
 
     return matchesEvent && matchesSearch;
+  });
+
+  const sortedPlayers = [...filteredPlayers].sort((a, b) => {
+    // 1️⃣ Complete teams first
+    const aComplete = Boolean(a.partner1 && a.partner2);
+    const bComplete = Boolean(b.partner1 && b.partner2);
+
+    if (aComplete !== bComplete) {
+      return aComplete ? -1 : 1;
+    }
+
+    // 2️⃣ Sort by Player 1 name
+    const nameA = a.partner1?.name?.toLowerCase() || "";
+    const nameB = b.partner1?.name?.toLowerCase() || "";
+
+    return nameA.localeCompare(nameB);
   });
 
   return (
     <>
       <Header />
+
       <div className={styles.container}>
-        {/* <header className={styles.header}>
-        <div className={styles.headerLogoGroup}>
-          <div className={styles.logoIcon}>
-            <img src="/logo.png" alt="UTA LOGO" />
-          </div>
-        </div>
-        <h2 className={styles.headerTitle}>Uttranchal Tennis Association</h2>
-        <Link to={"/tournaments"}>Back to Home</Link>
-      </header> */}
         <main className={styles.mainContent}>
           <h2 className={styles.pageTitle}>Registered Teams</h2>
 
-          {/* --- Search and Filter Section --- */}
+          {/* SEARCH & FILTER */}
           <div className={styles.filtersContainer}>
             <input
               type="text"
@@ -101,15 +112,8 @@ const RegisteredPlayers = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+
             <div className={styles.eventFilters}>
-              {/* <button
-                className={`${styles.filterButton} ${
-                  selectedEvent === null ? styles.activeFilter : ""
-                }`}
-                onClick={() => setSelectedEvent(null)}
-              >
-                All Events
-              </button> */}
               {events.map((event) => (
                 <button
                   key={event._id}
@@ -123,13 +127,13 @@ const RegisteredPlayers = () => {
               ))}
             </div>
           </div>
-          {/* --- End Search and Filter Section --- */}
 
+          {/* TABLE */}
           {loading ? (
             <div className={styles.noPlayersMessage}>
               Loading registered players...
             </div>
-          ) : filteredPlayers.length > 0 ? ( // Use filteredPlayers here
+          ) : sortedPlayers.length > 0 ? (
             <div className={styles.tableContainer}>
               <table className={styles.playersTable}>
                 <thead>
@@ -140,7 +144,7 @@ const RegisteredPlayers = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredPlayers.map((player) => (
+                  {sortedPlayers.map((player) => (
                     <tr key={player._id}>
                       <td data-label="Event">
                         {player.eventId?.name || "N/A"}
@@ -149,7 +153,8 @@ const RegisteredPlayers = () => {
                         {player.partner1?.name || "N/A"}
                       </td>
                       <td data-label="Player 2">
-                        {player.partner2?.name || "Partner Not Yet Registered"}
+                        {player.partner2?.name ||
+                          "Partner Not Yet Registered"}
                       </td>
                     </tr>
                   ))}

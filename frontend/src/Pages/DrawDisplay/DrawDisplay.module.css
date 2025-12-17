@@ -1,0 +1,240 @@
+/* ============================= */
+/* ROOT SCREEN                   */
+/* ============================= */
+
+.displayScreen {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 24px;
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* ============================= */
+/* FIXED EVENT HEADER             */
+/* ============================= */
+
+.displayHeader {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #f8fafc;
+  padding: 16px 0;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.displayHeader h1 {
+  font-size: 34px;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111827;
+  margin: 0;
+}
+
+/* ============================= */
+/* SCROLL AREA                    */
+/* ============================= */
+
+.scrollArea {
+  height: calc(100vh - 90px); /* header height */
+  overflow-y: auto;
+  padding-top: 16px;
+}
+
+/* Hide scrollbar (projector safe) */
+.scrollArea::-webkit-scrollbar {
+  display: none;
+}
+.scrollArea {
+  scrollbar-width: none;
+}
+
+/* ============================= */
+/* BRACKET CONTAINER              */
+/* ============================= */
+
+.bracketContainer {
+  display: flex;
+  justify-content: center;
+  gap: 64px;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================= */
+/* ROUND COLUMN                   */
+/* ============================= */
+
+.roundContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex-shrink: 0;
+  position: relative;
+  padding: 10px 0;
+  min-width: 340px;
+}
+
+.roundTitle {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #1f2937;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ============================= */
+/* MATCH STACK                    */
+/* ============================= */
+
+.matchesContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex-grow: 1;
+}
+
+/* ============================= */
+/* MATCH CARD                     */
+/* ============================= */
+
+.matchPair {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 36px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  width: 320px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.matchPair:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================= */
+/* MATCH NUMBER                   */
+/* ============================= */
+
+.matchNumber {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  background-color: #ffffff;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  z-index: 5;
+}
+
+/* ============================= */
+/* MATCH SLOT (TEAM)              */
+/* ============================= */
+
+.matchSlot {
+  padding: 14px 16px;
+  font-size: 15px;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin: 6px;
+}
+
+.matchSlot:first-child {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* ============================= */
+/* TEAM NAME                      */
+/* ============================= */
+
+.teamName {
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #111827;
+  white-space: normal;
+}
+
+/* ============================= */
+/* WIN / LOSS STATES              */
+/* ============================= */
+
+.matchSlot.winner {
+  background-color: #dcfce7;
+  border: 1px solid #22c55e;
+}
+
+.matchSlot.loser {
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+}
+
+/* ============================= */
+/* VS SEPARATOR                   */
+/* ============================= */
+
+.vsSeparator {
+  text-align: center;
+  font-weight: 700;
+  margin: 6px 0;
+  color: #6b7280;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+/* ============================= */
+/* SCORE DISPLAY                  */
+/* ============================= */
+
+.scoreText {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 0 10px;
+  color: #374151;
+}
+
+/* ============================= */
+/* CONNECTOR LINE                 */
+/* ============================= */
+
+.connectorLine {
+  height: 36px;
+  width: 2px;
+  background-color: #d1d5db;
+  margin: 0 auto;
+}
+
+/* ============================= */
+/* RESPONSIVE SCALE               */
+/* ============================= */
+
+@media (max-width: 1280px) {
+  .bracketContainer {
+    transform: scale(0.95);
+  }
+}
+
+@media (max-width: 1024px) {
+  .bracketContainer {
+    transform: scale(0.9);
+  }
+}
