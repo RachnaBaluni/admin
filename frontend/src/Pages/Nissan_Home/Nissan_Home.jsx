@@ -317,22 +317,22 @@ export default function Home() {
           </p>
           <div className={styles.ctaButtons}>
             <Link
-              to="/tournaments/registered-teams"
-              className={styles.registerButton}
-            >
-              <span className={styles.buttonText}>View Registered Teams</span>
-            </Link> 
-            <Link
               to="/tournaments/registered-players"
-              className={styles.loginButton}
+              className={styles.registerButton}
             >
               <span className={styles.buttonText}>View Registered Players</span>
             </Link>
-            <Link to="/tournaments/results" className={styles.registerButton}>
-              <span className={styles.buttonText}>View Results</span>
-            </Link>
-            <Link to="/tournaments/draws" className={styles.loginButton}>
+            <Link
+              to="/tournaments/registered-teams"
+              className={styles.loginButton}
+            >
+              <span className={styles.buttonText}>View Registered Teams</span>
+            </Link> 
+            <Link to="/tournaments/draws" className={styles.registerButton}>
               <span className={styles.buttonText}>View Draws</span>
+            </Link>
+            <Link to="/tournaments/results" className={styles.loginButton}>
+              <span className={styles.buttonText}>View Results</span>
             </Link>
           </div>
         </section>
