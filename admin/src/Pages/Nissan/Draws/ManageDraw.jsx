@@ -72,7 +72,14 @@ const Match = ({
   );
 };
 
-const Round = ({ title, matches, roundIndex, totalRounds }) => {
+const Round = ({
+  title,
+  matches,
+  roundIndex,
+  totalRounds,
+  onUpdateTime,
+  onUpdateCourt,
+}) => {
   const isLastRound = roundIndex === totalRounds - 1;
 
   return (
@@ -87,6 +94,32 @@ const Round = ({ title, matches, roundIndex, totalRounds }) => {
               <div className={styles.matchNumber}>
                 Match {match.Match_number}
               </div>
+              <div className={styles.matchMeta}>
+                <input
+                  type="time"
+                  value={match.MatchTime || ""}
+                  className={styles.timeInput}
+                  onChange={(e) =>
+                    onUpdateTime(match._id, e.target.value)
+                  }
+                />
+
+                <select
+                  value={match.CourtNumber || ""}
+                  className={styles.courtSelect}
+                  onChange={(e) =>
+                    onUpdateCourt(match._id, Number(e.target.value))
+                  }
+                >
+                  <option value="">Court</option>
+                  {[1, 2, 3, 4].map((court) => (
+                    <option key={court} value={court}>
+                      Court {court}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <Match
                 team={match.Team1}
                 roundIndex={roundIndex}
@@ -133,6 +166,55 @@ const ManageDraw = () => {
       setLoading(false);
     }
   };
+
+
+// =====================
+// UPDATE MATCH TIME
+// =====================
+const updateMatchTime = async (drawId, matchTime) => {
+  // optimistic UI update
+  setDraws((prev) =>
+    prev.map((draw) =>
+      draw._id === drawId
+        ? { ...draw, MatchTime: matchTime }
+        : draw
+    )
+  );
+
+  try {
+    await api.post(
+      `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/updateTime/${drawId}`,
+      { matchTime },
+      { withCredentials: true }
+    );
+  } catch (error) {
+    toast.error("Failed to update match time");
+  }
+};
+
+// =====================
+// UPDATE COURT NUMBER
+// =====================
+const updateMatchCourt = async (drawId, matchCourt) => {
+  setDraws((prev) =>
+    prev.map((draw) =>
+      draw._id === drawId
+        ? { ...draw, CourtNumber: matchCourt }
+        : draw
+    )
+  );
+
+  try {
+    await api.post(
+      `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/updateCourt/${drawId}`,
+      { matchCourt },
+      { withCredentials: true }
+    );
+  } catch (error) {
+    toast.error("Failed to update court number");
+  }
+};
+
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -373,7 +455,10 @@ const ManageDraw = () => {
                 matches={round.matches}
                 roundIndex={roundIndex}
                 totalRounds={totalRounds}
+                onUpdateTime={updateMatchTime}
+                onUpdateCourt={updateMatchCourt}
               />
+
             ))}
           </div>
         </DndContext>

@@ -13,4 +13,7 @@ router.get("/:eventId", drawController.getDrawsByEvent);
 router.put("/:drawId", isAdmin, drawController.updateDraw);
 router.delete("/:drawId", isAdmin, drawController.deleteDraw);
 
+router.post("/updateTime/:drawId", isAdmin, drawController.updateTime);
+router.post("/updateCourt/:drawId", isAdmin, drawController.updateCourt);
+
 module.exports = router;

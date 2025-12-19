@@ -36,6 +36,19 @@ const nissanDrawsSchema = new mongoose.Schema({
     enum: ["Upcoming", "In Progress", "Completed"],
     default: "Upcoming",
   },
+
+  MatchTime: {
+    type: String, // "HH:mm"
+    default: "",  // blank until explicitly set
+  },
+
+  CourtNumber: {
+    type: Number,
+    enum: [1, 2, 3, 4],
+    default: null, // not assigned initially
+  },
+
+  
 });
 
 const Nissan_Draws = mongoose.model("Nissan_Draws", nissanDrawsSchema);

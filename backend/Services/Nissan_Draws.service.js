@@ -270,3 +270,52 @@ exports.swapMatchup = async (
     throw new Error(error.message);
   }
 };
+
+
+
+
+exports.updateTime = async (matchTime, drawId) => {
+  try {
+    const updatedDraw = await Nissan_Draws.findByIdAndUpdate(
+      drawId,
+      { MatchTime: matchTime },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedDraw) {
+      throw new Error("Draw not found");
+    }
+
+    return updatedDraw;
+  } catch (error) {
+    console.error("Error in Updating Time service:", error);
+    throw new Error(error.message);
+  }
+};
+
+/* =========================
+   UPDATE COURT NUMBER
+   ========================= */
+exports.updateCourt = async (matchCourt, drawId) => {
+  try {
+    // Optional safety check
+    if (![1, 2, 3, 4].includes(matchCourt)) {
+      throw new Error("Invalid court number");
+    }
+
+    const updatedDraw = await Nissan_Draws.findByIdAndUpdate(
+      drawId,
+      { CourtNumber: matchCourt },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedDraw) {
+      throw new Error("Draw not found");
+    }
+
+    return updatedDraw;
+  } catch (error) {
+    console.error("Error in Updating Court service:", error);
+    throw new Error(error.message);
+  }
+};

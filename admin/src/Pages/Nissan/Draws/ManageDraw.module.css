@@ -208,3 +208,27 @@
   background-color: #fdfdfd; /* Very light background */
   color: #333; /* Darker text color */
 }
+
+.matchMeta {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #eee;
+  background-color: #fafafa;
+}
+
+.timeInput {
+  flex: 1;
+  font-size: 0.8em;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.courtSelect {
+  width: 85px;
+  font-size: 0.8em;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

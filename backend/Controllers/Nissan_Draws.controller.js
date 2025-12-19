@@ -56,7 +56,6 @@ exports.updateDrawOrder = async (req, res) => {
 
 exports.updateMatchup = async (req, res) => {
   try {
-    console.log("RAN 1");
     console.log(req.body);
     const { matchId, teamField, teamId } = req.body;
     await drawService.updateMatchup(matchId, teamField, teamId);
@@ -77,5 +76,68 @@ exports.swapMatchup = async (req, res) => {
       .json({ success: true, message: "Matchup swapped successfully." });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+/* =========================
+   UPDATE MATCH TIME
+   ========================= */
+exports.updateTime = async (req, res) => {
+  try {
+    const { matchTime } = req.body;
+    const { drawId } = req.params;
+
+    if (!matchTime) {
+      return res.status(400).json({
+        success: false,
+        message: "Match time is required",
+      });
+    }
+
+    const updatedDraw = await drawService.updateTime(matchTime, drawId);
+
+    res.status(200).json({
+      success: true,
+      message: "Match time updated successfully",
+      data: updatedDraw,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/* =========================
+   UPDATE COURT NUMBER
+   ========================= */
+exports.updateCourt = async (req, res) => {
+  try {
+    const { matchCourt } = req.body;
+    const { drawId } = req.params;
+
+    if (!matchCourt) {
+      return res.status(400).json({
+        success: false,
+        message: "Court number is required",
+      });
+    }
+
+    const updatedDraw = await drawService.updateCourt(matchCourt, drawId);
+
+    res.status(200).json({
+      success: true,
+      message: "Court number updated successfully",
+      data: updatedDraw,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
