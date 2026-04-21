@@ -9,6 +9,7 @@ const RegisterPage2 = ({
   events,
   players,
 }) => {
+  console.log(events);
   const [errors, setErrors] = useState({});
   const [event2List, setEvent2List] = useState(events);
   const [isEvent2Selected, setIsEvent2Selected] = useState(false);
