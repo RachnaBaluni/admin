@@ -1,0 +1,136 @@
+.members {
+    padding: 20px;
+}
+
+.members h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.category {
+    margin-bottom: 30px;
+}
+
+.category h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #2e7d32;
+    padding-bottom: 5px;
+}
+
+.members table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.members th, .members td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.members th {
+    background-color: #f4f6f8;
+    font-weight: bold;
+    color: #333;
+}
+
+.removeButton {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.removeButton:hover {
+    background-color: #d32f2f;
+}
+
+.status {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.statusVerified {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.noMembersMessage {
+    text-align: center;
+    padding: 20px;
+    color: #777;
+    font-size: 18px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .members table,
+    .members thead,
+    .members tbody,
+    .members th,
+    .members td,
+    .members tr {
+        display: block;
+    }
+
+    .members thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .members tr {
+        border: 1px solid #e0e0e0;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .members td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+        word-break: break-all;
+    }
+
+    .members td:before {
+        position: absolute;
+        top: 0;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        content: attr(data-label); /* Use data-label for column names */
+    }
+
+    /* Specific data-labels for each column */
+    .members td:nth-of-type(1):before { content: "Name"; }
+    .members td:nth-of-type(2):before { content: "Email"; }
+    .members td:nth-of-type(3):before { content: "Status"; }
+    .members td:nth-of-type(4):before { content: "Action"; }
+
+    .removeButton {
+        width: 100%;
+        margin-top: 10px;
+    }
+}

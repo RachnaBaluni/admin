@@ -1,0 +1,50 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f4f6f8;
+}
+
+.mainContent {
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+}
+
+.pageContent {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex; /* Add display flex */
+    flex-direction: column; /* Set flex direction to column */
+    overflow: hidden; /* Hide overflow */
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999; /* Below sidebar, above content */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    display: none; /* Hidden by default on desktop */
+}
+
+.overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (max-width: 768px) {
+    .pageContent {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    .overlay.visible {
+        display: block; /* Only display on mobile when visible */
+    }
+}

@@ -1,0 +1,57 @@
+:root {
+  /* Colors */
+  --primary-color: #4a90e2; /* A nice blue for primary actions/accents */
+  --secondary-color: #8cc46d; /* A soft green for secondary elements */
+  --text-dark: #333333; /* Dark text for readability */
+  --text-light: #ffffff; /* Light text, especially on dark backgrounds */
+  --background-light: #f5f8fa; /* A very light, neutral background */
+  --background-card: #ffffff; /* White background for cards/tiles */
+  --border-color: #e0e0e0; /* Light border color */
+  --hover-dark: #3a7bd5; /* Darker blue for hover */
+  --hover-light: #f0f0f0; /* Lighter gray for hover */
+  --shadow-color: rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  --danger-color: #dc2626; /* Red for important dates/warnings */
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Font Sizes */
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-md: 17px;
+  --font-size-lg: 19px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 30px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 48px;
+  --font-size-mobile-nav: 18px; /* Specific for mobile nav links */
+
+  /* Border Radii */
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+  --border-radius-xl: 12px;
+  --border-radius-full: 9999px; /* For pill shapes */
+  --border-radius-banner-mobile: 30px; /* Specific for banner curve on mobile */
+
+  /* Transitions */
+  --transition-speed-fast: 0.15s;
+  --transition-speed-normal: 0.2s;
+  --transition-speed-slow: 0.3s;
+  --transition-ease: ease-in-out;
+}
+
+body {
+  margin: 0;
+  background-color: #f4f6f8;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}

@@ -1,0 +1,234 @@
+/* ManageDraw.module.css */
+
+.manageDrawContainer {
+  padding: var(--spacing-lg);
+}
+
+.eventFilterButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.filterButton {
+  background-color: var(--background-card);
+  color: var(--text-dark);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.filterButton:hover {
+  background-color: var(--hover-light);
+}
+
+.filterButton.active {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border-color: var(--primary-color);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.drawButton, .deleteDrawButton {
+  color: var(--text-light);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background-color var(--transition-speed-normal) var(--transition-ease);
+}
+
+.drawButton {
+  background-color: var(--primary-color);
+}
+
+.drawButton:hover {
+  background-color: var(--hover-dark);
+}
+
+.deleteDrawButton {
+  background-color: var(--danger-color);
+}
+
+.deleteDrawButton:hover {
+  background-color: #b30000; /* Darker red */
+}
+
+.drawButton:disabled, .deleteDrawButton:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+/* Bracket Styles */
+.bracketContainer {
+  display: flex;
+  overflow-x: auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.roundContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex-shrink: 0;
+  margin-right: 80px; /* Space between rounds */
+  position: relative;
+  padding: 10px 0;
+}
+
+.roundContainer:last-child {
+  margin-right: 0;
+}
+
+.roundTitle {
+  text-align: center;
+  font-size: 1.3em;
+  font-weight: bold;
+  margin-bottom: 25px;
+  color: var(--text-dark);
+  text-transform: uppercase;
+}
+
+.matchesContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex-grow: 1;
+}
+
+.matchPair {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 40px; /* Space between match pairs */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 280px; /* Increased width to accommodate score input */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.matchPair:last-child {
+  margin-bottom: 0;
+}
+
+.matchSlot {
+  padding: 12px 15px;
+  font-size: 0.95em;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex; /* Added */
+  align-items: center; /* Added */
+  justify-content: space-between; /* Added */
+  user-select: none; /* Prevent text selection */
+  -webkit-user-select: none; /* For Webkit browsers */
+  -moz-user-select: none; /* For Firefox */
+  -ms-user-select: none; /* For Internet Explorer/Edge */
+  touch-action: none; /* Prevent default touch actions */
+}
+
+.matchSlot:first-child {
+  border-bottom: 1px solid #eee;
+}
+
+.teamName {
+  font-weight: 600; /* Bolder */
+  color: var(--text-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1; /* Allow shrinking */
+  min-width: 0; /* Allow content to shrink below its intrinsic size */
+}
+
+.dragging {
+  opacity: 0.5;
+  background-color: #e0e0e0;
+  border: 1px dashed #999;
+}
+
+.over {
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 0 8px rgba(var(--primary-color-rgb), 0.5);
+}
+
+.matchNumber {
+  position: absolute;
+  top: -20px; /* Offset from the top of matchPair */
+  left: 50%;
+  transform: translateX(-50%); /* Center horizontally */
+  font-size: 0.8em;
+  color: #777;
+  white-space: nowrap;
+  background-color: #f9f9f9; /* Match bracketContainer background */
+  padding: 2px 8px;
+  border-radius: 4px;
+  z-index: 10; /* Ensure it's above other elements */
+}
+
+.draggableSlot {
+  cursor: grab;
+  position: relative; /* Needed for absolute positioning of drag handle */
+}
+
+.draggableSlot.dragging {
+  cursor: grabbing;
+}
+
+.dragHandle {
+  font-size: 1.2em;
+  color: #888;
+  cursor: grab; /* Ensure grab cursor on the handle itself */
+  flex-shrink: 0; /* Prevent shrinking */
+  margin-left: 10px; /* Add some space between name and handle */
+}
+
+.teamScoreInput {
+  width: 70px; /* Adjusted width */
+  padding: 3px 5px; /* Adjusted padding */
+  font-size: 0.75em; /* Adjusted font size */
+  border: 1px solid #e0e0e0; /* Lighter border */
+  border-radius: 4px; /* Slightly larger border-radius */
+  text-align: center;
+  box-sizing: border-box; /* Include padding and border in width */
+  background-color: #fdfdfd; /* Very light background */
+  color: #333; /* Darker text color */
+}
+
+.matchMeta {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #eee;
+  background-color: #fafafa;
+}
+
+.timeInput {
+  flex: 1;
+  font-size: 0.8em;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.courtSelect {
+  width: 85px;
+  font-size: 0.8em;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

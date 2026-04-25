@@ -1,0 +1,158 @@
+.updateRanking {
+    padding: 2rem;
+    background-color: #f9fafb;
+}
+
+.updateRanking h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.5rem;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.filterButton {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    color: #374151;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.filterButton:hover {
+    background-color: #f3f4f6;
+}
+
+.filterButton.active {
+    background-color: #10b981;
+    color: #ffffff;
+    border-color: #10b981;
+}
+
+.rankingTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.rankingTable th,
+.rankingTable td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.rankingTable th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.tableRow {
+    transition: background-color 0.2s ease-in-out;
+}
+
+.tableRow:hover {
+    background-color: #f3f4f6;
+}
+
+.dragHandle {
+    cursor: grab;
+    font-size: 1.5rem;
+    color: #9ca3af;
+    touch-action: none;
+}
+
+.tableContainer {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+@media (max-width: 768px) {
+    .updateRanking {
+        padding: 1rem;
+    }
+
+    .filters {
+        gap: 0.5rem;
+    }
+
+    .filterButton {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .tableContainer {
+        overflow-x: hidden; /* Hide horizontal scroll on mobile */
+    }
+
+    .rankingTable {
+        display: block;
+        width: 100%;
+        box-shadow: none;
+        background-color: transparent;
+        border-collapse: separate;
+        border-spacing: 0 1rem; /* Add space between cards */
+    }
+
+    .rankingTable thead {
+        display: none;
+    }
+
+    .rankingTable tbody,
+    .tableRow {
+        display: block;
+        width: 100%;
+    }
+
+    .tableRow {
+        background-color: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .rankingTable td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        text-align: right;
+        border-bottom: 1px solid #e5e7eb;
+        white-space: normal;
+    }
+
+    .rankingTable td:last-child {
+        border-bottom: none;
+    }
+
+    .rankingTable td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #374151;
+        text-align: left;
+        padding-right: 1rem;
+        flex-basis: 50%;
+    }
+
+    .dragHandle {
+        justify-content: center;
+        padding: 0.5rem;
+    }
+}

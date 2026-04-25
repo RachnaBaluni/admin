@@ -1,0 +1,230 @@
+.updateEvents {
+    padding: 2rem;
+    background-color: #f9fafb;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.updateEvents h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.createButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    background-color: #10b981;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.createButton:hover {
+    background-color: #059669;
+}
+
+.tableContainer {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.eventsTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.eventsTable th,
+.eventsTable td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.eventsTable th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.editButton,
+.deleteButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    transition: color 0.2s ease-in-out;
+}
+
+.editButton {
+    color: #3b82f6;
+}
+
+.editButton:hover {
+    color: #2563eb;
+}
+
+.deleteButton {
+    color: #ef4444;
+}
+
+.deleteButton:hover {
+    color: #dc2626;
+}
+
+/* Modal Styles */
+.modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 90%;
+    max-width: 500px;
+}
+
+.modalContent h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.formGroup label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="date"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+}
+
+.formGroup input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.cancelButton,
+.saveButton {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.cancelButton {
+    background-color: #e5e7eb;
+    color: #374151;
+}
+
+.cancelButton:hover {
+    background-color: #d1d5db;
+}
+
+.saveButton {
+    background-color: #10b981;
+    color: #ffffff;
+}
+
+.saveButton:hover {
+    background-color: #059669;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .updateEvents {
+        padding: 1rem;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .eventsTable {
+        display: block;
+    }
+
+    .eventsTable thead {
+        display: none;
+    }
+
+    .eventsTable tbody,
+    .eventsTable tr,
+    .eventsTable td {
+        display: block;
+    }
+
+    .eventsTable tr {
+        margin-bottom: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+
+    .eventsTable td {
+        padding-left: 50%;
+        position: relative;
+        text-align: right;
+    }
+
+    .eventsTable td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 1rem;
+        width: 45%;
+        padding-right: 1rem;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+    }
+}
