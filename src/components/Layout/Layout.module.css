@@ -13,12 +13,14 @@
 
 .pageContent {
     flex-grow: 1;
-    padding: 20px;
-    display: flex; /* Add display flex */
-    flex-direction: column; /* Set flex direction to column */
-    width: 100%;        
-    max-width: 100%;
-    overflow: auto; 
+    width: 100%;          
+    max-width: 100%;      
+    padding: 10px;      
+    display: block;       
+}
+.mainContent {
+    display: flex;
+    width: 100%;
 }
 
 .overlay {
