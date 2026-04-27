@@ -6,11 +6,7 @@ import styles from "./Layout.module.css";
 import { useLocation } from "react-router-dom";
 
 const Layout = ({ children }) => {
-  //const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768); // Sidebar open by default on desktop
-  {isSidebarOpen && (
-  <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-)}
-  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768); // Sidebar open by default on desktop
   const location = useLocation();
   useEffect(() => {
     const handleResize = () => {
