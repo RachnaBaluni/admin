@@ -1,12 +1,14 @@
 .sidebar {
-    min-width: 250px;
+    /*min-width: 250px;*/
+    width: 250px;
+    flex-shrink: 0;
     background-color: #ffffff;
     border-right: 1px solid #e0e0e0;
     padding: 20px;
     height: 100vh;
     display: flex;
     flex-direction: column;
-    transition: all 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out;
     overflow-y: auto;
 }
 
@@ -101,6 +103,13 @@
 .submenu a {
     padding: 6px 8px 6px 30px;
     font-size: 14px;
+}
+.closed {
+  transform: translateX(-100%);
+}
+
+.open {
+  transform: translateX(0);
 }
 
 @media (max-width: 768px) {
