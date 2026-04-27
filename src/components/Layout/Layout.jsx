@@ -36,7 +36,10 @@ const Layout = ({ children }) => {
   return (
     <div className={styles.layout}>
       <Header toggleSidebar={toggleSidebar} />
-      <div className={styles.mainContent}>
+      <div className={`${styles.mainContent} ${
+    location.pathname.startsWith("/nissan") ? styles.noSidebar : ""
+  }`}
+>
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         {window.innerWidth <= 768 && isSidebarOpen && (
           <div className={`${styles.overlay} ${styles.visible}`} onClick={toggleSidebar}></div>
