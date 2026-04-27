@@ -12,11 +12,8 @@
 }
 
 .pageContent {
-    flex-grow: 1;
-    width: 100%;          
-    max-width: 100%;      
-    padding: 10px;      
-    display: block;       
+    flex: 1;              
+    padding: 10px;
 }
 .mainContent {
     display: flex;

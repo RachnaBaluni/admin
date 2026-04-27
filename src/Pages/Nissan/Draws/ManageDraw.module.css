@@ -71,8 +71,8 @@
 
 /* Bracket Styles */
 .bracketContainer {
-  display: flex;
-  overflow-x: auto;
+  display: block;
+  overflow-x: visible;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -80,17 +80,8 @@
 }
 
 .roundContainer {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  flex-shrink: 0;
-  margin-right: 80px; /* Space between rounds */
-  position: relative;
-  padding: 10px 0;
-}
-
-.roundContainer:last-child {
-  margin-right: 0;
+  width: 100%;           /* full width */
+  margin-bottom: 20px;   /* spacing between rounds */
 }
 
 .roundTitle {
@@ -103,10 +94,9 @@
 }
 
 .matchesContainer {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
 }
 
 .matchPair {
@@ -117,7 +107,7 @@
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 6px;
-  width: 280px; /* Increased width to accommodate score input */
+  width: 100%; /* Increased width to accommodate score input */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
