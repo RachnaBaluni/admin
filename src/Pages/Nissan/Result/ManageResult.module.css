@@ -1,6 +1,8 @@
 /* ManageResult.module.css */
 
 .manageResultContainer {
+  width: 100%;
+  max-width: 100%;
   padding: 10px;
 }
 
@@ -17,10 +19,9 @@
   font-size: 12px;
 }
 
-/* 🔥 MAIN CONTAINER */
+
 .bracketContainer {
-  display: block;           /* ❌ flex removed */
-  overflow: visible;        /* ❌ scroll removed */
+  display: block;           
   padding: 10px;
 }
 

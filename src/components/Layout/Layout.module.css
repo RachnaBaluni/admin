@@ -16,7 +16,9 @@
     padding: 20px;
     display: flex; /* Add display flex */
     flex-direction: column; /* Set flex direction to column */
-    overflow: hidden; /* Hide overflow */
+    width: 100%;        
+    max-width: 100%;
+    overflow: auto; 
 }
 
 .overlay {
