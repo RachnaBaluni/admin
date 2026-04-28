@@ -15,7 +15,7 @@ import ManageDraw from "./Pages/Nissan/Draws/ManageDraw";
 import ManageResult from "./Pages/Nissan/Result/ManageResult";
 import UpdateEvents from "./Pages/Nissan/UpdateEvents/UpdateEvents";
 import ViewPlayerJourney from "./Pages/Nissan/Journey/ViewPlayerJourney";
-import ManageResultsTo from "./Pages/Nissan/ResultsTo/ManageResultsTo";
+//import ManageResultsTo from "./Pages/Nissan/ResultsTo/ManageResultsTo";
 import { Toaster } from "sonner";
 
 function App() {
@@ -134,16 +134,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-        path="/nissan/manage-result-compact"
-        element={
-       <ProtectedRoute>
-        <Layout>
-        <ManageResultsTo/>
-      </Layout>
-    </ProtectedRoute>
-  }
-/>
+       
         <Route
           path="/nissan/update-events"
           element={

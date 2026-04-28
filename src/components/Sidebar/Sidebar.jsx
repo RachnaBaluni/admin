@@ -123,15 +123,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               className={({ isActive }) => (isActive ? styles.active : "")}
               onClick={toggleSidebar}
   >
-    <FiGrid className={styles.icon} /> Manage Result To
-  </NavLink>
-</li>
-              <li>
-                <NavLink
-                  to="/nissan/update-events"
-                  className={({ isActive }) => (isActive ? styles.active : "")}
-                  onClick={toggleSidebar}
-                >
+    
                   <FiEdit className={styles.icon} /> Update Events
                 </NavLink>
               </li>
