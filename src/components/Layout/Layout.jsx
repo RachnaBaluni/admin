@@ -3,30 +3,19 @@ import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import styles from "./Layout.module.css";
-import { useLocation } from "react-router-dom";
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768); // Sidebar open by default on desktop
-  
-  
-  
-  const location = useLocation();
+
   useEffect(() => {
     const handleResize = () => {
       setIsSidebarOpen(window.innerWidth > 768);
     };
 
-  
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  useEffect(() => {
-  if (location.pathname.startsWith("/nissan")) {
-    setIsSidebarOpen(false);
-  } else {
-    setIsSidebarOpen(window.innerWidth > 768);
-  }
-}, [location]);
+
   const toggleSidebar = () => {
     if (window.innerWidth <= 768) { // Only toggle on mobile
       setIsSidebarOpen(!isSidebarOpen);
@@ -36,10 +25,7 @@ const Layout = ({ children }) => {
   return (
     <div className={styles.layout}>
       <Header toggleSidebar={toggleSidebar} />
-      <div className={`${styles.mainContent} ${
-    location.pathname.startsWith("/nissan") ? styles.noSidebar : ""
-  }`}
->
+      <div className={styles.mainContent}>
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         {window.innerWidth <= 768 && isSidebarOpen && (
           <div className={`${styles.overlay} ${styles.visible}`} onClick={toggleSidebar}></div>
