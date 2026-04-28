@@ -1,108 +1,164 @@
+/* ManageResult.module.css */
+
 .manageResultContainer {
-  padding: 16px;
+  padding: var(--spacing-lg);
+  overflow-x: auto; /* 👈 scroll fix */
 }
 
 /* ===== BRACKET ===== */
 .bracketContainer {
   display: flex;
-  overflow-x: auto;
-  padding: 15px;
-  background: #f9f9f9;
-  border-radius: 6px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  transform: scale(0.85);          /* 👈 main magic */
+  transform-origin: top center;    /* 👈 center se shrink */
 }
 
 /* ===== ROUND ===== */
 .roundContainer {
   display: flex;
   flex-direction: column;
-  margin-right: 45px; /* thoda balance */
+  justify-content: space-around; /* 👈 SAME beech alignment */
+  flex-shrink: 0;
+  margin-right: 60px;
+  position: relative;
+  padding: 10px 0;
+}
+
+.roundContainer:last-child {
+  margin-right: 0;
 }
 
 .roundTitle {
   text-align: center;
-  font-size: 1.1rem;   /* readable */
-  margin-bottom: 15px;
+  font-size: 1.3em;
+  font-weight: bold;
+  margin-bottom: 25px;
+  color: var(--text-dark);
+  text-transform: uppercase;
+}
+
+/* ===== MATCHES ===== */
+.matchesContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex-grow: 1;
 }
 
 /* ===== MATCH CARD ===== */
 .matchPair {
-  margin-bottom: 22px;
-  width: 270px;   /* FIX: 240 se bada kiya */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 30px;
+  background-color: #e0e0e029;
   border: 1px solid #ccc;
   border-radius: 6px;
-  background: #fafafa;
-  padding: 8px;
+  width: 320px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.matchPair:last-child {
+  margin-bottom: 0;
 }
 
 /* ===== MATCH SLOT ===== */
 .matchSlot {
-  padding: 10px 12px;  /* FIX: thoda bada */
-  font-size: 0.85rem;
+  padding: 12px 15px;
+  font-size: 0.95em;
+  color: var(--text-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: white;
-  border-radius: 5px;
-  margin: 4px 0;
+  justify-content: center;
+  gap: 15px;
+
+  background-color: #ffffff;
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
-  transition: 0.2s;
+
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .matchSlot:hover {
-  transform: scale(1.01);
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* ===== TEAM NAME ===== */
+.matchSlot:first-child {
+  border-bottom: 1px solid #eee;
+}
+
+/* ===== TEAM ===== */
 .teamName {
-  font-size: 0.9rem;  /* FIX */
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.1em;
+  text-align: center;
+  color: var(--text-dark);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 5px 0;
+  border-radius: var(--border-radius-sm, 4px);
+  white-space: normal;
 }
 
-/* ===== WINNER / LOSER ===== */
+/* ===== WIN / LOSE ===== */
 .matchSlot.winner {
-  background: #e6ffe6;
+  background-color: #e6ffe6;
   border: 1px solid #8cff8c;
 }
 
 .matchSlot.loser {
-  background: #ffe6e6;
+  background-color: #ffe6e6;
   border: 1px solid #ff8c8c;
 }
 
 /* ===== MATCH NUMBER ===== */
 .matchNumber {
-  font-size: 0.75rem;
-  text-align: center;
-  margin-bottom: 5px;
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8em;
+  color: #777;
+  background-color: #f9f9f9;
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
-/* ===== SCORE INPUT ===== */
-.teamScoreInput {
-  width: 48px;   /* FIX */
-  padding: 4px;
-  font-size: 0.8rem;
-  text-align: center;
-}
-
-/* ===== STATUS DROPDOWN ===== */
+/* ===== DROPDOWN ===== */
 .matchStatusDropdown {
-  width: 70px;
-  font-size: 0.7rem;
-  padding: 3px;
-  margin: 4px auto;
+  display: block;
+  margin: 5px auto 0 auto;
+  width: 80px;
+  padding: 3px 6px;
+  font-size: 0.7em;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  text-align: center;
 }
 
-/* ===== VS TEXT ===== */
+/* ===== SCORE ===== */
+.teamScoreInput {
+  width: 60px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.85em;
+  text-align: center;
+}
+
+/* ===== VS ===== */
 .vsSeparator {
   text-align: center;
-  font-size: 0.8rem;
-  margin: 5px 0;
-  font-weight: 600;
-}
-
-/* ===== FILTER BUTTON ===== */
-.filterButton {
-  padding: 5px 10px;
-  font-size: 0.8rem;
+  font-weight: bold;
+  margin: 8px 0;
+  font-size: 0.9em;
 }
