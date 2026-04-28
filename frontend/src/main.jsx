@@ -27,6 +27,7 @@ import Contact from "./Pages/Contact/Contact";
 import Layout from "./Layout";
 import Login from "./Pages/Login/Login";
 import Result from "./Pages/Result/Result.jsx";
+import ViewResult from "./Pages/ViewResult/ViewResult.jsx";
 import Draws from "./Pages/Draws/Draws.jsx";
 import DrawDisplay from "./Pages/DrawDisplay/DrawDisplay.jsx";
 import DrawDisplaySetup from "./Pages/DrawDisplay/DrawDisplaySetup.jsx";
@@ -43,6 +44,7 @@ const router = createBrowserRouter(
         <Route path="/joinUs" element={<JoinUs />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/tournaments/results" element={<Result />} />
+       <Route path="/tournaments/viewresults" element={<ViewResult />} />
         <Route path="/tournaments/draws" element={<Draws />} />
         <Route path="/tournaments/drawdisplaysetup" element={<DrawDisplaySetup />} />
 

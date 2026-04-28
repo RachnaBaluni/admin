@@ -71,6 +71,7 @@ const Home = () => {
           <h1>Welcome to Uttaranchal Tennis Association</h1>
           <p>Promoting tennis excellence in the heart of the Himalayas.</p>
           <Link to="/tournaments">Explore Tournaments</Link>
+          
         </div>
 
         {/* <section className={styles.upcomingEvents}>

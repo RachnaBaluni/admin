@@ -1,6 +1,7 @@
 const MemberServices = require("../Services/Members.service");
 
 const register = async (req, res) => {
+  console.log("REQ BODY:", req.body);
   try {
     const reply = await MemberServices.Register(req.body);
     res.status(200).json(reply);
@@ -13,8 +14,10 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
+
   try {
     const { type, identifier, password } = req.body;
+
 
     const result = await MemberServices.Login({ type, identifier, password });
 

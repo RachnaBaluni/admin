@@ -16,3 +16,4 @@ router.delete("/delete", isAdmin, MemberController.deleteMember);
 router.put("/remove", isAdmin, MemberController.removeMember);
 
 module.exports = router;
+console.log("ME route file loaded");

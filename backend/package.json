@@ -2,11 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "Backend Server for Uttarakhand Tennis Association",
-  "main": "index.js",
+  "main": "app.js",
   "type": "commonjs",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js"
+    "dev": "nodemon app.js",
+    "start": "node app.js"
   },
   "author": "",
   "license": "ISC",

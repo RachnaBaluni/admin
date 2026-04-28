@@ -9,20 +9,28 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/admin/login`,
-        { email, password },
-        { withCredentials: true }
-      );
-      localStorage.setItem("isAuthenticated", "true");
-      navigate("/dashboard");
-    } catch (error) {
-      alert("Invalid credentials");
-    }
-  };
+  e.preventDefault();
+  console.log("EMAIL:", email);
+  console.log("PASSWORD:", password);
 
+  try {
+    const res = await axios.post(
+      "https://backendds.onrender.com/api/admin/login",
+      { email, password },
+      { withCredentials: true }
+    );
+
+    console.log("LOGIN RESPONSE:", res.data);
+    localStorage.setItem("token", res.data.token);
+
+    localStorage.setItem("isAuthenticated", "true");
+
+    navigate("/dashboard");
+  } catch (error) {
+    console.log("LOGIN ERROR:", error.response?.data || error.message);
+    alert(error.response?.data?.message || "Invalid credentials");
+  }
+};
   return (
     <div className={styles.loginContainer}>
       <form onSubmit={handleLogin} className={styles.loginForm}>

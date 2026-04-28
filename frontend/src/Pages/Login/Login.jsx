@@ -37,57 +37,44 @@ const Login = () => {
    * Integrates the API call for user login.
    */
   const handleLogin = async () => {
-    // Basic client-side validation
-    if (!loginForm.identifier || !loginForm.password) {
-      toast.warning("Please enter both your email/phone and password.");
-      return;
-    }
+  if (!loginForm.identifier || !loginForm.password) {
+    toast.warning("Please enter both your email/phone and password.");
+    return;
+  }
 
-    setIsLoading(true); // Start loading state
+  setIsLoading(true);
 
-    // Define your backend login endpoint using the environment variable
-    const LOGIN_API_ENDPOINT = `${
-      import.meta.env.VITE_APP_BACKEND_URL
-    }/api/member/login`;
-
-    const loginPromise = axios.post(
+  try {
+    const res = await axios.post(
       LOGIN_API_ENDPOINT,
       {
-        type: loginType, // Send the selected login type
-        identifier: loginForm.identifier,
-        password: loginForm.password,
+        type: loginType,
+        identifier: loginForm.identifier.trim(),
+        password: loginForm.password.trim(),
       },
       {
-        withCredentials: true, // Important: Allows sending and receiving cookies (for JWT token)
+        withCredentials: true,
       }
     );
 
-    toast.promise(loginPromise, {
-      loading: "Logging in...",
-      success: (res) => {
-        // On successful login, you might want to:
-        // 1. Store user data in global state (e.g., Context API, Redux)
-        // 2. Redirect the user to the dashboard
-        const newUser = { ...res.data.user, type: loginType };
-        dispatch(setUser(newUser));
-        navigate("/"); // Redirect to dashboard on success
-        // You can also clear the form here if needed:
-        // setLoginForm({ identifier: "", password: "" });
-        return res.data.message || `${loginType} logged in successfully!`;
-      },
-      error: (err) => {
-        console.error("Login error:", err);
-        // Extract error message from backend response if available
-        const errorMessage =
-          err.response?.data?.message ||
-          "Login failed. Please check your credentials.";
-        return errorMessage;
-      },
-      finally: () => {
-        setIsLoading(false); // Stop loading regardless of success or failure
-      },
-    });
-  };
+    // 🔥 SAVE TOKEN
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("isAuthenticated", "true");
+
+    dispatch(setUser({ ...res.data.user, type: loginType }));
+
+    toast.success(res.data.message || "Login successful");
+
+    navigate("/");
+
+  } catch (err) {
+    console.log(err);
+    toast.error(err.response?.data?.message || "Login failed");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className={styles.rootContainer}>
