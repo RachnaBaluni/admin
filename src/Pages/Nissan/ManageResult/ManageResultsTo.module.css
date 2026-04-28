@@ -2,9 +2,9 @@
 
 .manageResultContainer {
   padding: var(--spacing-lg);
-  
-  transform: scale(0.9);        /* 👈 zoom out */
-  transform-origin: top left;   /* 👈 shift na ho */
+  transform: scale(0.8);        /* 👈 aur zoom out */
+  transform-origin: top left;
+  overflow-x: auto;
 }
 
 .eventFilterButtons {
