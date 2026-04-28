@@ -13,9 +13,9 @@ import UpdateTeamRanking from "./Pages/Nissan/Ranking/UpdateTeamRanking";
 import ViewPlayerList from "./Pages/Nissan/Players/ViewPlayerList";
 import ManageDraw from "./Pages/Nissan/Draws/ManageDraw";
 import ManageResult from "./Pages/Nissan/Result/ManageResult";
+import ManageResultsTo from "./Pages/Nissan/ManageResult/ManageResultsTo";
 import UpdateEvents from "./Pages/Nissan/UpdateEvents/UpdateEvents";
 import ViewPlayerJourney from "./Pages/Nissan/Journey/ViewPlayerJourney";
-//import ManageResultsTo from "./Pages/Nissan/ResultsTo/ManageResultsTo";
 import { Toaster } from "sonner";
 
 function App() {
@@ -133,6 +133,17 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
+        />
+
+        <Route
+          path="/nissan/manage-result-compact"
+          element={
+           <ProtectedRoute>
+           <Layout>
+           <ManageResultsTo />
+           </Layout>
+           </ProtectedRoute>
+         }
         />
        
         <Route

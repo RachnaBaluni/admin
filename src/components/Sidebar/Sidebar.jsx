@@ -117,6 +117,20 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   <FiClipboard className={styles.icon} /> Manage Result
                 </NavLink>
               </li>
+
+
+              <li>
+                <NavLink
+                  to="/nissan/manage-result-compact"
+                  className={({ isActive }) => (isActive ? styles.active : "")}
+                  onClick={toggleSidebar}
+                >
+                   <FiGrid className={styles.icon} /> Manage Result Compact
+                </NavLink>
+              </li> 
+
+
+
               <li>
                 <NavLink
                   to="/nissan/update-events"
