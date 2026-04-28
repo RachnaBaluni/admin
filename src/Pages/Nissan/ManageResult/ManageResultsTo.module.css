@@ -1,12 +1,12 @@
 .manageResultContainer {
-  padding: 12px;
+  padding: 16px;
 }
 
 /* ===== BRACKET ===== */
 .bracketContainer {
   display: flex;
   overflow-x: auto;
-  padding: 10px;
+  padding: 15px;
   background: #f9f9f9;
   border-radius: 6px;
 }
@@ -15,36 +15,37 @@
 .roundContainer {
   display: flex;
   flex-direction: column;
-  margin-right: 35px; /* kam gap */
+  margin-right: 45px; /* thoda balance */
 }
 
 .roundTitle {
   text-align: center;
-  font-size: 1rem;   /* smaller */
-  margin-bottom: 12px;
+  font-size: 1.1rem;   /* readable */
+  margin-bottom: 15px;
 }
 
 /* ===== MATCH CARD ===== */
 .matchPair {
-  margin-bottom: 18px;
-  width: 240px;   /* 👈 main size control */
+  margin-bottom: 22px;
+  width: 270px;   /* FIX: 240 se bada kiya */
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 6px;
   background: #fafafa;
-  padding: 6px;
+  padding: 8px;
 }
 
 /* ===== MATCH SLOT ===== */
 .matchSlot {
-  padding: 8px;
-  font-size: 0.8rem;
+  padding: 10px 12px;  /* FIX: thoda bada */
+  font-size: 0.85rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: white;
-  border-radius: 4px;
-  margin: 3px 0;
+  border-radius: 5px;
+  margin: 4px 0;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .matchSlot:hover {
@@ -53,54 +54,55 @@
 
 /* ===== TEAM NAME ===== */
 .teamName {
-  font-size: 0.8rem;
+  font-size: 0.9rem;  /* FIX */
   font-weight: 600;
   text-transform: uppercase;
 }
 
 /* ===== WINNER / LOSER ===== */
 .matchSlot.winner {
-  background: #dff5df;
-  border: 1px solid #7ed57e;
+  background: #e6ffe6;
+  border: 1px solid #8cff8c;
 }
 
 .matchSlot.loser {
-  background: #f9dede;
-  border: 1px solid #e88;
+  background: #ffe6e6;
+  border: 1px solid #ff8c8c;
 }
 
 /* ===== MATCH NUMBER ===== */
 .matchNumber {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   text-align: center;
-  margin-bottom: 3px;
+  margin-bottom: 5px;
 }
 
 /* ===== SCORE INPUT ===== */
 .teamScoreInput {
-  width: 40px;   /* 👈 chota */
-  padding: 3px;
-  font-size: 0.75rem;
+  width: 48px;   /* FIX */
+  padding: 4px;
+  font-size: 0.8rem;
   text-align: center;
 }
 
 /* ===== STATUS DROPDOWN ===== */
 .matchStatusDropdown {
-  width: 65px;
-  font-size: 0.65rem;
-  padding: 2px;
-  margin: 2px auto;
+  width: 70px;
+  font-size: 0.7rem;
+  padding: 3px;
+  margin: 4px auto;
 }
 
 /* ===== VS TEXT ===== */
 .vsSeparator {
   text-align: center;
-  font-size: 0.75rem;
-  margin: 4px 0;
+  font-size: 0.8rem;
+  margin: 5px 0;
+  font-weight: 600;
 }
 
 /* ===== FILTER BUTTON ===== */
 .filterButton {
-  padding: 4px 8px;
-  font-size: 0.75rem;
+  padding: 5px 10px;
+  font-size: 0.8rem;
 }
