@@ -118,6 +118,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 </NavLink>
               </li>
               <li>
+              <NavLink
+              to="/nissan/manage-result-compact"
+              className={({ isActive }) => (isActive ? styles.active : "")}
+              onClick={toggleSidebar}
+  >
+    <FiGrid className={styles.icon} /> Manage Result To
+  </NavLink>
+</li>
+              <li>
                 <NavLink
                   to="/nissan/update-events"
                   className={({ isActive }) => (isActive ? styles.active : "")}
