@@ -1,6 +1,7 @@
 .manageResultContainer {
   width: 100%;
   padding: 6px;
+  overflow: hidden; /* parent overflow block na kare */
 }
 
 /* FILTER BUTTONS */
@@ -16,18 +17,26 @@
   font-size: 10px;
 }
 
-/* 🔥 SCROLL ENABLE */
+/* 🔥 SCROLL ENABLE (FIXED) */
 .bracketContainer {
   display: flex;
   gap: 10px;
-  overflow-x: auto;   /* ✅ horizontal scroll */
+  overflow-x: auto;
+  overflow-y: hidden;
   padding: 10px;
+  width: 100%;
+
+  /* 👇 smooth scroll */
+  scroll-behavior: smooth;
+
+  /* 👇 scroll always visible (important) */
+  white-space: nowrap;
 }
 
 /* EACH ROUND COLUMN */
 .roundContainer {
-  min-width: 180px;   /* ✅ small width */
-  flex-shrink: 0;     /* scroll ke liye important */
+  min-width: 220px;  /* 👈 thoda increase karo scroll force ke liye */
+  flex-shrink: 0;
 }
 
 /* ROUND TITLE */
@@ -37,7 +46,7 @@
   font-weight: 600;
 }
 
-/* MATCH GRID (column style) */
+/* MATCH GRID */
 .matchesContainer {
   display: flex;
   flex-direction: column;
