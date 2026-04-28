@@ -118,12 +118,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 </NavLink>
               </li>
               <li>
-              <NavLink
-              to="/nissan/manage-result-compact"
-              className={({ isActive }) => (isActive ? styles.active : "")}
-              onClick={toggleSidebar}
-  >
-    
+                <NavLink
+                  to="/nissan/update-events"
+                  className={({ isActive }) => (isActive ? styles.active : "")}
+                  onClick={toggleSidebar}
+                >
                   <FiEdit className={styles.icon} /> Update Events
                 </NavLink>
               </li>
