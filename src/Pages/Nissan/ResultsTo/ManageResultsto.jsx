@@ -363,7 +363,7 @@ const ManageResultsTo = () => {
     <div className={styles.manageResultContainer}>
       {" "}
       {/* Changed class name */}
-      <h1>Manage Results</h1> {/* Changed title */}
+      <h1>Manage Results To </h1> {/* Changed title */}
       <div className={styles.eventFilterButtons}>
         {events.map((event) => (
           <button
