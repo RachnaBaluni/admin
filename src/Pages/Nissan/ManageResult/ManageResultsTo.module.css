@@ -2,9 +2,12 @@
 
 .manageResultContainer {
   padding: var(--spacing-lg);
-  transform: scale(0.75);        /* 👈 aur zoom out */
-  transform-origin: top left;
   overflow-x: auto;
+
+  transform: scale(0.75);
+  transform-origin: top left;
+
+  width: 133.33%;   /* 👈 ADD THIS (100 / 0.75) */
 }
 
 .eventFilterButtons {
