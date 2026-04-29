@@ -148,6 +148,7 @@ const ManageDraw = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchDraws = async () => {
+     console.log("🚀 fetchDraws CALLED");
     if (selectedEvent) {
       setLoading(true);
       try {
@@ -157,6 +158,7 @@ const ManageDraw = () => {
           }/api/nissan-draws/${selectedEvent}`,
           { withCredentials: true }
         );
+        console.log(" DRAW API RESPONSE:", drawsRes.data);
         setDraws(drawsRes.data.data);
       } catch (error) {
         toast.error(error.response?.data?.message || "Error fetching data.");

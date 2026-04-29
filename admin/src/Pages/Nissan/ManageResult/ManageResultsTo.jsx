@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo, useCallback } from "react";
 import api from "../../../api";
-import styles from "./ManageResultsTo.module.css"; // Will create this CSS file
+import styles from "./ManageResult.module.css"; // Will create this CSS file
 import { toast } from "sonner";
 
 const Match = ({

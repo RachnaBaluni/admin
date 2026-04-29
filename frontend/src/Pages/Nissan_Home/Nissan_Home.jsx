@@ -335,7 +335,7 @@ export default function Home() {
               <span className={styles.buttonText}>View Results</span>
             </Link>
             <Link to="/tournaments/viewresults" className={styles.registerButton}>
-                <span className={styles.buttonText}>View Results To</span>
+                <span className={styles.buttonText}>View Results 2</span>
                 </Link>
           </div>
         </section>

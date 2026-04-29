@@ -3,13 +3,7 @@
 .manageResultContainer {
   padding: var(--spacing-lg);
   overflow-x: auto;
-
-  transform: scale(0.75);
-  transform-origin: top left;
-
-  width: 133.33%;   /* 👈 ADD THIS (100 / 0.75) */
 }
-
 .eventFilterButtons {
   display: flex;
   flex-wrap: wrap;
@@ -51,7 +45,8 @@
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  zoom: 0.75;   /* 👈 USE THIS instead of transform */
 }
 
 .roundContainer {

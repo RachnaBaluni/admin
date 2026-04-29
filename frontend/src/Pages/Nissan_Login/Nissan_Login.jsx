@@ -30,9 +30,16 @@ const Nissan_Login = () => {
         }
       );
       if (res.data.success) {
-        navigate(`/tournaments/login/${res.data.data.id}`);
-        toast.success(res.data.message);
-      }
+  console.log("LOGIN RESPONSE 👉", res.data);
+   console.log("PLAYER DATA 👉", res.data.data);
+
+  const token = res.data.token || res.data.data?.token;
+
+  localStorage.setItem("token", token);
+
+  navigate(`/tournaments/login/${res.data.data.id}`);
+  toast.success(res.data.message);
+}
     } catch (error) {
       toast.error(error.response?.data?.message || "Incorrect Credentials");
       console.log(error);

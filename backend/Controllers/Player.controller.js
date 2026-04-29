@@ -1,6 +1,11 @@
+
+const jwt = require("jsonwebtoken");
+
+
 const PlayerService = require("../Services/Player.service.js");
 const Team = require("../models/Team.model.js");
 const Player = require("../models/Player.model.js");
+
 
 const getPlayers = async (req, res) => {
   try {
@@ -39,18 +44,27 @@ const RegisterPlayer = async (req, res) => {
 const loginPlayer = async (req, res) => {
   try {
     const data = await PlayerService.loginPlayer(req.body);
+    const token = jwt.sign(
+      { id: data._id },
+      "secretkey123",   // ⚠️ baad me .env me dalna
+      { expiresIn: "7d" }
+    );
+
+
     res.status(200).json({
       success: true,
       message: `Welcome ${data.name}`,
       data: data,
+      token:token,
     });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+  console.log("LOGIN ERROR 👉", error); // ✅ ADD THIS
+
+  res.status(500).json({
+    success: false,
+    message: error.message,
+  });
+}}
 
 const getLoggedInPlayer = async (req, res) => {
   try {
