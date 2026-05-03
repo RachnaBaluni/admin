@@ -108,6 +108,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   <FiGitMerge className={styles.icon} /> Manage Draw
                 </NavLink>
               </li>
+
+
+
               <li>
                 <NavLink
                   to="/nissan/manage-result"
@@ -128,7 +131,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                    <FiGrid className={styles.icon} /> Manage Result 2
                 </NavLink>
               </li> 
-
+               
+               <li>
+  <NavLink
+    to="/nissan/order-of-play"
+    className={({ isActive }) => (isActive ? styles.active : "")}
+    onClick={toggleSidebar}
+  >
+    <FiCalendar className={styles.icon} /> Order of Play
+  </NavLink>
+</li>
 
 
               <li>

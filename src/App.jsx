@@ -16,6 +16,7 @@ import ManageResult from "./Pages/Nissan/Result/ManageResult";
 import ManageResultsTo from "./Pages/Nissan/ManageResult/ManageResultsTo";
 import UpdateEvents from "./Pages/Nissan/UpdateEvents/UpdateEvents";
 import ViewPlayerJourney from "./Pages/Nissan/Journey/ViewPlayerJourney";
+import OrderOfPlay from "./Pages/Nissan/OrderOfPlay/OrderOfPlay";
 import { Toaster } from "sonner";
 
 function App() {
@@ -124,6 +125,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/nissan/order-of-play"
+  element={
+    <ProtectedRoute>
+      <Layout>
+        <OrderOfPlay />
+      </Layout>
+    </ProtectedRoute>
+  }
+/>
         <Route
           path="/nissan/manage-result"
           element={
