@@ -130,10 +130,15 @@ const OrderOfPlay = () => {
     }
   };
 
-  // 👉 Only Round 1
-  const matches = draws.filter((d) => d.Stage === "Round 1");
+  // 🔥 Round 1 + AUTO ASSIGN TIME & COURT
+  const matches = draws
+    .filter((d) => d.Stage === "Round 1")
+    .map((m, index) => ({
+      ...m,
+      MatchTime: m.MatchTime || ["09:00", "10:00", "11:00", "12:00"][index % 4],
+      CourtNumber: m.CourtNumber || (index % 4) + 1,
+    }));
 
-  // 🔥 fixed times (important)
   const times = ["09:00", "10:00", "11:00", "12:00"];
 
   /* ================= DRAG END ================= */
