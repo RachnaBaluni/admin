@@ -107,8 +107,10 @@ const OrderOfPlay = () => {
 
  const fetchDraws = async () => {
   try {
+    const eventId = "685c156477b6439dbcd5f5b8"; // 👈 ye tumhara real id
+
     const res = await api.get(
-      `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws`,
+      `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${eventId}`,
       { withCredentials: true }
     );
 
