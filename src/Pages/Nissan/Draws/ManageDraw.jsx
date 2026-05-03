@@ -148,7 +148,7 @@ const ManageDraw = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchDraws = async () => {
-     console.log("🚀 fetchDraws CALLED");
+     console.log("fetchDraws CALLED");
     if (selectedEvent) {
       setLoading(true);
       try {
