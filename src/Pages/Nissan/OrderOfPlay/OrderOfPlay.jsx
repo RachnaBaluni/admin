@@ -122,7 +122,7 @@ const OrderOfPlay = () => {
         { withCredentials: true }
       );
 
-      console.log("DRAW DATA:", res.data);
+      console.log("DRAW DATA:", res.data.data);
       setDraws(res.data.data);
     } catch (err) {
       console.error(err);
