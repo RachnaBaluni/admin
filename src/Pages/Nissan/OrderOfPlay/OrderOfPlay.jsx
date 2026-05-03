@@ -105,20 +105,20 @@ const OrderOfPlay = () => {
     fetchDraws();
   }, []);
 
-  const fetchDraws = async () => {
-    try {
-      const eventId = "PUT_REAL_EVENT_ID_HERE";
+ const fetchDraws = async () => {
+  try {
+    const res = await api.get(
+      `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws`,
+      { withCredentials: true }
+    );
 
-const res = await api.get(
-  `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${eventId}`,
-  { withCredentials: true }
-);
-      console.log("DRAW DATA:", res.data);
-      setDraws(res.data.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    console.log("DRAW DATA:", res.data);
+
+    setDraws(res.data.data);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   // 👉 Only Round 1
   const matches = draws.filter((d) => d.Stage === "Round 1");
