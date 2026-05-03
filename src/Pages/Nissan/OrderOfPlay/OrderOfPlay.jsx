@@ -111,6 +111,7 @@ const OrderOfPlay = () => {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws`,
         { withCredentials: true }
       );
+      console.log("DRAW DATA:", res.data);
       setDraws(res.data.data);
     } catch (err) {
       console.error(err);
