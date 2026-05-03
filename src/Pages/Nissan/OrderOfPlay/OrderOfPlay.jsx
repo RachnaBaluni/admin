@@ -107,10 +107,12 @@ const OrderOfPlay = () => {
 
   const fetchDraws = async () => {
     try {
-      const res = await api.get(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws`,
-        { withCredentials: true }
-      );
+      const eventId = "PUT_REAL_EVENT_ID_HERE";
+
+const res = await api.get(
+  `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${eventId}`,
+  { withCredentials: true }
+);
       console.log("DRAW DATA:", res.data);
       setDraws(res.data.data);
     } catch (err) {
