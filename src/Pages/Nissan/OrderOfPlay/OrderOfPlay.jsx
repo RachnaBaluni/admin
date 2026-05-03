@@ -5,9 +5,6 @@ import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 
 const courts = [1, 2, 3, 4];
 
-// 🔥 apna REAL event id yaha daalo
-const EVENT_ID = "685c156477b6439dbcd5f5b8";
-
 /* ================= VALIDATION ================= */
 const isValidMatchPlacement = (match, time, court, schedule) => {
   const players = [
@@ -17,7 +14,6 @@ const isValidMatchPlacement = (match, time, court, schedule) => {
     match.Team2?.partner2?.name,
   ].filter(Boolean);
 
-  // ❌ same player same time
   for (let m of schedule) {
     if (m.MatchTime !== time) continue;
 
@@ -28,16 +24,16 @@ const isValidMatchPlacement = (match, time, court, schedule) => {
       m.Team2?.partner2?.name,
     ];
 
-    const clash = players.some((p) => existingPlayers.includes(p));
-    if (clash) return "Player already playing at same time ❌";
+    if (players.some((p) => existingPlayers.includes(p))) {
+      return "Player clash ❌";
+    }
   }
 
-  // ❌ same court occupied
   const courtTaken = schedule.find(
     (m) => m.MatchTime === time && m.CourtNumber === court
   );
 
-  if (courtTaken) return "Court already occupied ❌";
+  if (courtTaken) return "Court occupied ❌";
 
   return null;
 };
@@ -57,7 +53,6 @@ const DraggableMatch = ({ match }) => {
       style={{
         border: "1px solid black",
         padding: "8px",
-        margin: "5px",
         background: "#fff",
         cursor: "grab",
         borderRadius: "6px",
@@ -65,13 +60,11 @@ const DraggableMatch = ({ match }) => {
     >
       <b>{match.EventCategory}</b>
       <br />
-      {match.Team1?.partner1?.name} &{" "}
-      {match.Team1?.partner2?.name}
+      {match.Team1?.partner1?.name} & {match.Team1?.partner2?.name}
       <br />
       <b>VS</b>
       <br />
-      {match.Team2?.partner1?.name} &{" "}
-      {match.Team2?.partner2?.name}
+      {match.Team2?.partner1?.name} & {match.Team2?.partner2?.name}
     </div>
   );
 };
@@ -98,11 +91,7 @@ const DropCell = ({ time, court, matches }) => {
     >
       <b>{time}</b>
       <br />
-      {match ? (
-        <DraggableMatch match={match} />
-      ) : (
-        <span style={{ color: "#999" }}>Empty</span>
-      )}
+      {match ? <DraggableMatch match={match} /> : "Empty"}
     </div>
   );
 };
@@ -110,38 +99,54 @@ const DropCell = ({ time, court, matches }) => {
 /* ================= MAIN ================= */
 const OrderOfPlay = () => {
   const [draws, setDraws] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
+  /* ================= FETCH EVENTS ================= */
   useEffect(() => {
-    fetchDraws();
+    const fetchEvents = async () => {
+      const res = await api.get(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
+        { withCredentials: true }
+      );
+      setEvents(res.data.data);
+      setSelectedEvent(res.data.data[0]?._id);
+    };
+    fetchEvents();
   }, []);
 
-  const fetchDraws = async () => {
-    try {
+  /* ================= FETCH DRAWS ================= */
+  useEffect(() => {
+    if (!selectedEvent) return;
+
+    const fetchDraws = async () => {
       const res = await api.get(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${EVENT_ID}`,
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${selectedEvent}`,
         { withCredentials: true }
       );
 
-      console.log("DRAW DATA:", res.data);
       setDraws(res.data.data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Error fetching draws");
-    }
-  };
 
-  // 🔥 Round 1 + AUTO ASSIGN TIME & COURT
-  const matches = draws
-    .filter((d) => d.Stage === "Round 1")
-    .map((m, index) => ({
-      ...m,
-      MatchTime: m.MatchTime || ["09:00", "10:00", "11:00", "12:00"][index % 4],
-      CourtNumber: m.CourtNumber || (index % 4) + 1,
-    }));
+      // default category
+      if (res.data.data.length > 0) {
+        setSelectedCategory(res.data.data[0].EventCategory);
+      }
+    };
+
+    fetchDraws();
+  }, [selectedEvent]);
+
+  /* ================= FILTER ================= */
+  const matches = draws.filter(
+    (d) =>
+      d.Stage === "Round 1" &&
+      d.EventCategory === selectedCategory
+  );
 
   const times = ["09:00", "10:00", "11:00", "12:00"];
 
-  /* ================= DRAG END ================= */
+  /* ================= DRAG ================= */
   const handleDragEnd = ({ active, over }) => {
     if (!over) return;
 
@@ -155,12 +160,8 @@ const OrderOfPlay = () => {
       matches
     );
 
-    if (error) {
-      toast.error(error);
-      return;
-    }
+    if (error) return toast.error(error);
 
-    // update UI
     const updated = draws.map((d) =>
       d._id === draggedMatch._id
         ? { ...d, MatchTime: time, CourtNumber: court }
@@ -168,40 +169,46 @@ const OrderOfPlay = () => {
     );
 
     setDraws(updated);
-
-    toast.success("Match moved ✅");
+    toast.success("Updated ✅");
   };
 
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
-      <h1>ORDER OF PLAY</h1>
+    <div style={{ padding: "20px" }}>
+      <h1 style={{ textAlign: "center" }}>ORDER OF PLAY</h1>
+
+      {/* EVENTS */}
+      <div>
+        {events.map((e) => (
+          <button key={e._id} onClick={() => setSelectedEvent(e._id)}>
+            {e.name}
+          </button>
+        ))}
+      </div>
+
+      {/* CATEGORY */}
+      <div style={{ margin: "10px 0" }}>
+        {[...new Set(draws.map((d) => d.EventCategory))].map((cat) => (
+          <button key={cat} onClick={() => setSelectedCategory(cat)}>
+            {cat}
+          </button>
+        ))}
+      </div>
 
       <DndContext onDragEnd={handleDragEnd}>
         {/* HEADER */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4,1fr)",
-          }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)" }}>
           {courts.map((c) => (
-            <div
-              key={c}
-              style={{ border: "1px solid black", padding: "10px" }}
-            >
+            <div key={c} style={{ border: "1px solid black" }}>
               <b>COURT {c}</b>
             </div>
           ))}
         </div>
 
-        {/* ROWS */}
+        {/* BODY */}
         {times.map((time) => (
           <div
             key={time}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4,1fr)",
-            }}
+            style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)" }}
           >
             {courts.map((court) => (
               <DropCell
