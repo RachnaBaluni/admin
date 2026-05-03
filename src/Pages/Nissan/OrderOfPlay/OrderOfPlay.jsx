@@ -5,6 +5,9 @@ import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 
 const courts = [1, 2, 3, 4];
 
+// 🔥 apna REAL event id yaha daalo
+const EVENT_ID = "685c156477b6439dbcd5f5b8";
+
 /* ================= VALIDATION ================= */
 const isValidMatchPlacement = (match, time, court, schedule) => {
   const players = [
@@ -53,25 +56,28 @@ const DraggableMatch = ({ match }) => {
       {...attributes}
       style={{
         border: "1px solid black",
-        padding: "5px",
+        padding: "8px",
         margin: "5px",
         background: "#fff",
         cursor: "grab",
+        borderRadius: "6px",
       }}
     >
       <b>{match.EventCategory}</b>
       <br />
-      {match.Team1?.partner1?.name} & {match.Team1?.partner2?.name}
+      {match.Team1?.partner1?.name} &{" "}
+      {match.Team1?.partner2?.name}
       <br />
-      VS
+      <b>VS</b>
       <br />
-      {match.Team2?.partner1?.name} & {match.Team2?.partner2?.name}
+      {match.Team2?.partner1?.name} &{" "}
+      {match.Team2?.partner2?.name}
     </div>
   );
 };
 
 /* ================= DROP CELL ================= */
-const DropCell = ({ time, court, matches, onDrop }) => {
+const DropCell = ({ time, court, matches }) => {
   const { setNodeRef } = useDroppable({
     id: `${time}-${court}`,
     data: { time, court },
@@ -86,13 +92,17 @@ const DropCell = ({ time, court, matches, onDrop }) => {
       ref={setNodeRef}
       style={{
         border: "1px solid black",
-        minHeight: "120px",
+        minHeight: "130px",
         padding: "10px",
       }}
     >
       <b>{time}</b>
       <br />
-      {match ? <DraggableMatch match={match} /> : "—"}
+      {match ? (
+        <DraggableMatch match={match} />
+      ) : (
+        <span style={{ color: "#999" }}>Empty</span>
+      )}
     </div>
   );
 };
@@ -105,27 +115,26 @@ const OrderOfPlay = () => {
     fetchDraws();
   }, []);
 
- const fetchDraws = async () => {
-  try {
-    const eventId = "685c156477b6439dbcd5f5b8"; // 👈 ye tumhara real id
+  const fetchDraws = async () => {
+    try {
+      const res = await api.get(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${EVENT_ID}`,
+        { withCredentials: true }
+      );
 
-    const res = await api.get(
-      `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${eventId}`,
-      { withCredentials: true }
-    );
-
-    console.log("DRAW DATA:", res.data);
-
-    setDraws(res.data.data);
-  } catch (err) {
-    console.error(err);
-  }
-};
+      console.log("DRAW DATA:", res.data);
+      setDraws(res.data.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error fetching draws");
+    }
+  };
 
   // 👉 Only Round 1
   const matches = draws.filter((d) => d.Stage === "Round 1");
 
-  const times = [...new Set(matches.map((m) => m.MatchTime || "TBD"))];
+  // 🔥 fixed times (important)
+  const times = ["09:00", "10:00", "11:00", "12:00"];
 
   /* ================= DRAG END ================= */
   const handleDragEnd = ({ active, over }) => {
@@ -164,9 +173,17 @@ const OrderOfPlay = () => {
 
       <DndContext onDragEnd={handleDragEnd}>
         {/* HEADER */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4,1fr)",
+          }}
+        >
           {courts.map((c) => (
-            <div key={c} style={{ border: "1px solid black", padding: "10px" }}>
+            <div
+              key={c}
+              style={{ border: "1px solid black", padding: "10px" }}
+            >
               <b>COURT {c}</b>
             </div>
           ))}
@@ -176,7 +193,10 @@ const OrderOfPlay = () => {
         {times.map((time) => (
           <div
             key={time}
-            style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)" }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4,1fr)",
+            }}
           >
             {courts.map((court) => (
               <DropCell
