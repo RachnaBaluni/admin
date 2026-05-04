@@ -5,6 +5,34 @@ import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 
 const courts = [1, 2, 3, 4];
 
+/* ================= GET PLAYER IDS ================= */
+const getPlayerIds = (match) => {
+  return [
+    match.Team1?.partner1?._id,
+    match.Team1?.partner2?._id,
+    match.Team2?.partner1?._id,
+    match.Team2?.partner2?._id,
+  ].filter(Boolean);
+};
+
+/* ================= PLAYER CLASH ================= */
+const isPlayerClash = (match, newTime, allMatches) => {
+  const players = getPlayerIds(match);
+
+  for (let m of allMatches) {
+    if (m._id === match._id) continue;
+    if (m.MatchTime !== newTime) continue;
+
+    const existingPlayers = getPlayerIds(m);
+
+    const clash = players.some((p) => existingPlayers.includes(p));
+
+    if (clash) return true;
+  }
+
+  return false;
+};
+
 /* ================= DRAG MATCH ================= */
 const DraggableMatch = ({ match }) => {
   const { attributes, listeners, setNodeRef } = useDraggable({
@@ -80,7 +108,6 @@ const OrderOfPlay = () => {
         { withCredentials: true }
       );
 
-      console.log("TOTAL DRAWS:", res.data.data.length);
       setDraws(res.data.data);
     } catch (err) {
       console.error(err);
@@ -88,20 +115,17 @@ const OrderOfPlay = () => {
     }
   };
 
-  /* ================= DYNAMIC SCHEDULING ================= */
+  /* ================= SCHEDULING ================= */
 
   const courtsCount = 4;
 
   const matches = draws
-    .filter((d) => d.Stage === "Round 1") // ALL categories included
+    .filter((d) => d.Stage === "Round 1")
     .sort((a, b) => a.Match_number - b.Match_number);
-
-  console.log("ROUND 1 MATCHES:", matches.length);
 
   const generateTime = (index) => {
     const baseHour = 9;
-    const hour = baseHour + index;
-    return `${hour.toString().padStart(2, "0")}:00`;
+    return `${(baseHour + index).toString().padStart(2, "0")}:00`;
   };
 
   const scheduledMatches = matches.map((m, index) => {
@@ -126,6 +150,19 @@ const OrderOfPlay = () => {
     const draggedMatch = active.data.current.match;
     const { time, court } = over.data.current;
 
+    // 🔴 PLAYER CLASH CHECK
+    const clash = isPlayerClash(
+      draggedMatch,
+      time,
+      scheduledMatches
+    );
+
+    if (clash) {
+      toast.error("Same player already playing at this time ❌");
+      return;
+    }
+
+    // ✅ UPDATE
     const updated = scheduledMatches.map((m) =>
       m._id === draggedMatch._id
         ? { ...m, MatchTime: time, CourtNumber: court }
@@ -142,7 +179,8 @@ const OrderOfPlay = () => {
 
       <DndContext onDragEnd={handleDragEnd}>
         {/* HEADER */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "80px repeat(4,1fr)" }}>
+          <div></div>
           {courts.map((c) => (
             <div
               key={c}
@@ -163,9 +201,21 @@ const OrderOfPlay = () => {
             key={time}
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(4,1fr)",
+              gridTemplateColumns: "80px repeat(4,1fr)",
             }}
           >
+            {/* TIME COLUMN */}
+            <div
+              style={{
+                border: "1px solid black",
+                padding: "10px",
+                background: "#fafafa",
+                fontWeight: "bold",
+              }}
+            >
+              {time}
+            </div>
+
             {courts.map((court) => (
               <DropCell
                 key={court}
