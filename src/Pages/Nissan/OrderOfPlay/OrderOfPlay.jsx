@@ -21,23 +21,64 @@ const COURTS = 4;
 /* ================= PLAYERS ================= */
 const getPlayers = (match) => {
   return [
-    match?.Team1?.partner1?._id,
-    match?.Team1?.partner2?._id,
-    match?.Team2?.partner1?._id,
-    match?.Team2?.partner2?._id,
-  ].filter(Boolean);
+    match?.Team1?.partner1,
+    match?.Team1?.partner2,
+    match?.Team2?.partner1,
+    match?.Team2?.partner2,
+  ]
+    .filter(Boolean)
+    .map((p) => ({
+      id: p._id || "",
+      name: (p.name || "").toLowerCase().trim(),
+    }));
 };
 
-/* ================= CONFLICT ================= */
-const hasConflict = (match, time, allMatches) => {
+const isSamePlayer = (p1, p2) => {
+  return (
+    (p1.id && p2.id && p1.id === p2.id) ||
+    (p1.name && p2.name && p1.name === p2.name)
+  );
+};
+
+/* ================= SAME TIME ================= */
+const hasSameTimeConflict = (match, allMatches) => {
   const players = getPlayers(match);
 
   return allMatches.some((m) => {
-    if (m._id === match._id) return false;
-    if (m.MatchTime !== time) return false;
+    if (!m || m._id === match._id) return false;
+    if (m.MatchTime !== match.MatchTime) return false;
 
     const other = getPlayers(m);
-    return players.some((p) => other.includes(p));
+
+    return players.some((p1) =>
+      other.some((p2) => isSamePlayer(p1, p2))
+    );
+  });
+};
+
+/* ================= CONSECUTIVE ================= */
+const hasConsecutiveConflict = (match, allMatches) => {
+  const players = getPlayers(match);
+  const currentIndex = TIME_SLOTS.indexOf(match.MatchTime);
+
+  return allMatches.some((m) => {
+    if (!m || m._id === match._id) return false;
+
+    const otherPlayers = getPlayers(m);
+
+    const samePlayer = players.some((p1) =>
+      otherPlayers.some((p2) => isSamePlayer(p1, p2))
+    );
+
+    if (!samePlayer) return false;
+
+    const otherIndex = TIME_SLOTS.indexOf(m.MatchTime);
+
+    if (Math.abs(otherIndex - currentIndex) === 1) {
+      return m.CourtNumber !== match.CourtNumber;
+    }
+
+    return false;
   });
 };
 
@@ -54,9 +95,8 @@ const MatchCard = ({ match }) => {
 
   return (
     <div className={styles.card}>
-      <div className={styles.timeTop}>{match.MatchTime}</div>
-
-      <div className={styles.category}>{match.category}</div>
+      <div className={styles.time}>{match.MatchTime}</div>
+      <div className={styles.cat}>{match.category}</div>
 
       <div>{name(match.Team1)}</div>
       <div className={styles.vs}>VS</div>
@@ -72,10 +112,7 @@ const Slot = ({ id, match }) => {
     data: match,
   });
 
-  const { setNodeRef: dropRef } = useDroppable({
-    id,
-    data: match,
-  });
+  const { setNodeRef: dropRef } = useDroppable({ id });
 
   const style = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
@@ -99,14 +136,12 @@ const Slot = ({ id, match }) => {
 
 /* ================= MAIN ================= */
 export default function OrderOfPlay() {
-  const [draws, setDraws] = useState([]);
   const [grid, setGrid] = useState([]);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  /* ================= FETCH ================= */
   const fetchData = async () => {
     try {
       const eventsRes = await api.get(
@@ -126,18 +161,17 @@ export default function OrderOfPlay() {
           (d) => d.Stage === "Round 1"
         );
 
-        const withCategory = round1.map((m) => ({
+        const withCat = round1.map((m) => ({
           ...m,
           category: ev.name,
         }));
 
-        allMatches = [...allMatches, ...withCategory];
+        allMatches = [...allMatches, ...withCat];
       }
 
       console.log("TOTAL MATCHES:", allMatches.length);
-      console.log("ALL MATCHES:", allMatches);
 
-      /* ================= MIX CATEGORY ================= */
+      /* 🔥 MIX CATEGORY */
       let grouped = {};
       allMatches.forEach((m) => {
         if (!grouped[m.category]) grouped[m.category] = [];
@@ -145,44 +179,37 @@ export default function OrderOfPlay() {
       });
 
       let mixed = [];
-      let max = Math.max(...Object.values(grouped).map(arr => arr.length));
+      let max = Math.max(...Object.values(grouped).map(a => a.length));
 
       for (let i = 0; i < max; i++) {
         Object.keys(grouped).forEach(cat => {
-          if (grouped[cat][i]) {
-            mixed.push(grouped[cat][i]);
-          }
+          if (grouped[cat][i]) mixed.push(grouped[cat][i]);
         });
       }
 
-      setDraws(mixed);
       buildGrid(mixed);
 
     } catch (err) {
       console.error(err);
-      toast.error("Error loading draws");
+      toast.error("Error loading data");
     }
   };
 
-  /* ================= GRID ================= */
   const buildGrid = (matches) => {
-    let temp = [];
     let index = 0;
+    let temp = [];
 
-    const totalRows = Math.ceil(matches.length / COURTS);
+    const rows = Math.ceil(matches.length / COURTS);
 
-    for (let i = 0; i < totalRows; i++) {
+    for (let i = 0; i < rows; i++) {
       let row = [];
 
-      for (let c = 1; c <= COURTS; c++) {
+      for (let j = 0; j < COURTS; j++) {
         let match = matches[index];
 
         if (match) {
-          match = {
-            ...match,
-            MatchTime: TIME_SLOTS[i] || `Slot ${i + 1}`,
-            CourtNumber: c,
-          };
+          match.MatchTime = TIME_SLOTS[i];
+          match.CourtNumber = j + 1;
         }
 
         row.push(match || null);
@@ -195,7 +222,6 @@ export default function OrderOfPlay() {
     setGrid(temp);
   };
 
-  /* ================= DRAG ================= */
   const handleDragEnd = ({ active, over }) => {
     if (!over) return;
 
@@ -203,18 +229,6 @@ export default function OrderOfPlay() {
     const target = over.data.current;
 
     if (!source || !target) return;
-
-    /* ❌ SAME TIME CONFLICT */
-    if (hasConflict(source, target.MatchTime, draws)) {
-      toast.error("Same player same time ❌");
-      return;
-    }
-
-    /* ❌ CONSECUTIVE MATCH SAME COURT CHECK */
-    if (source.MatchTime === target.MatchTime && source.CourtNumber !== target.CourtNumber) {
-      toast.error("Same time diff court not allowed ❌");
-      return;
-    }
 
     setGrid((prev) => {
       const copy = prev.map((r) => [...r]);
@@ -228,37 +242,54 @@ export default function OrderOfPlay() {
         });
       });
 
-      if (s && t) {
-        let temp = copy[s[0]][s[1]];
-        copy[s[0]][s[1]] = copy[t[0]][t[1]];
-        copy[t[0]][t[1]] = temp;
+      if (!s || !t) return prev;
 
-        copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
-        copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
+      // swap
+      const temp = copy[s[0]][s[1]];
+      copy[s[0]][s[1]] = copy[t[0]][t[1]];
+      copy[t[0]][t[1]] = temp;
+
+      // update
+      copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
+      copy[s[0]][s[1]].CourtNumber = s[1] + 1;
+
+      copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
+      copy[t[0]][t[1]].CourtNumber = t[1] + 1;
+
+      const all = copy.flat().filter(Boolean);
+
+      if (
+        hasSameTimeConflict(copy[s[0]][s[1]], all) ||
+        hasSameTimeConflict(copy[t[0]][t[1]], all)
+      ) {
+        toast.error("Same player same time ❌");
+        return prev;
       }
 
+      if (
+        hasConsecutiveConflict(copy[s[0]][s[1]], all) ||
+        hasConsecutiveConflict(copy[t[0]][t[1]], all)
+      ) {
+        toast.error("Consecutive match must be same court ❌");
+        return prev;
+      }
+
+      toast.success("Moved ✅");
       return copy;
     });
-
-    toast.success("Moved ✅");
   };
 
-  /* ================= UI ================= */
   return (
     <div className={styles.container}>
       <h1>ORDER OF PLAY</h1>
-      <h3>Date: Tournament Day</h3>
 
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-
-        {/* HEADER */}
         <div className={styles.header}>
           {[1,2,3,4].map(c => (
             <div key={c}>COURT {c}</div>
           ))}
         </div>
 
-        {/* GRID */}
         {grid.map((row, i) => (
           <div key={i} className={styles.row}>
             {row.map((cell, j) => (
@@ -266,7 +297,6 @@ export default function OrderOfPlay() {
             ))}
           </div>
         ))}
-
       </DndContext>
     </div>
   );
