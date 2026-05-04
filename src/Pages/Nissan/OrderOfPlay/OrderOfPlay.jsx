@@ -9,18 +9,16 @@ import {
   closestCenter,
 } from "@dnd-kit/core";
 
-/* ================= TIME SLOTS ================= */
+/* ================= TIME ================= */
 const TIME_SLOTS = [
-  "07:30",
-  "08:15",
-  "09:00",
-  "09:45",
-  "10:30",
-  "11:15",
-  "12:00",
+  "07:30","08:15","09:00","09:45",
+  "10:30","11:15","12:00","12:45",
+  "01:30","02:15","03:00","03:45"
 ];
 
-/* ================= GET PLAYERS ================= */
+const COURTS = 4;
+
+/* ================= PLAYERS ================= */
 const getPlayers = (match) => {
   return [
     match?.Team1?.partner1?._id,
@@ -43,7 +41,7 @@ const hasConflict = (match, time, allMatches) => {
   });
 };
 
-/* ================= MATCH CARD ================= */
+/* ================= CARD ================= */
 const MatchCard = ({ match }) => {
   if (!match) return <div className={styles.empty}>—</div>;
 
@@ -55,8 +53,8 @@ const MatchCard = ({ match }) => {
       : "TBD";
 
   return (
-    <div className={styles.matchCard}>
-      <div className={styles.category}>{match.category || "Match"}</div>
+    <div className={styles.card}>
+      <div className={styles.category}>{match.category}</div>
 
       <div>{name(match.Team1)}</div>
       <div className={styles.vs}>VS</div>
@@ -100,48 +98,67 @@ const Slot = ({ id, match }) => {
 };
 
 /* ================= MAIN ================= */
-export default function OrderOfPlay({eventId}) {
-  console.log("EVENT ID:", eventId);
+export default function OrderOfPlay() {
   const [draws, setDraws] = useState([]);
   const [grid, setGrid] = useState([]);
 
-  /* ================= FETCH ================= */
   useEffect(() => {
-  if (!eventId) return;
-  fetchData();
-}, [eventId]);
+    fetchData();
+  }, []);
+
+  /* ================= FETCH ALL EVENTS ================= */
   const fetchData = async () => {
     try {
-      const res = await api.get(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${eventId}`,
+      const eventsRes = await api.get(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
         { withCredentials: true }
       );
 
-      const round1 = res.data.data.filter(
-        (d) => d.Stage === "Round 1"
-      );
+      let allMatches = [];
 
-      buildGrid(round1);
-      setDraws(round1);
+      for (let ev of eventsRes.data.data) {
+        const res = await api.get(
+          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
+          { withCredentials: true }
+        );
+
+        const round1 = res.data.data.filter(
+          (d) => d.Stage === "Round 1"
+        );
+
+        const withCategory = round1.map((m) => ({
+          ...m,
+          category: ev.name,
+        }));
+
+        allMatches = [...allMatches, ...withCategory];
+      }
+
+      console.log("TOTAL MATCHES:", allMatches.length);
+
+      setDraws(allMatches);
+      buildGrid(allMatches);
     } catch (err) {
       console.error(err);
       toast.error("Error loading draws");
     }
   };
 
-  /* ================= BUILD GRID ================= */
+  /* ================= GRID ================= */
   const buildGrid = (matches) => {
     let index = 0;
     let temp = [];
 
-    for (let i = 0; i < TIME_SLOTS.length; i++) {
+    const totalRows = Math.ceil(matches.length / COURTS);
+
+    for (let i = 0; i < totalRows; i++) {
       let row = [];
 
-      for (let c = 1; c <= 4; c++) {
+      for (let c = 1; c <= COURTS; c++) {
         let match = matches[index];
 
         if (match) {
-          match.MatchTime = TIME_SLOTS[i];
+          match.MatchTime = TIME_SLOTS[i] || `Slot ${i + 1}`;
           match.CourtNumber = c;
         }
 
@@ -164,15 +181,13 @@ export default function OrderOfPlay({eventId}) {
 
     if (!source || !target) return;
 
-    // ❌ conflict check
     if (hasConflict(source, target.MatchTime, draws)) {
-      toast.error("Same player already playing at this time ❌");
+      toast.error("Player already playing at same time ❌");
       return;
     }
 
-    // ✅ swap
     setGrid((prev) => {
-      const copy = prev.map((row) => [...row]);
+      const copy = prev.map((r) => [...r]);
 
       let s, t;
 
@@ -188,7 +203,6 @@ export default function OrderOfPlay({eventId}) {
         copy[s[0]][s[1]] = copy[t[0]][t[1]];
         copy[t[0]][t[1]] = temp;
 
-        // update time + court
         copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
         copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
       }
@@ -196,29 +210,30 @@ export default function OrderOfPlay({eventId}) {
       return copy;
     });
 
-    toast.success("Match moved ✅");
+    toast.success("Moved ✅");
   };
 
   /* ================= UI ================= */
   return (
     <div className={styles.container}>
       <h1>ORDER OF PLAY</h1>
-      <h3>DATE: 21 DEC, 2025</h3>
+      <h3>Date: Tournament Day</h3>
 
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
         {/* HEADER */}
         <div className={styles.header}>
           <div></div>
-          <div>COURT 1</div>
-          <div>COURT 2</div>
-          <div>COURT 3</div>
-          <div>COURT 4</div>
+          {[1,2,3,4].map(c => (
+            <div key={c}>COURT {c}</div>
+          ))}
         </div>
 
-        {/* BODY */}
+        {/* GRID */}
         {grid.map((row, i) => (
           <div key={i} className={styles.row}>
-            <div className={styles.timeCol}>{TIME_SLOTS[i]}</div>
+            <div className={styles.timeCol}>
+              {TIME_SLOTS[i] || `Slot ${i + 1}`}
+            </div>
 
             {row.map((cell, j) => (
               <Slot key={j} id={`${i}-${j}`} match={cell} />
