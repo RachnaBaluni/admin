@@ -2,20 +2,12 @@ import React, { useEffect, useState } from "react";
 import api from "../../../api";
 import styles from "./OrderOfPlay.module.css";
 import { toast } from "sonner";
-
 import {
   DndContext,
-  closestCenter
+  useDraggable,
+  useDroppable,
+  closestCenter,
 } from "@dnd-kit/core";
-
-import {
-  SortableContext,
-  useSortable,
-  arrayMove,
-  rectSortingStrategy
-} from "@dnd-kit/sortable";
-
-import { CSS } from "@dnd-kit/utilities";
 
 /* ================= TIME ================= */
 const TIME_SLOTS = [
@@ -26,44 +18,50 @@ const TIME_SLOTS = [
 const COURTS = 4;
 
 /* ================= PLAYERS ================= */
-const getPlayers = (match) => {
+const getPlayers = (m) => {
   return [
-    match?.Team1?.partner1?._id,
-    match?.Team1?.partner2?._id,
-    match?.Team2?.partner1?._id,
-    match?.Team2?.partner2?._id,
+    m?.Team1?.partner1?._id,
+    m?.Team1?.partner2?._id,
+    m?.Team2?.partner1?._id,
+    m?.Team2?.partner2?._id,
   ].filter(Boolean);
 };
 
 /* ================= VALIDATION ================= */
 const validateGrid = (grid) => {
-  const all = grid.flat().filter(Boolean);
+  let matches = [];
 
-  for (let i = 0; i < all.length; i++) {
-    for (let j = i + 1; j < all.length; j++) {
-      const m1 = all[i];
-      const m2 = all[j];
+  grid.forEach((row, i) => {
+    row.forEach((cell, j) => {
+      if (cell) {
+        matches.push({
+          ...cell,
+          row: i,
+          court: j + 1,
+        });
+      }
+    });
+  });
+
+  for (let i = 0; i < matches.length; i++) {
+    for (let j = i + 1; j < matches.length; j++) {
+      const m1 = matches[i];
+      const m2 = matches[j];
 
       const p1 = getPlayers(m1);
       const p2 = getPlayers(m2);
 
-      const samePlayer = p1.some((p) => p2.includes(p));
+      const samePlayer = p1.some(p => p2.includes(p));
       if (!samePlayer) continue;
 
-      // ❌ same time diff court
-      if (
-        m1.MatchTime === m2.MatchTime &&
-        m1.CourtNumber !== m2.CourtNumber
-      ) {
-        return "❌ Same player cannot play on 2 courts at same time";
+      // ❌ SAME TIME DIFF COURT
+      if (m1.row === m2.row && m1.court !== m2.court) {
+        return "❌ Same player same time different court";
       }
 
-      // ❌ consecutive diff court
-      const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
-      const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
-
-      if (Math.abs(t1 - t2) === 1) {
-        if (m1.CourtNumber !== m2.CourtNumber) {
+      // ❌ CONSECUTIVE DIFF COURT
+      if (Math.abs(m1.row - m2.row) === 1) {
+        if (m1.court !== m2.court) {
           return "❌ Consecutive matches must be on same court";
         }
       }
@@ -73,7 +71,7 @@ const validateGrid = (grid) => {
   return null;
 };
 
-/* ================= MATCH CARD ================= */
+/* ================= CARD ================= */
 const MatchCard = ({ match }) => {
   if (!match) return <div className={styles.empty}>—</div>;
 
@@ -97,27 +95,29 @@ const MatchCard = ({ match }) => {
 };
 
 /* ================= SLOT ================= */
-const Slot = ({ id, match }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition
-  } = useSortable({ id });
+const Slot = ({ match }) => {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: match?._id,
+  });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition
-  };
+  const { setNodeRef: dropRef } = useDroppable({
+    id: match?._id,
+  });
+
+  const style = transform
+    ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
+    : {};
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setNodeRef(node);
+        dropRef(node);
+      }}
       style={style}
       className={styles.slot}
-      {...attributes}
       {...listeners}
+      {...attributes}
     >
       <MatchCard match={match} />
     </div>
@@ -132,7 +132,6 @@ export default function OrderOfPlay() {
     fetchData();
   }, []);
 
-  /* ================= FETCH ================= */
   const fetchData = async () => {
     try {
       const eventsRes = await api.get(
@@ -148,47 +147,44 @@ export default function OrderOfPlay() {
           { withCredentials: true }
         );
 
-        const round1 = res.data.data.filter(
+        const matches = res.data.data.filter(
           (d) => d.Stage === "Round 1"
         );
 
-        const withCategory = round1.map((m) => ({
+        const withCat = matches.map(m => ({
           ...m,
-          category: ev.name,
+          category: ev.name
         }));
 
-        allMatches = [...allMatches, ...withCategory];
+        allMatches = [...allMatches, ...withCat];
       }
 
       buildGrid(allMatches);
     } catch (err) {
       console.error(err);
-      toast.error("Error loading data");
+      toast.error("Error loading");
     }
   };
 
   /* ================= GRID ================= */
   const buildGrid = (matches) => {
-    let temp = [];
     let index = 0;
+    let temp = [];
 
-    const totalRows = Math.ceil(matches.length / COURTS);
+    const rows = Math.ceil(matches.length / COURTS);
 
-    for (let i = 0; i < totalRows; i++) {
+    for (let i = 0; i < rows; i++) {
       let row = [];
 
       for (let j = 0; j < COURTS; j++) {
-        let match = matches[index];
+        let m = matches[index];
 
-        if (match) {
-          match = {
-            ...match,
-            MatchTime: TIME_SLOTS[i],
-            CourtNumber: j + 1,
-          };
+        if (m) {
+          m.MatchTime = TIME_SLOTS[i];
+          m.CourtNumber = j + 1;
         }
 
-        row.push(match || null);
+        row.push(m || null);
         index++;
       }
 
@@ -198,63 +194,47 @@ export default function OrderOfPlay() {
     setGrid(temp);
   };
 
-  /* ================= FLATTEN ================= */
-  const flattenGrid = (grid) => {
-    return grid.flat().map((item, index) => ({
-      ...item,
-      uniqueId: item?._id || `empty-${index}`
-    }));
-  };
-
   /* ================= DRAG ================= */
   const handleDragEnd = ({ active, over }) => {
-    if (!over) return;
-
-    if (active.id === over.id) return;
+    if (!over || active.id === over.id) return;
 
     setGrid((prev) => {
-      const flat = flattenGrid(prev);
+      const copy = prev.map((r) => [...r]);
 
-      const oldIndex = flat.findIndex(i => i.uniqueId === active.id);
-      const newIndex = flat.findIndex(i => i.uniqueId === over.id);
+      let s, t;
 
-      if (oldIndex === -1 || newIndex === -1) return prev;
+      copy.forEach((row, i) => {
+        row.forEach((cell, j) => {
+          if (cell?._id === active.id) s = [i, j];
+          if (cell?._id === over.id) t = [i, j];
+        });
+      });
 
-      const newFlat = arrayMove(flat, oldIndex, newIndex);
+      if (!s || !t) return prev;
 
-      let newGrid = [];
-      let index = 0;
+      // 🔁 SWAP ONLY
+      const temp = copy[s[0]][s[1]];
+      copy[s[0]][s[1]] = copy[t[0]][t[1]];
+      copy[t[0]][t[1]] = temp;
 
-      for (let i = 0; i < prev.length; i++) {
-        let row = [];
-
-        for (let j = 0; j < COURTS; j++) {
-          const item = newFlat[index];
-
-          if (item && item._id) {
-            row.push({
-              ...item,
-              MatchTime: TIME_SLOTS[i],
-              CourtNumber: j + 1,
-            });
-          } else {
-            row.push(null);
+      // 🕒 RESET TIME + COURT
+      copy.forEach((row, i) => {
+        row.forEach((cell, j) => {
+          if (cell) {
+            cell.MatchTime = TIME_SLOTS[i];
+            cell.CourtNumber = j + 1;
           }
+        });
+      });
 
-          index++;
-        }
-
-        newGrid.push(row);
-      }
-
-      const error = validateGrid(newGrid);
-
+      // ✅ VALIDATION
+      const error = validateGrid(copy);
       if (error) {
         toast.error(error);
         return prev;
       }
 
-      return newGrid;
+      return copy;
     });
   };
 
@@ -264,26 +244,22 @@ export default function OrderOfPlay() {
       <h1>ORDER OF PLAY</h1>
 
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        <SortableContext
-          items={flattenGrid(grid).map(i => i.uniqueId)}
-          strategy={rectSortingStrategy}
-        >
-          <div className={styles.header}>
-            {[1,2,3,4].map(c => <div key={c}>COURT {c}</div>)}
-          </div>
-
-          {grid.map((row, i) => (
-            <div key={i} className={styles.row}>
-              {row.map((cell, j) => (
-                <Slot
-                  key={`${i}-${j}`}
-                  id={cell?._id || `empty-${i}-${j}`}
-                  match={cell}
-                />
-              ))}
-            </div>
+        
+        {/* HEADER */}
+        <div className={styles.header}>
+          {[1,2,3,4].map(c => (
+            <div key={c}>COURT {c}</div>
           ))}
-        </SortableContext>
+        </div>
+
+        {/* GRID */}
+        {grid.map((row, i) => (
+          <div key={i} className={styles.row}>
+            {row.map((cell, j) => (
+              <Slot key={cell?._id || j} match={cell} />
+            ))}
+          </div>
+        ))}
       </DndContext>
     </div>
   );
