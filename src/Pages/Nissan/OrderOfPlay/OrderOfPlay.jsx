@@ -42,7 +42,7 @@ const validateGrid = (grid) => {
       const samePlayer = p1.some((p) => p2.includes(p));
       if (!samePlayer) continue;
 
-      // ❌ RULE 1: same time diff court
+      // ❌ same time diff court
       if (
         m1.MatchTime === m2.MatchTime &&
         m1.CourtNumber !== m2.CourtNumber
@@ -50,7 +50,7 @@ const validateGrid = (grid) => {
         return "❌ Same player cannot play on 2 courts at same time";
       }
 
-      // ❌ RULE 2: consecutive diff court
+      // ❌ consecutive diff court
       const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
       const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
 
@@ -66,7 +66,7 @@ const validateGrid = (grid) => {
 };
 
 /* ================= MATCH CARD ================= */
-const MatchCard = ({ match, updateMatchTime }) => {
+const MatchCard = ({ match }) => {
   if (!match) return <div className={styles.empty}>—</div>;
 
   const name = (t) =>
@@ -78,16 +78,7 @@ const MatchCard = ({ match, updateMatchTime }) => {
 
   return (
     <div className={styles.card}>
-      <select
-        value={match.MatchTime}
-        className={styles.timeSelect}
-        onChange={(e) => updateMatchTime(match._id, e.target.value)}
-      >
-        {TIME_SLOTS.map((t) => (
-          <option key={t}>{t}</option>
-        ))}
-      </select>
-
+      <div className={styles.time}>{match.MatchTime}</div>
       <div className={styles.category}>{match.category}</div>
 
       <div>{name(match.Team1)}</div>
@@ -98,7 +89,7 @@ const MatchCard = ({ match, updateMatchTime }) => {
 };
 
 /* ================= SLOT ================= */
-const Slot = ({ id, match, updateMatchTime }) => {
+const Slot = ({ id, match }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
     data: match,
@@ -124,7 +115,7 @@ const Slot = ({ id, match, updateMatchTime }) => {
       {...listeners}
       {...attributes}
     >
-      <MatchCard match={match} updateMatchTime={updateMatchTime} />
+      <MatchCard match={match} />
     </div>
   );
 };
@@ -188,7 +179,7 @@ export default function OrderOfPlay() {
         if (match) {
           match = {
             ...match,
-            MatchTime: TIME_SLOTS[i],
+            MatchTime: TIME_SLOTS[i], // FIXED
             CourtNumber: c + 1,
           };
         }
@@ -203,34 +194,12 @@ export default function OrderOfPlay() {
     setGrid(temp);
   };
 
-  /* ================= UPDATE TIME ================= */
-  const updateMatchTime = (matchId, newTime) => {
-    setGrid((prev) => {
-      const copy = prev.map((r) => [...r]);
-
-      const updated = copy.map((row) =>
-        row.map((cell) =>
-          cell?._id === matchId
-            ? { ...cell, MatchTime: newTime }
-            : cell
-        )
-      );
-
-      const error = validateGrid(updated);
-
-      if (error) {
-        toast.error(error);
-        return prev;
-      }
-
-      toast.success("Time updated ✅");
-      return updated;
-    });
-  };
-
   /* ================= DRAG ================= */
   const handleDragEnd = ({ active, over }) => {
     if (!over) return;
+
+    // ❌ same slot
+    if (active.id === over.id) return;
 
     const source = active.data.current;
     const target = over.data.current;
@@ -251,12 +220,12 @@ export default function OrderOfPlay() {
 
       if (!s || !t) return prev;
 
-      // swap
+      // swap ONLY
       const temp = copy[s[0]][s[1]];
       copy[s[0]][s[1]] = copy[t[0]][t[1]];
       copy[t[0]][t[1]] = temp;
 
-      // update
+      // keep time FIXED
       copy[s[0]][s[1]] = {
         ...copy[s[0]][s[1]],
         MatchTime: TIME_SLOTS[s[0]],
@@ -276,7 +245,6 @@ export default function OrderOfPlay() {
         return prev;
       }
 
-      toast.success("Moved ✅");
       return copy;
     });
   };
@@ -296,12 +264,7 @@ export default function OrderOfPlay() {
         {grid.map((row, i) => (
           <div key={i} className={styles.row}>
             {row.map((cell, j) => (
-              <Slot
-                key={j}
-                id={`${i}-${j}`}
-                match={cell}
-                updateMatchTime={updateMatchTime}
-              />
+              <Slot key={j} id={`${i}-${j}`} match={cell} />
             ))}
           </div>
         ))}
