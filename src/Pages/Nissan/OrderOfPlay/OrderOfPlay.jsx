@@ -18,27 +18,44 @@ const TIME_SLOTS = [
 
 const COURTS = 4;
 
-/* ================= PLAYERS ================= */
-const getPlayers = (match) => {
-  return [
-    match?.Team1?.partner1?._id,
-    match?.Team1?.partner2?._id,
-    match?.Team2?.partner1?._id,
-    match?.Team2?.partner2?._id,
-  ].filter(Boolean);
-};
+/* ================= GET PLAYERS ================= */
+const getPlayers = (m) => [
+  m?.Team1?.partner1?._id,
+  m?.Team1?.partner2?._id,
+  m?.Team2?.partner1?._id,
+  m?.Team2?.partner2?._id,
+].filter(Boolean);
 
-/* ================= CONFLICT ================= */
-const hasConflict = (match, time, allMatches) => {
+/* ================= VALIDATIONS ================= */
+const hasSameTimeConflict = (match, time, all) => {
   const players = getPlayers(match);
 
-  return allMatches.some((m) => {
+  return all.some((m) => {
     if (m._id === match._id) return false;
     if (m.MatchTime !== time) return false;
 
     const other = getPlayers(m);
     return players.some((p) => other.includes(p));
   });
+};
+
+const hasConsecutiveCourtIssue = (match, newCourt, grid) => {
+  const players = getPlayers(match);
+
+  for (let row of grid) {
+    for (let cell of row) {
+      if (!cell || cell._id === match._id) continue;
+
+      const otherPlayers = getPlayers(cell);
+
+      if (players.some(p => otherPlayers.includes(p))) {
+        if (Math.abs(cell.CourtNumber - newCourt) > 0) {
+          return true; // different court
+        }
+      }
+    }
+  }
+  return false;
 };
 
 /* ================= CARD ================= */
@@ -82,18 +99,18 @@ const Slot = ({ id, match }) => {
     : {};
 
   return (
-    <div
+    <td
       ref={(node) => {
         setNodeRef(node);
         dropRef(node);
       }}
       style={style}
-      className={styles.slot}
+      className={styles.cell}
       {...listeners}
       {...attributes}
     >
       <MatchCard match={match} />
-    </div>
+    </td>
   );
 };
 
@@ -126,16 +143,17 @@ export default function OrderOfPlay() {
           (d) => d.Stage === "Round 1"
         );
 
-        const withCategory = round1.map((m) => ({
+        const updated = round1.map((m) => ({
           ...m,
           category: ev.name,
         }));
 
-        allMatches = [...allMatches, ...withCategory];
+        allMatches = [...allMatches, ...updated];
       }
 
       setDraws(allMatches);
       buildGrid(allMatches);
+
     } catch (err) {
       console.error(err);
       toast.error("Error loading draws");
@@ -144,8 +162,8 @@ export default function OrderOfPlay() {
 
   /* ================= GRID ================= */
   const buildGrid = (matches) => {
-    let index = 0;
     let temp = [];
+    let index = 0;
 
     const totalRows = Math.ceil(matches.length / COURTS);
 
@@ -156,7 +174,7 @@ export default function OrderOfPlay() {
         let match = matches[index];
 
         if (match) {
-          match.MatchTime = TIME_SLOTS[i] || `Slot ${i + 1}`;
+          match.MatchTime = TIME_SLOTS[i] || `Slot ${i+1}`;
           match.CourtNumber = c;
         }
 
@@ -179,20 +197,27 @@ export default function OrderOfPlay() {
 
     if (!source || !target) return;
 
-    if (hasConflict(source, target.MatchTime, draws)) {
-      toast.error("Player already playing at same time ❌");
+    // ❌ SAME TIME PLAYER
+    if (hasSameTimeConflict(source, target.MatchTime, draws)) {
+      toast.error("Same player 2 courts same time ❌");
       return;
     }
 
-    setGrid((prev) => {
-      const copy = prev.map((r) => [...r]);
+    // ❌ CONSECUTIVE COURT RULE
+    if (hasConsecutiveCourtIssue(source, target.CourtNumber, grid)) {
+      toast.error("Consecutive match same court hona chahiye ❌");
+      return;
+    }
+
+    setGrid(prev => {
+      const copy = prev.map(r => [...r]);
 
       let s, t;
 
       copy.forEach((row, i) => {
         row.forEach((cell, j) => {
-          if (cell?._id === source._id) s = [i, j];
-          if (cell?._id === target._id) t = [i, j];
+          if (cell?._id === source._id) s = [i,j];
+          if (cell?._id === target._id) t = [i,j];
         });
       });
 
@@ -203,6 +228,9 @@ export default function OrderOfPlay() {
 
         copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
         copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
+
+        copy[s[0]][s[1]].CourtNumber = s[1] + 1;
+        copy[t[0]][t[1]].CourtNumber = t[1] + 1;
       }
 
       return copy;
@@ -215,29 +243,34 @@ export default function OrderOfPlay() {
   return (
     <div className={styles.container}>
       <h1>ORDER OF PLAY</h1>
-      <h3>DATE: Tournament Day</h3>
+      <h3>Date: Tournament Day</h3>
 
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        {/* HEADER */}
-        <div className={styles.header}>
-          <div>TIME</div>
-          {[1, 2, 3, 4].map((c) => (
-            <div key={c}>COURT {c}</div>
-          ))}
-        </div>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>TIME</th>
+              <th>COURT 1</th>
+              <th>COURT 2</th>
+              <th>COURT 3</th>
+              <th>COURT 4</th>
+            </tr>
+          </thead>
 
-        {/* GRID */}
-        {grid.map((row, i) => (
-          <div key={i} className={styles.row}>
-            <div className={styles.timeCol}>
-              {TIME_SLOTS[i] || `Slot ${i + 1}`}
-            </div>
+          <tbody>
+            {grid.map((row, i) => (
+              <tr key={i}>
+                <td className={styles.timeCol}>
+                  {TIME_SLOTS[i] || `Slot ${i+1}`}
+                </td>
 
-            {row.map((cell, j) => (
-              <Slot key={j} id={`${i}-${j}`} match={cell} />
+                {row.map((cell, j) => (
+                  <Slot key={j} id={`${i}-${j}`} match={cell} />
+                ))}
+              </tr>
             ))}
-          </div>
-        ))}
+          </tbody>
+        </table>
       </DndContext>
     </div>
   );
