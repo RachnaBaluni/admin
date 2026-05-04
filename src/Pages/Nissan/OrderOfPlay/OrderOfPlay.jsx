@@ -33,53 +33,45 @@ const getPlayers = (match) => {
     }));
 };
 
-const isSamePlayer = (p1, p2) => {
-  return (
-    (p1.id && p2.id && p1.id === p2.id) ||
-    (p1.name && p2.name && p1.name === p2.name)
-  );
-};
+const isSamePlayer = (a, b) =>
+  (a.id && b.id && a.id === b.id) || (a.name && b.name && a.name === b.name);
 
-/* ================= SAME TIME ================= */
-const hasSameTimeConflict = (match, allMatches) => {
-  const players = getPlayers(match);
+/* ================= VALIDATION ================= */
+const validateGrid = (grid) => {
+  const all = grid.flat().filter(Boolean);
 
-  return allMatches.some((m) => {
-    if (!m || m._id === match._id) return false;
-    if (m.MatchTime !== match.MatchTime) return false;
+  for (let i = 0; i < all.length; i++) {
+    for (let j = i + 1; j < all.length; j++) {
+      const m1 = all[i];
+      const m2 = all[j];
 
-    const other = getPlayers(m);
+      const p1 = getPlayers(m1);
+      const p2 = getPlayers(m2);
 
-    return players.some((p1) =>
-      other.some((p2) => isSamePlayer(p1, p2))
-    );
-  });
-};
+      const samePlayer = p1.some((x) =>
+        p2.some((y) => isSamePlayer(x, y))
+      );
 
-/* ================= CONSECUTIVE ================= */
-const hasConsecutiveConflict = (match, allMatches) => {
-  const players = getPlayers(match);
-  const currentIndex = TIME_SLOTS.indexOf(match.MatchTime);
+      if (!samePlayer) continue;
 
-  return allMatches.some((m) => {
-    if (!m || m._id === match._id) return false;
+      // ❌ SAME TIME
+      if (m1.MatchTime === m2.MatchTime) {
+        return "Same player same time ❌";
+      }
 
-    const otherPlayers = getPlayers(m);
+      // ❌ CONSECUTIVE
+      const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
+      const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
 
-    const samePlayer = players.some((p1) =>
-      otherPlayers.some((p2) => isSamePlayer(p1, p2))
-    );
-
-    if (!samePlayer) return false;
-
-    const otherIndex = TIME_SLOTS.indexOf(m.MatchTime);
-
-    if (Math.abs(otherIndex - currentIndex) === 1) {
-      return m.CourtNumber !== match.CourtNumber;
+      if (Math.abs(t1 - t2) === 1) {
+        if (m1.CourtNumber !== m2.CourtNumber) {
+          return "Consecutive match must be same court ❌";
+        }
+      }
     }
+  }
 
-    return false;
-  });
+  return null;
 };
 
 /* ================= CARD ================= */
@@ -171,23 +163,7 @@ export default function OrderOfPlay() {
 
       console.log("TOTAL MATCHES:", allMatches.length);
 
-      /* 🔥 MIX CATEGORY */
-      let grouped = {};
-      allMatches.forEach((m) => {
-        if (!grouped[m.category]) grouped[m.category] = [];
-        grouped[m.category].push(m);
-      });
-
-      let mixed = [];
-      let max = Math.max(...Object.values(grouped).map(a => a.length));
-
-      for (let i = 0; i < max; i++) {
-        Object.keys(grouped).forEach(cat => {
-          if (grouped[cat][i]) mixed.push(grouped[cat][i]);
-        });
-      }
-
-      buildGrid(mixed);
+      buildGrid(allMatches);
 
     } catch (err) {
       console.error(err);
@@ -222,6 +198,7 @@ export default function OrderOfPlay() {
     setGrid(temp);
   };
 
+  /* ================= DRAG ================= */
   const handleDragEnd = ({ active, over }) => {
     if (!over) return;
 
@@ -249,29 +226,19 @@ export default function OrderOfPlay() {
       copy[s[0]][s[1]] = copy[t[0]][t[1]];
       copy[t[0]][t[1]] = temp;
 
-      // update
+      // update time + court
       copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
       copy[s[0]][s[1]].CourtNumber = s[1] + 1;
 
       copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
       copy[t[0]][t[1]].CourtNumber = t[1] + 1;
 
-      const all = copy.flat().filter(Boolean);
+      // 🔥 VALIDATE AFTER SWAP
+      const error = validateGrid(copy);
 
-      if (
-        hasSameTimeConflict(copy[s[0]][s[1]], all) ||
-        hasSameTimeConflict(copy[t[0]][t[1]], all)
-      ) {
-        toast.error("Same player same time ❌");
-        return prev;
-      }
-
-      if (
-        hasConsecutiveConflict(copy[s[0]][s[1]], all) ||
-        hasConsecutiveConflict(copy[t[0]][t[1]], all)
-      ) {
-        toast.error("Consecutive match must be same court ❌");
-        return prev;
+      if (error) {
+        toast.error(error);
+        return prev; // revert
       }
 
       toast.success("Moved ✅");
