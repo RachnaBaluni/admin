@@ -42,12 +42,22 @@ const validateGrid = (grid) => {
       const samePlayer = p1.some((p) => p2.includes(p));
       if (!samePlayer) continue;
 
-      // ❌ same time diff court
+      // ❌ RULE 1: same time diff court
       if (
         m1.MatchTime === m2.MatchTime &&
         m1.CourtNumber !== m2.CourtNumber
       ) {
         return "❌ Same player cannot play on 2 courts at same time";
+      }
+
+      // ❌ RULE 2: consecutive diff court
+      const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
+      const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
+
+      if (Math.abs(t1 - t2) === 1) {
+        if (m1.CourtNumber !== m2.CourtNumber) {
+          return "❌ Consecutive matches must be on same court";
+        }
       }
     }
   }
@@ -68,14 +78,13 @@ const MatchCard = ({ match, updateMatchTime }) => {
 
   return (
     <div className={styles.card}>
-      {/* TIME DROPDOWN */}
       <select
         value={match.MatchTime}
         className={styles.timeSelect}
         onChange={(e) => updateMatchTime(match._id, e.target.value)}
       >
         {TIME_SLOTS.map((t) => (
-          <option key={t} value={t}>{t}</option>
+          <option key={t}>{t}</option>
         ))}
       </select>
 
@@ -247,7 +256,7 @@ export default function OrderOfPlay() {
       copy[s[0]][s[1]] = copy[t[0]][t[1]];
       copy[t[0]][t[1]] = temp;
 
-      // update time & court
+      // update
       copy[s[0]][s[1]] = {
         ...copy[s[0]][s[1]],
         MatchTime: TIME_SLOTS[s[0]],
