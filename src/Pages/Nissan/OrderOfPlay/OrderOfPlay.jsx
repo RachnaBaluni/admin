@@ -53,12 +53,12 @@ const validateGrid = (grid) => {
       const samePlayer = p1.some(p => p2.includes(p));
       if (!samePlayer) continue;
 
-      // ✅ SAME TIME
+      // SAME TIME
       if (m1.MatchTime === m2.MatchTime && m1.court !== m2.court) {
         return "❌ Same player same time different court";
       }
 
-      // ✅ CONSECUTIVE (correct logic)
+      // CONSECUTIVE
       const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
       const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
 
@@ -202,7 +202,8 @@ export default function OrderOfPlay() {
     if (!over || active.id === over.id) return;
 
     setGrid((prev) => {
-      const copy = prev.map((r) => [...r]);
+      // ✅ deep copy (IMPORTANT)
+      const copy = prev.map((r) => r.map(c => c ? { ...c } : null));
 
       let s, t;
 
@@ -215,10 +216,20 @@ export default function OrderOfPlay() {
 
       if (!s || !t) return prev;
 
-      // 🔁 SWAP ONLY
-      const temp = copy[s[0]][s[1]];
-      copy[s[0]][s[1]] = copy[t[0]][t[1]];
-      copy[t[0]][t[1]] = temp;
+      const source = copy[s[0]][s[1]];
+      const target = copy[t[0]][t[1]];
+
+      if (!source || !target) return prev;
+
+      // ⭐ ONLY PLAYERS SWAP (TIME SAFE)
+      const tempTeam1 = source.Team1;
+      const tempTeam2 = source.Team2;
+
+      source.Team1 = target.Team1;
+      source.Team2 = target.Team2;
+
+      target.Team1 = tempTeam1;
+      target.Team2 = tempTeam2;
 
       // 🕒 RESET TIME + COURT
       copy.forEach((row, i) => {
@@ -248,14 +259,12 @@ export default function OrderOfPlay() {
 
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
         
-        {/* HEADER */}
         <div className={styles.header}>
           {[1,2,3,4].map(c => (
             <div key={c}>COURT {c}</div>
           ))}
         </div>
 
-        {/* GRID */}
         {grid.map((row, i) => (
           <div key={i} className={styles.row}>
             {row.map((cell, j) => (
