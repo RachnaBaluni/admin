@@ -12,13 +12,12 @@ import {
 /* ================= TIME ================= */
 const TIME_SLOTS = [
   "07:30","08:15","09:00","09:45",
-  "10:30","11:15","12:00","12:45",
-  "01:30","02:15","03:00","03:45"
+  "10:30","11:15","12:00","12:45"
 ];
 
 const COURTS = 4;
 
-/* ================= PLAYERS ================= */
+/* ================= GET PLAYERS ================= */
 const getPlayers = (match) => {
   return [
     match?.Team1?.partner1?.name,
@@ -42,24 +41,24 @@ const validateGrid = (grid) => {
       const p1 = getPlayers(m1);
       const p2 = getPlayers(m2);
 
-      const samePlayer = p1.some((n) => p2.includes(n));
+      const samePlayer = p1.some((p) => p2.includes(p));
       if (!samePlayer) continue;
 
-      // ❌ SAME TIME + DIFFERENT CATEGORY
+      // ❌ RULE 1: same time different court
       if (
         m1.MatchTime === m2.MatchTime &&
-        m1.category !== m2.category
+        m1.CourtNumber !== m2.CourtNumber
       ) {
-        return "⚠️ Same player different category same time";
+        return "❌ Same player cannot play on 2 courts at same time";
       }
 
-      // ❌ CONSECUTIVE + DIFFERENT COURT
+      // ❌ RULE 2: consecutive match diff court
       const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
       const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
 
       if (Math.abs(t1 - t2) === 1) {
         if (m1.CourtNumber !== m2.CourtNumber) {
-          return "⚠️ Consecutive matches must be same court";
+          return "❌ Consecutive matches must be on same court";
         }
       }
     }
@@ -159,25 +158,7 @@ export default function OrderOfPlay() {
         allMatches = [...allMatches, ...withCategory];
       }
 
-      console.log("TOTAL MATCHES:", allMatches.length);
-
-      // 🔀 MIX CATEGORY
-      let grouped = {};
-      allMatches.forEach((m) => {
-        if (!grouped[m.category]) grouped[m.category] = [];
-        grouped[m.category].push(m);
-      });
-
-      let mixed = [];
-      let max = Math.max(...Object.values(grouped).map((a) => a.length));
-
-      for (let i = 0; i < max; i++) {
-        Object.keys(grouped).forEach((cat) => {
-          if (grouped[cat][i]) mixed.push(grouped[cat][i]);
-        });
-      }
-
-      buildGrid(mixed);
+      buildGrid(allMatches);
     } catch (err) {
       console.error(err);
       toast.error("Error loading data");
@@ -186,20 +167,23 @@ export default function OrderOfPlay() {
 
   /* ================= GRID ================= */
   const buildGrid = (matches) => {
-    let index = 0;
     let temp = [];
+    let index = 0;
 
     const totalRows = Math.ceil(matches.length / COURTS);
 
     for (let i = 0; i < totalRows; i++) {
       let row = [];
 
-      for (let c = 1; c <= COURTS; c++) {
+      for (let c = 0; c < COURTS; c++) {
         let match = matches[index];
 
         if (match) {
-          match.MatchTime = TIME_SLOTS[i] || `Slot ${i + 1}`;
-          match.CourtNumber = c;
+          match = {
+            ...match,
+            MatchTime: TIME_SLOTS[i],
+            CourtNumber: c + 1,
+          };
         }
 
         row.push(match || null);
@@ -240,14 +224,20 @@ export default function OrderOfPlay() {
       copy[s[0]][s[1]] = copy[t[0]][t[1]];
       copy[t[0]][t[1]] = temp;
 
-      // update time + court
-      copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
-      copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
+      // update
+      copy[s[0]][s[1]] = {
+        ...copy[s[0]][s[1]],
+        MatchTime: TIME_SLOTS[s[0]],
+        CourtNumber: s[1] + 1,
+      };
 
-      copy[s[0]][s[1]].CourtNumber = s[1] + 1;
-      copy[t[0]][t[1]].CourtNumber = t[1] + 1;
+      copy[t[0]][t[1]] = {
+        ...copy[t[0]][t[1]],
+        MatchTime: TIME_SLOTS[t[0]],
+        CourtNumber: t[1] + 1,
+      };
 
-      // ✅ VALIDATE
+      // ✅ VALIDATION
       const error = validateGrid(copy);
 
       if (error) {
@@ -266,14 +256,12 @@ export default function OrderOfPlay() {
       <h1>ORDER OF PLAY</h1>
 
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        {/* HEADER */}
         <div className={styles.header}>
           {[1, 2, 3, 4].map((c) => (
             <div key={c}>COURT {c}</div>
           ))}
         </div>
 
-        {/* GRID */}
         {grid.map((row, i) => (
           <div key={i} className={styles.row}>
             {row.map((cell, j) => (
