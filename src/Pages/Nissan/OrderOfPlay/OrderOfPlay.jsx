@@ -1,234 +1,230 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../api";
+import styles from "./OrderOfPlay.module.css";
 import { toast } from "sonner";
-import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
+import {
+  DndContext,
+  useDraggable,
+  useDroppable,
+  closestCenter,
+} from "@dnd-kit/core";
 
-const courts = [1, 2, 3, 4];
+/* ================= TIME SLOTS ================= */
+const TIME_SLOTS = [
+  "07:30",
+  "08:15",
+  "09:00",
+  "09:45",
+  "10:30",
+  "11:15",
+  "12:00",
+];
 
-/* ================= GET PLAYER IDS ================= */
-const getPlayerIds = (match) => {
+/* ================= GET PLAYERS ================= */
+const getPlayers = (match) => {
   return [
-    match.Team1?.partner1?._id,
-    match.Team1?.partner2?._id,
-    match.Team2?.partner1?._id,
-    match.Team2?.partner2?._id,
+    match?.Team1?.partner1?._id,
+    match?.Team1?.partner2?._id,
+    match?.Team2?.partner1?._id,
+    match?.Team2?.partner2?._id,
   ].filter(Boolean);
 };
 
-/* ================= PLAYER CLASH ================= */
-const isPlayerClash = (match, newTime, allMatches) => {
-  const players = getPlayerIds(match);
+/* ================= CONFLICT ================= */
+const hasConflict = (match, time, allMatches) => {
+  const players = getPlayers(match);
 
-  for (let m of allMatches) {
-    if (m._id === match._id) continue;
-    if (m.MatchTime !== newTime) continue;
+  return allMatches.some((m) => {
+    if (m._id === match._id) return false;
+    if (m.MatchTime !== time) return false;
 
-    const existingPlayers = getPlayerIds(m);
-
-    const clash = players.some((p) => existingPlayers.includes(p));
-
-    if (clash) return true;
-  }
-
-  return false;
+    const other = getPlayers(m);
+    return players.some((p) => other.includes(p));
+  });
 };
 
-/* ================= DRAG MATCH ================= */
-const DraggableMatch = ({ match }) => {
-  const { attributes, listeners, setNodeRef } = useDraggable({
-    id: match._id,
-    data: { match },
-  });
+/* ================= MATCH CARD ================= */
+const MatchCard = ({ match }) => {
+  if (!match) return <div className={styles.empty}>—</div>;
+
+  const name = (t) =>
+    t
+      ? `${t.partner1?.name || ""}${
+          t.partner2 ? " & " + t.partner2?.name : ""
+        }`
+      : "TBD";
 
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={{
-        border: "1px solid black",
-        padding: "6px",
-        margin: "4px",
-        background: "#fff",
-        cursor: "grab",
-        fontSize: "12px",
-      }}
-    >
-      <b>{match.Event?.name || "Event"}</b>
-      <br />
+    <div className={styles.matchCard}>
+      <div className={styles.category}>{match.category || "Match"}</div>
 
-      {match.Team1?.partner1?.name || "—"}{" "}
-      {match.Team1?.partner2 ? `& ${match.Team1.partner2.name}` : ""}
-      <br />
-      <b>VS</b>
-      <br />
-      {match.Team2?.partner1?.name || "—"}{" "}
-      {match.Team2?.partner2 ? `& ${match.Team2.partner2.name}` : ""}
+      <div>{name(match.Team1)}</div>
+      <div className={styles.vs}>VS</div>
+      <div>{name(match.Team2)}</div>
+
+      <div className={styles.time}>{match.MatchTime}</div>
     </div>
   );
 };
 
-/* ================= DROP CELL ================= */
-const DropCell = ({ time, court, matches }) => {
-  const { setNodeRef } = useDroppable({
-    id: `${time}-${court}`,
-    data: { time, court },
+/* ================= SLOT ================= */
+const Slot = ({ id, match }) => {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id,
+    data: match,
   });
 
-  const match = matches.find(
-    (m) => m.MatchTime === time && m.CourtNumber === court
-  );
+  const { setNodeRef: dropRef } = useDroppable({
+    id,
+    data: match,
+  });
+
+  const style = transform
+    ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
+    : {};
 
   return (
     <div
-      ref={setNodeRef}
-      style={{
-        border: "1px solid black",
-        minHeight: "110px",
-        padding: "6px",
+      ref={(node) => {
+        setNodeRef(node);
+        dropRef(node);
       }}
+      style={style}
+      className={styles.slot}
+      {...listeners}
+      {...attributes}
     >
-      {match ? <DraggableMatch match={match} /> : "—"}
+      <MatchCard match={match} />
     </div>
   );
 };
 
 /* ================= MAIN ================= */
-const OrderOfPlay = () => {
+export default function OrderOfPlay() {
   const [draws, setDraws] = useState([]);
+  const [grid, setGrid] = useState([]);
 
+  /* ================= FETCH ================= */
   useEffect(() => {
-    fetchDraws();
+    fetchData();
   }, []);
 
-  const fetchDraws = async () => {
+  const fetchData = async () => {
     try {
       const res = await api.get(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws`,
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/YOUR_EVENT_ID`,
         { withCredentials: true }
       );
 
-      setDraws(res.data.data);
+      const round1 = res.data.data.filter(
+        (d) => d.Stage === "Round 1"
+      );
+
+      buildGrid(round1);
+      setDraws(round1);
     } catch (err) {
       console.error(err);
-      toast.error("Error fetching draws");
+      toast.error("Error loading draws");
     }
   };
 
-  /* ================= SCHEDULING ================= */
+  /* ================= BUILD GRID ================= */
+  const buildGrid = (matches) => {
+    let index = 0;
+    let temp = [];
 
-  const courtsCount = 4;
+    for (let i = 0; i < TIME_SLOTS.length; i++) {
+      let row = [];
 
-  const matches = draws
-    .filter((d) => d.Stage === "Round 1")
-    .sort((a, b) => a.Match_number - b.Match_number);
+      for (let c = 1; c <= 4; c++) {
+        let match = matches[index];
 
-  const generateTime = (index) => {
-    const baseHour = 9;
-    return `${(baseHour + index).toString().padStart(2, "0")}:00`;
+        if (match) {
+          match.MatchTime = TIME_SLOTS[i];
+          match.CourtNumber = c;
+        }
+
+        row.push(match || null);
+        index++;
+      }
+
+      temp.push(row);
+    }
+
+    setGrid(temp);
   };
-
-  const scheduledMatches = matches.map((m, index) => {
-    const slot = Math.floor(index / courtsCount);
-    const court = (index % courtsCount) + 1;
-
-    return {
-      ...m,
-      MatchTime: m.MatchTime || generateTime(slot),
-      CourtNumber: m.CourtNumber || court,
-    };
-  });
-
-  const times = [
-    ...new Set(scheduledMatches.map((m) => m.MatchTime)),
-  ];
 
   /* ================= DRAG ================= */
   const handleDragEnd = ({ active, over }) => {
     if (!over) return;
 
-    const draggedMatch = active.data.current.match;
-    const { time, court } = over.data.current;
+    const source = active.data.current;
+    const target = over.data.current;
 
-    // 🔴 PLAYER CLASH CHECK
-    const clash = isPlayerClash(
-      draggedMatch,
-      time,
-      scheduledMatches
-    );
+    if (!source || !target) return;
 
-    if (clash) {
+    // ❌ conflict check
+    if (hasConflict(source, target.MatchTime, draws)) {
       toast.error("Same player already playing at this time ❌");
       return;
     }
 
-    // ✅ UPDATE
-    const updated = scheduledMatches.map((m) =>
-      m._id === draggedMatch._id
-        ? { ...m, MatchTime: time, CourtNumber: court }
-        : m
-    );
+    // ✅ swap
+    setGrid((prev) => {
+      const copy = prev.map((row) => [...row]);
 
-    setDraws(updated);
+      let s, t;
+
+      copy.forEach((row, i) => {
+        row.forEach((cell, j) => {
+          if (cell?._id === source._id) s = [i, j];
+          if (cell?._id === target._id) t = [i, j];
+        });
+      });
+
+      if (s && t) {
+        const temp = copy[s[0]][s[1]];
+        copy[s[0]][s[1]] = copy[t[0]][t[1]];
+        copy[t[0]][t[1]] = temp;
+
+        // update time + court
+        copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
+        copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
+      }
+
+      return copy;
+    });
+
     toast.success("Match moved ✅");
   };
 
+  /* ================= UI ================= */
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
+    <div className={styles.container}>
       <h1>ORDER OF PLAY</h1>
+      <h3>DATE: 21 DEC, 2025</h3>
 
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
         {/* HEADER */}
-        <div style={{ display: "grid", gridTemplateColumns: "80px repeat(4,1fr)" }}>
+        <div className={styles.header}>
           <div></div>
-          {courts.map((c) => (
-            <div
-              key={c}
-              style={{
-                border: "1px solid black",
-                padding: "10px",
-                background: "#f0f0f0",
-              }}
-            >
-              <b>COURT {c}</b>
-            </div>
-          ))}
+          <div>COURT 1</div>
+          <div>COURT 2</div>
+          <div>COURT 3</div>
+          <div>COURT 4</div>
         </div>
 
-        {/* ROWS */}
-        {times.map((time) => (
-          <div
-            key={time}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "80px repeat(4,1fr)",
-            }}
-          >
-            {/* TIME COLUMN */}
-            <div
-              style={{
-                border: "1px solid black",
-                padding: "10px",
-                background: "#fafafa",
-                fontWeight: "bold",
-              }}
-            >
-              {time}
-            </div>
+        {/* BODY */}
+        {grid.map((row, i) => (
+          <div key={i} className={styles.row}>
+            <div className={styles.timeCol}>{TIME_SLOTS[i]}</div>
 
-            {courts.map((court) => (
-              <DropCell
-                key={court}
-                time={time}
-                court={court}
-                matches={scheduledMatches}
-              />
+            {row.map((cell, j) => (
+              <Slot key={j} id={`${i}-${j}`} match={cell} />
             ))}
           </div>
         ))}
       </DndContext>
     </div>
   );
-};
-
-export default OrderOfPlay;
+}
