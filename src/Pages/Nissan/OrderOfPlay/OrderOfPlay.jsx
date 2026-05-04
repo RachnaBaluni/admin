@@ -104,7 +104,10 @@ const Slot = ({ id, match }) => {
     data: match,
   });
 
-  const { setNodeRef: dropRef } = useDroppable({ id });
+  const { setNodeRef: dropRef } = useDroppable({
+    id,
+    data: match, // 🔥 FIXED
+  });
 
   const style = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
@@ -205,6 +208,9 @@ export default function OrderOfPlay() {
     const source = active.data.current;
     const target = over.data.current;
 
+    console.log("ACTIVE:", source);
+    console.log("OVER:", target);
+
     if (!source || !target) return;
 
     setGrid((prev) => {
@@ -226,14 +232,14 @@ export default function OrderOfPlay() {
       copy[s[0]][s[1]] = copy[t[0]][t[1]];
       copy[t[0]][t[1]] = temp;
 
-      // update time + court
+      // update
       copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
       copy[s[0]][s[1]].CourtNumber = s[1] + 1;
 
       copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
       copy[t[0]][t[1]].CourtNumber = t[1] + 1;
 
-      // 🔥 VALIDATE AFTER SWAP
+      // validate AFTER swap
       const error = validateGrid(copy);
 
       if (error) {
