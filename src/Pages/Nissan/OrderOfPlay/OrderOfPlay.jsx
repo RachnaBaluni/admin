@@ -33,7 +33,7 @@ const hasConflict = (match, time, allMatches) => {
   const players = getPlayers(match);
 
   return allMatches.some((m) => {
-    if (m._id === match._id) return false;
+    if (!m || m._id === match._id) return false;
     if (m.MatchTime !== time) return false;
 
     const other = getPlayers(m);
@@ -55,11 +55,9 @@ const MatchCard = ({ match }) => {
   return (
     <div className={styles.card}>
       <div className={styles.category}>{match.category}</div>
-
       <div>{name(match.Team1)}</div>
       <div className={styles.vs}>VS</div>
       <div>{name(match.Team2)}</div>
-
       <div className={styles.time}>{match.MatchTime}</div>
     </div>
   );
@@ -106,7 +104,7 @@ export default function OrderOfPlay() {
     fetchData();
   }, []);
 
-  /* ================= FETCH ALL EVENTS ================= */
+  /* ================= FETCH ================= */
   const fetchData = async () => {
     try {
       const eventsRes = await api.get(
@@ -114,13 +112,19 @@ export default function OrderOfPlay() {
         { withCredentials: true }
       );
 
-      let allMatches = [];
-
-      for (let ev of eventsRes.data.data) {
-        const res = await api.get(
+      const promises = eventsRes.data.data.map((ev) =>
+        api.get(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
           { withCredentials: true }
-        );
+        )
+      );
+
+      const results = await Promise.all(promises);
+
+      let allMatches = [];
+
+      results.forEach((res, index) => {
+        const eventName = eventsRes.data.data[index].name;
 
         const round1 = res.data.data.filter(
           (d) => d.Stage === "Round 1"
@@ -128,11 +132,11 @@ export default function OrderOfPlay() {
 
         const withCategory = round1.map((m) => ({
           ...m,
-          category: ev.name,
+          category: eventName,
         }));
 
-        allMatches = [...allMatches, ...withCategory];
-      }
+        allMatches.push(...withCategory);
+      });
 
       console.log("TOTAL MATCHES:", allMatches.length);
 
@@ -158,8 +162,11 @@ export default function OrderOfPlay() {
         let match = matches[index];
 
         if (match) {
-          match.MatchTime = TIME_SLOTS[i] || `Slot ${i + 1}`;
-          match.CourtNumber = c;
+          match = {
+            ...match,
+            MatchTime: TIME_SLOTS[i] || `Slot ${i + 1}`,
+            CourtNumber: c,
+          };
         }
 
         row.push(match || null);
@@ -181,7 +188,10 @@ export default function OrderOfPlay() {
 
     if (!source || !target) return;
 
-    if (hasConflict(source, target.MatchTime, draws)) {
+    const allMatches = grid.flat().filter(Boolean);
+
+    // ❌ conflict check
+    if (hasConflict(source, target.MatchTime, allMatches)) {
       toast.error("Player already playing at same time ❌");
       return;
     }
@@ -203,14 +213,24 @@ export default function OrderOfPlay() {
         copy[s[0]][s[1]] = copy[t[0]][t[1]];
         copy[t[0]][t[1]] = temp;
 
-        copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
-        copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
+        // ✅ update time
+        copy[s[0]][s[1]] = {
+          ...copy[s[0]][s[1]],
+          MatchTime: TIME_SLOTS[s[0]],
+          CourtNumber: s[1] + 1,
+        };
+
+        copy[t[0]][t[1]] = {
+          ...copy[t[0]][t[1]],
+          MatchTime: TIME_SLOTS[t[0]],
+          CourtNumber: t[1] + 1,
+        };
       }
 
       return copy;
     });
 
-    toast.success("Moved ✅");
+    toast.success("Match moved ✅");
   };
 
   /* ================= UI ================= */
@@ -223,7 +243,7 @@ export default function OrderOfPlay() {
         {/* HEADER */}
         <div className={styles.header}>
           <div></div>
-          {[1,2,3,4].map(c => (
+          {[1, 2, 3, 4].map((c) => (
             <div key={c}>COURT {c}</div>
           ))}
         </div>
