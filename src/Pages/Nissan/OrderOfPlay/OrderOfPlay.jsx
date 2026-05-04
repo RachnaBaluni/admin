@@ -244,7 +244,7 @@ export default function OrderOfPlay() {
       // ✅ VALIDATION
       const error = validateGrid(copy);
       if (error) {
-        toast.error(error);
+        toast.error(error, { duration: 1500 });
         return prev;
       }
 
