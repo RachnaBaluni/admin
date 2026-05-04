@@ -1,115 +1,19 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../api";
-import { toast } from "sonner";
-import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 
 const courts = [1, 2, 3, 4];
+const timeSlots = [
+  "07:30",
+  "08:15",
+  "09:00",
+  "09:45",
+  "10:30",
+  "11:15",
+  "12:00",
+];
 
-// 🔥 apna REAL event id yaha daalo
-const EVENT_ID = "685c156477b6439dbcd5f5b8";
-
-/* ================= VALIDATION ================= */
-const isValidMatchPlacement = (match, time, court, schedule) => {
-  const players = [
-    match.Team1?.partner1?.name,
-    match.Team1?.partner2?.name,
-    match.Team2?.partner1?.name,
-    match.Team2?.partner2?.name,
-  ].filter(Boolean);
-
-  // ❌ same player same time
-  for (let m of schedule) {
-    if (m.MatchTime !== time) continue;
-
-    const existingPlayers = [
-      m.Team1?.partner1?.name,
-      m.Team1?.partner2?.name,
-      m.Team2?.partner1?.name,
-      m.Team2?.partner2?.name,
-    ];
-
-    const clash = players.some((p) => existingPlayers.includes(p));
-    if (clash) return "Player already playing at same time ❌";
-  }
-
-  // ❌ same court occupied
-  const courtTaken = schedule.find(
-    (m) => m.MatchTime === time && m.CourtNumber === court
-  );
-
-  if (courtTaken) return "Court already occupied ❌";
-
-  return null;
-};
-
-/* ================= DRAG MATCH ================= */
-const DraggableMatch = ({ match }) => {
-  const { attributes, listeners, setNodeRef } = useDraggable({
-    id: match._id,
-    data: { match },
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={{
-        border: "1px solid black",
-        padding: "8px",
-        margin: "5px",
-        background: "#fff",
-        cursor: "grab",
-        borderRadius: "6px",
-      }}
-    >
-      <b>{match.EventCategory}</b>
-      <br />
-      {match.Team1?.partner1?.name} &{" "}
-      {match.Team1?.partner2?.name}
-      <br />
-      <b>VS</b>
-      <br />
-      {match.Team2?.partner1?.name} &{" "}
-      {match.Team2?.partner2?.name}
-    </div>
-  );
-};
-
-/* ================= DROP CELL ================= */
-const DropCell = ({ time, court, matches }) => {
-  const { setNodeRef } = useDroppable({
-    id: `${time}-${court}`,
-    data: { time, court },
-  });
-
-  const match = matches.find(
-    (m) => m.MatchTime === time && m.CourtNumber === court
-  );
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        border: "1px solid black",
-        minHeight: "130px",
-        padding: "10px",
-      }}
-    >
-      <b>{time}</b>
-      <br />
-      {match ? (
-        <DraggableMatch match={match} />
-      ) : (
-        <span style={{ color: "#999" }}>Empty</span>
-      )}
-    </div>
-  );
-};
-
-/* ================= MAIN ================= */
 const OrderOfPlay = () => {
-  const [draws, setDraws] = useState([]);
+  const [schedule, setSchedule] = useState([]);
 
   useEffect(() => {
     fetchDraws();
@@ -118,102 +22,170 @@ const OrderOfPlay = () => {
   const fetchDraws = async () => {
     try {
       const res = await api.get(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${EVENT_ID}`,
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws`,
         { withCredentials: true }
       );
 
-      console.log("DRAW DATA:", res.data.data);
-      setDraws(res.data.data);
+      const draws = res.data.data;
+
+      // ✅ STEP 1: ALL categories Round 1
+      const matches = draws.filter((d) => d.Stage === "Round 1");
+
+      console.log("TOTAL ROUND 1:", matches.length);
+
+      // ✅ STEP 2: AUTO SCHEDULING
+      const scheduled = autoSchedule(matches);
+
+      setSchedule(scheduled);
     } catch (err) {
       console.error(err);
-      toast.error("Error fetching draws");
     }
   };
 
-  // 🔥 Round 1 + AUTO ASSIGN TIME & COURT
-  const matches = draws
-    .filter((d) => d.Stage === "Round 1")
-    .map((m, index) => ({
-      ...m,
-      MatchTime: m.MatchTime || ["09:00", "10:00", "11:00", "12:00"][index % 4],
-      CourtNumber: m.CourtNumber || (index % 4) + 1,
-    }));
+  /* ================= PLAYER CHECK ================= */
+  const getPlayers = (match) => {
+    return [
+      match.Team1?.partner1?.name,
+      match.Team1?.partner2?.name,
+      match.Team2?.partner1?.name,
+      match.Team2?.partner2?.name,
+    ].filter(Boolean);
+  };
 
-  const times = ["09:00", "10:00", "11:00", "12:00"];
+  const hasClash = (players, scheduledMatches, time) => {
+    for (let m of scheduledMatches) {
+      if (m.MatchTime !== time) continue;
 
-  /* ================= DRAG END ================= */
-  const handleDragEnd = ({ active, over }) => {
-    if (!over) return;
+      const existingPlayers = getPlayers(m);
+      if (players.some((p) => existingPlayers.includes(p))) {
+        return true;
+      }
+    }
+    return false;
+  };
 
-    const draggedMatch = active.data.current.match;
-    const { time, court } = over.data.current;
+  /* ================= AUTO SCHEDULE ================= */
+  const autoSchedule = (matches) => {
+    let result = [];
 
-    const error = isValidMatchPlacement(
-      draggedMatch,
-      time,
-      court,
-      matches
-    );
+    for (let match of matches) {
+      const players = getPlayers(match);
+      let placed = false;
 
-    if (error) {
-      toast.error(error);
-      return;
+      for (let time of timeSlots) {
+        for (let court of courts) {
+          const clash = hasClash(players, result, time);
+
+          const courtTaken = result.find(
+            (m) => m.MatchTime === time && m.CourtNumber === court
+          );
+
+          if (!clash && !courtTaken) {
+            result.push({
+              ...match,
+              MatchTime: time,
+              CourtNumber: court,
+            });
+            placed = true;
+            break;
+          }
+        }
+        if (placed) break;
+      }
+
+      // ❗ fallback (force place if no slot found)
+      if (!placed) {
+        result.push({
+          ...match,
+          MatchTime: timeSlots[0],
+          CourtNumber: 1,
+        });
+      }
     }
 
-    // update UI
-    const updated = draws.map((d) =>
-      d._id === draggedMatch._id
-        ? { ...d, MatchTime: time, CourtNumber: court }
-        : d
+    return result;
+  };
+
+  /* ================= GROUP BY TIME ================= */
+  const getMatch = (time, court) => {
+    return schedule.find(
+      (m) => m.MatchTime === time && m.CourtNumber === court
     );
-
-    setDraws(updated);
-
-    toast.success("Match moved ✅");
   };
 
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
-      <h1>ORDER OF PLAY</h1>
+    <div style={{ padding: "20px" }}>
+      <h1 style={{ textAlign: "center" }}>ORDER OF PLAY</h1>
 
-      <DndContext onDragEnd={handleDragEnd}>
-        {/* HEADER */}
+      {/* HEADER */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4,1fr)",
+          border: "1px solid black",
+        }}
+      >
+        {courts.map((c) => (
+          <div
+            key={c}
+            style={{ border: "1px solid black", padding: "10px" }}
+          >
+            <b>COURT {c}</b>
+          </div>
+        ))}
+      </div>
+
+      {/* TABLE */}
+      {timeSlots.map((time) => (
         <div
+          key={time}
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4,1fr)",
           }}
         >
-          {courts.map((c) => (
-            <div
-              key={c}
-              style={{ border: "1px solid black", padding: "10px" }}
-            >
-              <b>COURT {c}</b>
-            </div>
-          ))}
-        </div>
+          {courts.map((court) => {
+            const match = getMatch(time, court);
 
-        {/* ROWS */}
-        {times.map((time) => (
-          <div
-            key={time}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4,1fr)",
-            }}
-          >
-            {courts.map((court) => (
-              <DropCell
+            return (
+              <div
                 key={court}
-                time={time}
-                court={court}
-                matches={matches}
-              />
-            ))}
-          </div>
-        ))}
-      </DndContext>
+                style={{
+                  border: "1px solid black",
+                  minHeight: "120px",
+                  padding: "10px",
+                  textAlign: "center",
+                }}
+              >
+                <b>{time}</b>
+                <br />
+
+                {match ? (
+                  <>
+                    <div style={{ fontSize: "12px", color: "#666" }}>
+                      {match.EventCategory}
+                    </div>
+
+                    <div>
+                      {match.Team1?.partner1?.name} &{" "}
+                      {match.Team1?.partner2?.name}
+                    </div>
+
+                    <b>VS</b>
+
+                    <div>
+                      {match.Team2?.partner1?.name} &{" "}
+                      {match.Team2?.partner2?.name}
+                    </div>
+                  </>
+                ) : (
+                  "Empty"
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 };
