@@ -8,7 +8,7 @@
 .header {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  background: #e6ffe6;
+  background: #8ee88e;
   color: white;
   font-weight: bold;
   text-align: center;
