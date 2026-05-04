@@ -2,12 +2,20 @@ import React, { useEffect, useState } from "react";
 import api from "../../../api";
 import styles from "./OrderOfPlay.module.css";
 import { toast } from "sonner";
+
 import {
   DndContext,
-  useDraggable,
-  useDroppable,
-  closestCenter,
+  closestCenter
 } from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  rectSortingStrategy
+} from "@dnd-kit/sortable";
+
+import { CSS } from "@dnd-kit/utilities";
 
 /* ================= TIME ================= */
 const TIME_SLOTS = [
@@ -90,30 +98,26 @@ const MatchCard = ({ match }) => {
 
 /* ================= SLOT ================= */
 const Slot = ({ id, match }) => {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id,
-    data: match,
-  });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition
+  } = useSortable({ id });
 
-  const { setNodeRef: dropRef } = useDroppable({
-    id,
-    data: match,
-  });
-
-  const style = transform
-    ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
-    : {};
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition
+  };
 
   return (
     <div
-      ref={(node) => {
-        setNodeRef(node);
-        dropRef(node);
-      }}
+      ref={setNodeRef}
       style={style}
       className={styles.slot}
-      {...listeners}
       {...attributes}
+      {...listeners}
     >
       <MatchCard match={match} />
     </div>
@@ -173,14 +177,14 @@ export default function OrderOfPlay() {
     for (let i = 0; i < totalRows; i++) {
       let row = [];
 
-      for (let c = 0; c < COURTS; c++) {
+      for (let j = 0; j < COURTS; j++) {
         let match = matches[index];
 
         if (match) {
           match = {
             ...match,
-            MatchTime: TIME_SLOTS[i], // FIXED
-            CourtNumber: c + 1,
+            MatchTime: TIME_SLOTS[i],
+            CourtNumber: j + 1,
           };
         }
 
@@ -194,58 +198,63 @@ export default function OrderOfPlay() {
     setGrid(temp);
   };
 
+  /* ================= FLATTEN ================= */
+  const flattenGrid = (grid) => {
+    return grid.flat().map((item, index) => ({
+      ...item,
+      uniqueId: item?._id || `empty-${index}`
+    }));
+  };
+
   /* ================= DRAG ================= */
   const handleDragEnd = ({ active, over }) => {
     if (!over) return;
 
-    // ❌ same slot
     if (active.id === over.id) return;
 
-    const source = active.data.current;
-    const target = over.data.current;
-
-    if (!source || !target) return;
-
     setGrid((prev) => {
-      const copy = prev.map((r) => [...r]);
+      const flat = flattenGrid(prev);
 
-      let s, t;
+      const oldIndex = flat.findIndex(i => i.uniqueId === active.id);
+      const newIndex = flat.findIndex(i => i.uniqueId === over.id);
 
-      copy.forEach((row, i) => {
-        row.forEach((cell, j) => {
-          if (cell?._id === source._id) s = [i, j];
-          if (cell?._id === target._id) t = [i, j];
-        });
-      });
+      if (oldIndex === -1 || newIndex === -1) return prev;
 
-      if (!s || !t) return prev;
+      const newFlat = arrayMove(flat, oldIndex, newIndex);
 
-      // swap ONLY
-      const temp = copy[s[0]][s[1]];
-      copy[s[0]][s[1]] = copy[t[0]][t[1]];
-      copy[t[0]][t[1]] = temp;
+      let newGrid = [];
+      let index = 0;
 
-      // keep time FIXED
-      copy[s[0]][s[1]] = {
-        ...copy[s[0]][s[1]],
-        MatchTime: TIME_SLOTS[s[0]],
-        CourtNumber: s[1] + 1,
-      };
+      for (let i = 0; i < prev.length; i++) {
+        let row = [];
 
-      copy[t[0]][t[1]] = {
-        ...copy[t[0]][t[1]],
-        MatchTime: TIME_SLOTS[t[0]],
-        CourtNumber: t[1] + 1,
-      };
+        for (let j = 0; j < COURTS; j++) {
+          const item = newFlat[index];
 
-      const error = validateGrid(copy);
+          if (item && item._id) {
+            row.push({
+              ...item,
+              MatchTime: TIME_SLOTS[i],
+              CourtNumber: j + 1,
+            });
+          } else {
+            row.push(null);
+          }
+
+          index++;
+        }
+
+        newGrid.push(row);
+      }
+
+      const error = validateGrid(newGrid);
 
       if (error) {
         toast.error(error);
         return prev;
       }
 
-      return copy;
+      return newGrid;
     });
   };
 
@@ -255,19 +264,26 @@ export default function OrderOfPlay() {
       <h1>ORDER OF PLAY</h1>
 
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        <div className={styles.header}>
-          {[1, 2, 3, 4].map((c) => (
-            <div key={c}>COURT {c}</div>
-          ))}
-        </div>
-
-        {grid.map((row, i) => (
-          <div key={i} className={styles.row}>
-            {row.map((cell, j) => (
-              <Slot key={j} id={`${i}-${j}`} match={cell} />
-            ))}
+        <SortableContext
+          items={flattenGrid(grid).map(i => i.uniqueId)}
+          strategy={rectSortingStrategy}
+        >
+          <div className={styles.header}>
+            {[1,2,3,4].map(c => <div key={c}>COURT {c}</div>)}
           </div>
-        ))}
+
+          {grid.map((row, i) => (
+            <div key={i} className={styles.row}>
+              {row.map((cell, j) => (
+                <Slot
+                  key={`${i}-${j}`}
+                  id={cell?._id || `empty-${i}-${j}`}
+                  match={cell}
+                />
+              ))}
+            </div>
+          ))}
+        </SortableContext>
       </DndContext>
     </div>
   );
