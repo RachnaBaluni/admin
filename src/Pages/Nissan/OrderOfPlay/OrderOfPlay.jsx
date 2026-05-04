@@ -36,7 +36,6 @@ const validateGrid = (grid) => {
       if (cell) {
         matches.push({
           ...cell,
-          row: i,
           court: j + 1,
         });
       }
@@ -54,13 +53,16 @@ const validateGrid = (grid) => {
       const samePlayer = p1.some(p => p2.includes(p));
       if (!samePlayer) continue;
 
-      // ❌ SAME TIME DIFF COURT
-      if (m1.row === m2.row && m1.court !== m2.court) {
+      // ✅ SAME TIME
+      if (m1.MatchTime === m2.MatchTime && m1.court !== m2.court) {
         return "❌ Same player same time different court";
       }
 
-      // ❌ CONSECUTIVE DIFF COURT
-      if (Math.abs(m1.row - m2.row) === 1) {
+      // ✅ CONSECUTIVE (correct logic)
+      const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
+      const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
+
+      if (Math.abs(t1 - t2) === 1) {
         if (m1.court !== m2.court) {
           return "❌ Consecutive matches must be on same court";
         }
@@ -160,6 +162,7 @@ export default function OrderOfPlay() {
       }
 
       buildGrid(allMatches);
+
     } catch (err) {
       console.error(err);
       toast.error("Error loading");
