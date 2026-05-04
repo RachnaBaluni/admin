@@ -21,20 +21,14 @@ const COURTS = 4;
 /* ================= PLAYERS ================= */
 const getPlayers = (match) => {
   return [
-    match?.Team1?.partner1,
-    match?.Team1?.partner2,
-    match?.Team2?.partner1,
-    match?.Team2?.partner2,
+    match?.Team1?.partner1?.name,
+    match?.Team1?.partner2?.name,
+    match?.Team2?.partner1?.name,
+    match?.Team2?.partner2?.name,
   ]
     .filter(Boolean)
-    .map((p) => ({
-      id: p._id || "",
-      name: (p.name || "").toLowerCase().trim(),
-    }));
+    .map((n) => n.toLowerCase().trim());
 };
-
-const isSamePlayer = (a, b) =>
-  (a.id && b.id && a.id === b.id) || (a.name && b.name && a.name === b.name);
 
 /* ================= VALIDATION ================= */
 const validateGrid = (grid) => {
@@ -48,24 +42,24 @@ const validateGrid = (grid) => {
       const p1 = getPlayers(m1);
       const p2 = getPlayers(m2);
 
-      const samePlayer = p1.some((x) =>
-        p2.some((y) => isSamePlayer(x, y))
-      );
-
+      const samePlayer = p1.some((n) => p2.includes(n));
       if (!samePlayer) continue;
 
-      // ❌ SAME TIME
-      if (m1.MatchTime === m2.MatchTime) {
-        return "Same player same time ❌";
+      // ❌ SAME TIME + DIFFERENT CATEGORY
+      if (
+        m1.MatchTime === m2.MatchTime &&
+        m1.category !== m2.category
+      ) {
+        return "⚠️ Same player different category same time";
       }
 
-      // ❌ CONSECUTIVE
+      // ❌ CONSECUTIVE + DIFFERENT COURT
       const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
       const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
 
       if (Math.abs(t1 - t2) === 1) {
         if (m1.CourtNumber !== m2.CourtNumber) {
-          return "Consecutive match must be same court ❌";
+          return "⚠️ Consecutive matches must be same court";
         }
       }
     }
@@ -87,8 +81,8 @@ const MatchCard = ({ match }) => {
 
   return (
     <div className={styles.card}>
-      <div className={styles.time}>{match.MatchTime}</div>
-      <div className={styles.cat}>{match.category}</div>
+      <div className={styles.timeTop}>{match.MatchTime}</div>
+      <div className={styles.category}>{match.category}</div>
 
       <div>{name(match.Team1)}</div>
       <div className={styles.vs}>VS</div>
@@ -106,7 +100,7 @@ const Slot = ({ id, match }) => {
 
   const { setNodeRef: dropRef } = useDroppable({
     id,
-    data: match, // 🔥 FIXED
+    data: match,
   });
 
   const style = transform
@@ -137,6 +131,7 @@ export default function OrderOfPlay() {
     fetchData();
   }, []);
 
+  /* ================= FETCH ================= */
   const fetchData = async () => {
     try {
       const eventsRes = await api.get(
@@ -156,39 +151,55 @@ export default function OrderOfPlay() {
           (d) => d.Stage === "Round 1"
         );
 
-        const withCat = round1.map((m) => ({
+        const withCategory = round1.map((m) => ({
           ...m,
           category: ev.name,
         }));
 
-        allMatches = [...allMatches, ...withCat];
+        allMatches = [...allMatches, ...withCategory];
       }
 
       console.log("TOTAL MATCHES:", allMatches.length);
 
-      buildGrid(allMatches);
+      // 🔀 MIX CATEGORY
+      let grouped = {};
+      allMatches.forEach((m) => {
+        if (!grouped[m.category]) grouped[m.category] = [];
+        grouped[m.category].push(m);
+      });
 
+      let mixed = [];
+      let max = Math.max(...Object.values(grouped).map((a) => a.length));
+
+      for (let i = 0; i < max; i++) {
+        Object.keys(grouped).forEach((cat) => {
+          if (grouped[cat][i]) mixed.push(grouped[cat][i]);
+        });
+      }
+
+      buildGrid(mixed);
     } catch (err) {
       console.error(err);
       toast.error("Error loading data");
     }
   };
 
+  /* ================= GRID ================= */
   const buildGrid = (matches) => {
     let index = 0;
     let temp = [];
 
-    const rows = Math.ceil(matches.length / COURTS);
+    const totalRows = Math.ceil(matches.length / COURTS);
 
-    for (let i = 0; i < rows; i++) {
+    for (let i = 0; i < totalRows; i++) {
       let row = [];
 
-      for (let j = 0; j < COURTS; j++) {
+      for (let c = 1; c <= COURTS; c++) {
         let match = matches[index];
 
         if (match) {
-          match.MatchTime = TIME_SLOTS[i];
-          match.CourtNumber = j + 1;
+          match.MatchTime = TIME_SLOTS[i] || `Slot ${i + 1}`;
+          match.CourtNumber = c;
         }
 
         row.push(match || null);
@@ -208,9 +219,6 @@ export default function OrderOfPlay() {
     const source = active.data.current;
     const target = over.data.current;
 
-    console.log("ACTIVE:", source);
-    console.log("OVER:", target);
-
     if (!source || !target) return;
 
     setGrid((prev) => {
@@ -227,24 +235,24 @@ export default function OrderOfPlay() {
 
       if (!s || !t) return prev;
 
-      // swap
+      // 🔄 swap
       const temp = copy[s[0]][s[1]];
       copy[s[0]][s[1]] = copy[t[0]][t[1]];
       copy[t[0]][t[1]] = temp;
 
-      // update
+      // update time + court
       copy[s[0]][s[1]].MatchTime = TIME_SLOTS[s[0]];
-      copy[s[0]][s[1]].CourtNumber = s[1] + 1;
-
       copy[t[0]][t[1]].MatchTime = TIME_SLOTS[t[0]];
+
+      copy[s[0]][s[1]].CourtNumber = s[1] + 1;
       copy[t[0]][t[1]].CourtNumber = t[1] + 1;
 
-      // validate AFTER swap
+      // ✅ VALIDATE
       const error = validateGrid(copy);
 
       if (error) {
         toast.error(error);
-        return prev; // revert
+        return prev; // ❌ revert
       }
 
       toast.success("Moved ✅");
@@ -252,17 +260,20 @@ export default function OrderOfPlay() {
     });
   };
 
+  /* ================= UI ================= */
   return (
     <div className={styles.container}>
       <h1>ORDER OF PLAY</h1>
 
       <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+        {/* HEADER */}
         <div className={styles.header}>
-          {[1,2,3,4].map(c => (
+          {[1, 2, 3, 4].map((c) => (
             <div key={c}>COURT {c}</div>
           ))}
         </div>
 
+        {/* GRID */}
         {grid.map((row, i) => (
           <div key={i} className={styles.row}>
             {row.map((cell, j) => (
