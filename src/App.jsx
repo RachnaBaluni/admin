@@ -18,6 +18,12 @@ import UpdateEvents from "./Pages/Nissan/UpdateEvents/UpdateEvents";
 import ViewPlayerJourney from "./Pages/Nissan/Journey/ViewPlayerJourney";
 import OrderOfPlay from "./Pages/Nissan/OrderOfPlay/OrderOfPlay";
 import { Toaster } from "sonner";
+import { useParams } from "react-router-dom"; // 👈 ऊपर add करना
+
+const OrderOfPlayWrapper = () => {
+  const { eventId } = useParams();
+  return <OrderOfPlay eventId={eventId} />;
+};
 
 function App() {
   return (
@@ -127,11 +133,11 @@ function App() {
         />
 
         <Route
-  path="/nissan/order-of-play"
+  path="/nissan/order-of-play/:eventId"
   element={
     <ProtectedRoute>
       <Layout>
-        <OrderOfPlay />
+        <OrderOfPlayWrapper />
       </Layout>
     </ProtectedRoute>
   }

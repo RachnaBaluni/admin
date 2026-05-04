@@ -100,19 +100,20 @@ const Slot = ({ id, match }) => {
 };
 
 /* ================= MAIN ================= */
-export default function OrderOfPlay() {
+export default function OrderOfPlay({eventId}) {
+  console.log("EVENT ID:", eventId);
   const [draws, setDraws] = useState([]);
   const [grid, setGrid] = useState([]);
 
   /* ================= FETCH ================= */
   useEffect(() => {
-    fetchData();
-  }, []);
-
+  if (!eventId) return;
+  fetchData();
+}, [eventId]);
   const fetchData = async () => {
     try {
       const res = await api.get(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/YOUR_EVENT_ID`,
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${eventId}`,
         { withCredentials: true }
       );
 
