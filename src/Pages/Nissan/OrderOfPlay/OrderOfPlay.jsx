@@ -10,7 +10,18 @@ import {
   useDroppable,
 } from "@dnd-kit/core";
 
-/* ================= COURTS ================= */
+/* ================= TIME ================= */
+const TIME_SLOTS = [
+  "07:30",
+  "08:15",
+  "09:00",
+  "09:45",
+  "10:30",
+  "11:15",
+  "12:00",
+  "12:45",
+];
+
 const COURTS = 4;
 
 /* ================= PLAYERS ================= */
@@ -29,11 +40,12 @@ const validateGrid = (grid) => {
 
   grid.forEach((row, rowIndex) => {
     row.forEach((cell, colIndex) => {
-      if (cell) {
+      if (cell?.match) {
         matches.push({
-          ...cell,
+          ...cell.match,
           row: rowIndex,
           court: colIndex + 1,
+          time: cell.time,
         });
       }
     });
@@ -53,20 +65,10 @@ const validateGrid = (grid) => {
 
       if (!samePlayer) continue;
 
-      /* SAME TIME */
-      if (m1.MatchTime === m2.MatchTime) {
-        if (m1.CourtNumber !== m2.CourtNumber) {
+      /* SAME TIME VALIDATION */
+      if (m1.time === m2.time) {
+        if (m1.court !== m2.court) {
           return "❌ Same player cannot play on different courts at same time";
-        }
-      }
-
-      /* CONSECUTIVE */
-      const t1 = m1.MatchTime;
-      const t2 = m2.MatchTime;
-
-      if (Math.abs(t1.localeCompare(t2)) === 1) {
-        if (m1.CourtNumber !== m2.CourtNumber) {
-          return "❌ Consecutive matches must be on same court";
         }
       }
     }
@@ -76,7 +78,7 @@ const validateGrid = (grid) => {
 };
 
 /* ================= DRAG CARD ================= */
-function DraggableMatch({ match }) {
+function DraggableMatch({ match, time }) {
   const { attributes, listeners, setNodeRef, transform } =
     useDraggable({
       id: match._id,
@@ -103,8 +105,9 @@ function DraggableMatch({ match }) {
       {...attributes}
       className={styles.card}
     >
+      {/* FIXED TIME */}
       <div className={styles.time}>
-        {match.MatchTime}
+        {time}
       </div>
 
       <div className={styles.category}>
@@ -193,14 +196,16 @@ export default function OrderOfPlay() {
 
         if (match) {
           row.push({
-            ...match,
-            CourtNumber: j + 1,
+            match,
+            time: TIME_SLOTS[i] || "",
+            court: j + 1,
           });
         }
 
         index++;
       }
 
+      /* REMOVE EMPTY ROW */
       if (row.length > 0) {
         temp.push(row);
       }
@@ -227,7 +232,7 @@ export default function OrderOfPlay() {
 
     newGrid.forEach((row, i) => {
       row.forEach((cell, j) => {
-        if (cell?._id === activeId) {
+        if (cell?.match?._id === activeId) {
           activePos = { i, j };
         }
 
@@ -239,26 +244,31 @@ export default function OrderOfPlay() {
 
     if (!activePos || !overPos) return;
 
-    const draggedMatch =
+    const dragged =
       newGrid[activePos.i][activePos.j];
 
-    const targetMatch =
+    const target =
       newGrid[overPos.i][overPos.j];
 
-    /* SWAP ONLY MATCH */
-    newGrid[overPos.i][overPos.j] = draggedMatch;
-    newGrid[activePos.i][activePos.j] = targetMatch;
+    if (!dragged || !target) return;
 
-    /* ONLY UPDATE COURT */
-    newGrid.forEach((row) => {
-      row.forEach((cell, colIndex) => {
-        if (cell) {
-          cell.CourtNumber = colIndex + 1;
-        }
-      });
-    });
+    /* ================= ONLY SWAP TEAMS ================= */
 
-    /* VALIDATION */
+    const draggedTeams = {
+      Team1: dragged.match.Team1,
+      Team2: dragged.match.Team2,
+    };
+
+    dragged.match.Team1 = target.match.Team1;
+    dragged.match.Team2 = target.match.Team2;
+
+    target.match.Team1 = draggedTeams.Team1;
+    target.match.Team2 = draggedTeams.Team2;
+
+    /* TIME FIXED */
+    /* COURT FIXED */
+    /* CATEGORY FIXED */
+
     const error = validateGrid(newGrid);
 
     if (error) {
@@ -277,7 +287,9 @@ export default function OrderOfPlay() {
       {/* HEADER */}
       <div className={styles.header}>
         {[1, 2, 3, 4].map((court) => (
-          <div key={court}>COURT {court}</div>
+          <div key={court}>
+            COURT {court}
+          </div>
         ))}
       </div>
 
@@ -293,7 +305,10 @@ export default function OrderOfPlay() {
                 id={`slot-${i}-${j}`}
               >
                 {cell && (
-                  <DraggableMatch match={cell} />
+                  <DraggableMatch
+                    match={cell.match}
+                    time={cell.time}
+                  />
                 )}
               </DroppableSlot>
             ))}
