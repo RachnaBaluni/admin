@@ -39,6 +39,7 @@ function DraggableMatch({
   match,
   time,
 }) {
+
   const {
     attributes,
     listeners,
@@ -71,6 +72,8 @@ function DraggableMatch({
       {...attributes}
       className={styles.card}
     >
+
+      {/* FIXED TIME */}
       <div className={styles.fixedTime}>
         {time}
       </div>
@@ -86,6 +89,7 @@ function DraggableMatch({
       </div>
 
       <div>{name(match.Team2)}</div>
+
     </div>
   );
 }
@@ -95,6 +99,7 @@ function DroppableSlot({
   children,
   id,
 }) {
+
   const { setNodeRef } = useDroppable({
     id,
   });
@@ -216,6 +221,7 @@ export default function OrderOfPlay() {
     let overPos = null;
 
     grid.forEach((row, i) => {
+
       row.forEach((cell, j) => {
 
         if (
@@ -229,7 +235,9 @@ export default function OrderOfPlay() {
         ) {
           overPos = { i, j };
         }
+
       });
+
     });
 
     if (!activePos || !overPos) {
@@ -262,59 +270,7 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* ================= VALIDATION ================= */
-
-    const draggedPlayers =
-      getPlayers(dragged.match);
-
-    const targetPlayers =
-      getPlayers(target.match);
-
-    const samePlayer =
-      draggedPlayers.some((p) =>
-        targetPlayers.includes(p)
-      );
-
-    /* ONLY IF SAME PLAYER */
-    if (samePlayer) {
-
-      /* SAME TIME */
-      if (
-        dragged.time === target.time
-      ) {
-        toast.error(
-          "❌ Same player cannot play at same time"
-        );
-        return;
-      }
-
-      /* CONSECUTIVE */
-      const draggedIndex =
-        TIME_SLOTS.indexOf(
-          dragged.time
-        );
-
-      const targetIndex =
-        TIME_SLOTS.indexOf(
-          target.time
-        );
-
-      const diff = Math.abs(
-        draggedIndex - targetIndex
-      );
-
-      if (
-        diff === 1 &&
-        dragged.court !== target.court
-      ) {
-        toast.error(
-          "❌ Consecutive matches must be on same court"
-        );
-        return;
-      }
-    }
-
-    /* ================= FULL SWAP ================= */
+    /* ================= TEMP SWAP ================= */
 
     const temp = dragged.match;
 
@@ -322,10 +278,81 @@ export default function OrderOfPlay() {
 
     target.match = temp;
 
+    /* ================= VALIDATE FULL GRID ================= */
+
+    let allMatches = [];
+
+    newGrid.forEach((row, rowIndex) => {
+
+      row.forEach((cell, colIndex) => {
+
+        if (cell?.match) {
+
+          allMatches.push({
+            players: getPlayers(cell.match),
+            time: cell.time,
+            court: colIndex + 1,
+            timeIndex: rowIndex,
+          });
+
+        }
+
+      });
+
+    });
+
+    for (let i = 0; i < allMatches.length; i++) {
+
+      for (let j = i + 1; j < allMatches.length; j++) {
+
+        const m1 = allMatches[i];
+        const m2 = allMatches[j];
+
+        const samePlayer =
+          m1.players.some((p) =>
+            m2.players.includes(p)
+          );
+
+        if (!samePlayer) continue;
+
+        /* SAME TIME */
+        if (
+          m1.time === m2.time &&
+          m1.court !== m2.court
+        ) {
+
+          toast.error(
+            "❌ Same player cannot play on different courts at same time"
+          );
+
+          return;
+        }
+
+        /* CONSECUTIVE */
+        const diff = Math.abs(
+          m1.timeIndex - m2.timeIndex
+        );
+
+        if (
+          diff === 1 &&
+          m1.court !== m2.court
+        ) {
+
+          toast.error(
+            "❌ Consecutive matches must be on same court"
+          );
+
+          return;
+        }
+      }
+    }
+
     /* SUCCESS */
     setGrid(newGrid);
 
-    toast.success("✅ Match swapped");
+    toast.success(
+      "✅ Match swapped successfully"
+    );
   };
 
   /* ================= UI ================= */
