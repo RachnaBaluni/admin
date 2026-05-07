@@ -34,60 +34,6 @@ const getPlayers = (m) => {
   ].filter(Boolean);
 };
 
-/* ================= VALIDATION ================= */
-const validateGrid = (grid) => {
-  let allMatches = [];
-
-  grid.forEach((row, rowIndex) => {
-    row.forEach((cell, colIndex) => {
-      if (cell?.match) {
-        allMatches.push({
-          match: cell.match,
-          players: getPlayers(cell.match),
-          time: cell.time,
-          court: colIndex + 1,
-          timeIndex: rowIndex,
-        });
-      }
-    });
-  });
-
-  for (let i = 0; i < allMatches.length; i++) {
-    for (let j = i + 1; j < allMatches.length; j++) {
-
-      const m1 = allMatches[i];
-      const m2 = allMatches[j];
-
-      /* SAME PLAYER */
-      const samePlayer = m1.players.some((p) =>
-        m2.players.includes(p)
-      );
-
-      if (!samePlayer) continue;
-
-      /* ================= SAME TIME ================= */
-      if (m1.time === m2.time) {
-        if (m1.court !== m2.court) {
-          return "❌ Same player cannot play on different courts at same time";
-        }
-      }
-
-      /* ================= CONSECUTIVE ================= */
-      const diff = Math.abs(
-        m1.timeIndex - m2.timeIndex
-      );
-
-      if (diff === 1) {
-        if (m1.court !== m2.court) {
-          return "❌ Consecutive matches must be on same court";
-        }
-      }
-    }
-  }
-
-  return null;
-};
-
 /* ================= DRAG CARD ================= */
 function DraggableMatch({
   match,
@@ -316,6 +262,58 @@ export default function OrderOfPlay() {
       return;
     }
 
+    /* ================= VALIDATION ================= */
+
+    const draggedPlayers =
+      getPlayers(dragged.match);
+
+    const targetPlayers =
+      getPlayers(target.match);
+
+    const samePlayer =
+      draggedPlayers.some((p) =>
+        targetPlayers.includes(p)
+      );
+
+    /* ONLY IF SAME PLAYER */
+    if (samePlayer) {
+
+      /* SAME TIME */
+      if (
+        dragged.time === target.time
+      ) {
+        toast.error(
+          "❌ Same player cannot play at same time"
+        );
+        return;
+      }
+
+      /* CONSECUTIVE */
+      const draggedIndex =
+        TIME_SLOTS.indexOf(
+          dragged.time
+        );
+
+      const targetIndex =
+        TIME_SLOTS.indexOf(
+          target.time
+        );
+
+      const diff = Math.abs(
+        draggedIndex - targetIndex
+      );
+
+      if (
+        diff === 1 &&
+        dragged.court !== target.court
+      ) {
+        toast.error(
+          "❌ Consecutive matches must be on same court"
+        );
+        return;
+      }
+    }
+
     /* ================= FULL SWAP ================= */
 
     const temp = dragged.match;
@@ -324,18 +322,10 @@ export default function OrderOfPlay() {
 
     target.match = temp;
 
-    /* ================= VALIDATE ================= */
-
-    const error = validateGrid(newGrid);
-
-    /* INVALID => NO SWAP */
-    if (error) {
-      toast.error(error);
-      return;
-    }
-
     /* SUCCESS */
     setGrid(newGrid);
+
+    toast.success("✅ Match swapped");
   };
 
   /* ================= UI ================= */
