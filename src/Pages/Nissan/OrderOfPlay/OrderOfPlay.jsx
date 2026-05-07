@@ -10,18 +10,7 @@ import {
   useDroppable,
 } from "@dnd-kit/core";
 
-/* ================= TIME ================= */
-const TIME_SLOTS = [
-  "07:30",
-  "08:15",
-  "09:00",
-  "09:45",
-  "10:30",
-  "11:15",
-  "12:00",
-  "12:45",
-];
-
+/* ================= COURTS ================= */
 const COURTS = 4;
 
 /* ================= PLAYERS ================= */
@@ -65,15 +54,18 @@ const validateGrid = (grid) => {
       if (!samePlayer) continue;
 
       /* SAME TIME */
-      if (m1.row === m2.row) {
-        if (m1.court !== m2.court) {
+      if (m1.MatchTime === m2.MatchTime) {
+        if (m1.CourtNumber !== m2.CourtNumber) {
           return "❌ Same player cannot play on different courts at same time";
         }
       }
 
       /* CONSECUTIVE */
-      if (Math.abs(m1.row - m2.row) === 1) {
-        if (m1.court !== m2.court) {
+      const t1 = m1.MatchTime;
+      const t2 = m2.MatchTime;
+
+      if (Math.abs(t1.localeCompare(t2)) === 1) {
+        if (m1.CourtNumber !== m2.CourtNumber) {
           return "❌ Consecutive matches must be on same court";
         }
       }
@@ -85,9 +77,10 @@ const validateGrid = (grid) => {
 
 /* ================= DRAG CARD ================= */
 function DraggableMatch({ match }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: match._id,
-  });
+  const { attributes, listeners, setNodeRef, transform } =
+    useDraggable({
+      id: match._id,
+    });
 
   const style = transform
     ? {
@@ -164,6 +157,7 @@ export default function ViewOrderOfPlay() {
           { withCredentials: true }
         );
 
+        /* ONLY ROUND 1 */
         const matches = res.data.data.filter(
           (d) => d.Stage === "Round 1"
         );
@@ -195,19 +189,18 @@ export default function ViewOrderOfPlay() {
       let row = [];
 
       for (let j = 0; j < COURTS; j++) {
-        let match = matches[index];
+        const match = matches[index];
 
         if (match) {
-          match.MatchTime = TIME_SLOTS[i] || "";
-          match.CourtNumber = j + 1;
-
-          row.push(match);
+          row.push({
+            ...match,
+            CourtNumber: j + 1,
+          });
         }
 
         index++;
       }
 
-      /* EMPTY ROW REMOVE */
       if (row.length > 0) {
         temp.push(row);
       }
@@ -252,15 +245,14 @@ export default function ViewOrderOfPlay() {
     const targetMatch =
       newGrid[overPos.i][overPos.j];
 
-    /* SWAP */
+    /* SWAP ONLY MATCH */
     newGrid[overPos.i][overPos.j] = draggedMatch;
     newGrid[activePos.i][activePos.j] = targetMatch;
 
-    /* UPDATE TIME + COURT */
-    newGrid.forEach((row, rowIndex) => {
+    /* ONLY UPDATE COURT */
+    newGrid.forEach((row) => {
       row.forEach((cell, colIndex) => {
         if (cell) {
-          cell.MatchTime = TIME_SLOTS[rowIndex];
           cell.CourtNumber = colIndex + 1;
         }
       });
