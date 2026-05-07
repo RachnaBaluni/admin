@@ -278,71 +278,83 @@ export default function OrderOfPlay() {
 
     target.match = temp;
 
-    /* ================= VALIDATE FULL GRID ================= */
+    /* ================= VALIDATE ONLY SWAPPED AGAINST GRID ================= */
 
-    let allMatches = [];
+    const swappedMatches = [
+      {
+        match: dragged.match,
+        time: dragged.time,
+        court: dragged.court,
+        timeIndex: activePos.i,
+      },
+      {
+        match: target.match,
+        time: target.time,
+        court: target.court,
+        timeIndex: overPos.i,
+      },
+    ];
 
-    newGrid.forEach((row, rowIndex) => {
+    for (const swapped of swappedMatches) {
 
-      row.forEach((cell, colIndex) => {
+      const swappedPlayers =
+        getPlayers(swapped.match);
 
-        if (cell?.match) {
+      for (let i = 0; i < newGrid.length; i++) {
 
-          allMatches.push({
-            players: getPlayers(cell.match),
-            time: cell.time,
-            court: colIndex + 1,
-            timeIndex: rowIndex,
-          });
+        for (let j = 0; j < newGrid[i].length; j++) {
 
-        }
+          const cell = newGrid[i][j];
 
-      });
+          if (!cell?.match) continue;
 
-    });
+          /* SKIP SAME CELL */
+          if (
+            i === swapped.timeIndex &&
+            j === swapped.court - 1
+          ) {
+            continue;
+          }
 
-    for (let i = 0; i < allMatches.length; i++) {
+          const cellPlayers =
+            getPlayers(cell.match);
 
-      for (let j = i + 1; j < allMatches.length; j++) {
+          const samePlayer =
+            swappedPlayers.some((p) =>
+              cellPlayers.includes(p)
+            );
 
-        const m1 = allMatches[i];
-        const m2 = allMatches[j];
+          if (!samePlayer) continue;
 
-        const samePlayer =
-          m1.players.some((p) =>
-            m2.players.includes(p)
+          /* SAME TIME */
+          if (
+            swapped.time === cell.time &&
+            swapped.court !== cell.court
+          ) {
+
+            toast.error(
+              "❌ Same player cannot play on different courts at same time"
+            );
+
+            return;
+          }
+
+          /* CONSECUTIVE */
+          const diff = Math.abs(
+            swapped.timeIndex - i
           );
 
-        if (!samePlayer) continue;
+          if (
+            diff === 1 &&
+            swapped.court !== cell.court
+          ) {
 
-        /* SAME TIME */
-        if (
-          m1.time === m2.time &&
-          m1.court !== m2.court
-        ) {
+            toast.error(
+              "❌ Consecutive matches must be on same court"
+            );
 
-          toast.error(
-            "❌ Same player cannot play on different courts at same time"
-          );
-
-          return;
-        }
-
-        /* CONSECUTIVE */
-        const diff = Math.abs(
-          m1.timeIndex - m2.timeIndex
-        );
-
-        if (
-          diff === 1 &&
-          m1.court !== m2.court
-        ) {
-
-          toast.error(
-            "❌ Consecutive matches must be on same court"
-          );
-
-          return;
+            return;
+          }
         }
       }
     }
