@@ -6,11 +6,15 @@ import { toast } from "sonner";
 import {
   DndContext,
   closestCenter,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
   useDraggable,
   useDroppable,
 } from "@dnd-kit/core";
 
-/* ================= TIME ================= */
+/* ================= TIME SLOTS ================= */
 const TIME_SLOTS = [
   "07:30",
   "08:15",
@@ -24,62 +28,68 @@ const TIME_SLOTS = [
 
 const COURTS = 4;
 
-/* ================= PLAYERS ================= */
-const getPlayers = (m) => {
+/* ================= GET PLAYER IDs ================= */
+const getPlayers = (match) => {
+  if (!match) return [];
   return [
-    m?.Team1?.partner1?._id,
-    m?.Team1?.partner2?._id,
-    m?.Team2?.partner1?._id,
-    m?.Team2?.partner2?._id,
+    match?.Team1?.partner1?._id,
+    match?.Team1?.partner2?._id,
+    match?.Team2?.partner1?._id,
+    match?.Team2?.partner2?._id,
   ].filter(Boolean);
 };
 
-/* ================= VALIDATION ================= */
-const validateGrid = (grid) => {
-  let matches = [];
+/* ================= VALIDATE SWAP ================= */
+/*
+ * We validate BEFORE the swap, simulating the post-swap state.
+ *
+ * grid[row][col] = { match, time, court }
+ * - time and court are FIXED to the slot.
+ * - Only Team1 / Team2 inside match will be swapped.
+ *
+ * After simulating the swap, we check ALL slot pairs:
+ *   1. No player appears twice in the same time row.
+ *   2. If a player has matches in consecutive rows,
+ *      both must be in the same column (court).
+ */
+const validateSwap = (grid, fromRow, fromCol, toRow, toCol) => {
+  // Build post-swap slot list: [ { row, col, players[] } ]
+  const slots = [];
 
-  grid.forEach((row, rowIndex) => {
-    row.forEach((cell, colIndex) => {
-      if (cell?.match) {
-        matches.push({
-          ...cell.match,
-          court: colIndex + 1,
-          time: cell.time,
-          row: rowIndex,
-        });
-      }
-    });
-  });
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      const cell = grid[i][j];
+      if (!cell?.match) continue;
 
-  for (let i = 0; i < matches.length; i++) {
-    for (let j = i + 1; j < matches.length; j++) {
-      const m1 = matches[i];
-      const m2 = matches[j];
-
-      const p1 = getPlayers(m1);
-      const p2 = getPlayers(m2);
-
-      const samePlayer = p1.some((p) =>
-        p && p2.includes(p)
-      );
-
-      if (!samePlayer) continue;
-
-      /* SAME TIME */
-      if (m1.time === m2.time) {
-        return "❌ Same player cannot play at same time";
+      // Simulate: which match's teams will be in this slot after the swap?
+      let match = cell.match;
+      if (i === fromRow && j === fromCol) {
+        match = grid[toRow][toCol].match;   // dragged slot gets target's teams
+      } else if (i === toRow && j === toCol) {
+        match = grid[fromRow][fromCol].match; // target slot gets dragged's teams
       }
 
-      /* CONSECUTIVE */
-      const diff = Math.abs(
-        m1.row - m2.row
-      );
+      slots.push({ row: i, col: j, players: getPlayers(match) });
+    }
+  }
 
-      if (
-        diff === 1 &&
-        m1.court !== m2.court
-      ) {
-        return "❌ Consecutive matches must be on same court";
+  // Check every unique pair of slots
+  for (let a = 0; a < slots.length; a++) {
+    for (let b = a + 1; b < slots.length; b++) {
+      const A = slots[a];
+      const B = slots[b];
+
+      const shared = A.players.filter((p) => B.players.includes(p));
+      if (shared.length === 0) continue;
+
+      // Rule 1: Same row (same time) — cannot play twice simultaneously
+      if (A.row === B.row) {
+        return "❌ Same player cannot play two matches at the same time";
+      }
+
+      // Rule 2: Consecutive rows — must be on the same court
+      if (Math.abs(A.row - B.row) === 1 && A.col !== B.col) {
+        return "❌ Consecutive matches for the same player must be on the same court";
       }
     }
   }
@@ -87,35 +97,30 @@ const validateGrid = (grid) => {
   return null;
 };
 
-/* ================= DRAG CARD ================= */
-function DraggableMatch({
-  match,
-  time,
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-  } = useDraggable({
-    id: match._id,
-  });
+/* ================= TEAM NAME HELPER ================= */
+const getTeamName = (team) => {
+  if (!team) return "TBD";
+  const p1 = team.partner1?.name || "";
+  const p2 = team.partner2?.name ? ` & ${team.partner2.name}` : "";
+  return `${p1}${p2}` || "TBD";
+};
+
+/* ================= DRAGGABLE MATCH CARD ================= */
+/*
+ * Accepts only display-ready props — no raw match object.
+ * time, category are passed from the SLOT, not from the match,
+ * so they never move during a swap.
+ */
+function DraggableMatch({ matchId, time, category, team1Name, team2Name }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({ id: matchId });
 
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: 999,
       }
     : undefined;
-
-  const name = (team) =>
-    team
-      ? `${team.partner1?.name || ""}${
-          team.partner2
-            ? " & " +
-              team.partner2?.name
-            : ""
-        }`
-      : "TBD";
 
   return (
     <div
@@ -123,50 +128,48 @@ function DraggableMatch({
       style={style}
       {...listeners}
       {...attributes}
-      className={styles.card}
+      className={`${styles.card} ${isDragging ? styles.dragging : ""}`}
     >
-      {/* FIXED TIME */}
-      <div className={styles.fixedTime}>
-        {time}
-      </div>
-
-      <div className={styles.category}>
-        {match.category}
-      </div>
-
-      <div>{name(match.Team1)}</div>
-
-      <div className={styles.vs}>
-        VS
-      </div>
-
-      <div>{name(match.Team2)}</div>
+      <div className={styles.fixedTime}>{time}</div>
+      <div className={styles.category}>{category}</div>
+      <div className={styles.teamName}>{team1Name}</div>
+      <div className={styles.vs}>VS</div>
+      <div className={styles.teamName}>{team2Name}</div>
     </div>
   );
 }
 
-/* ================= DROP SLOT ================= */
-function DroppableSlot({
-  children,
-  id,
-}) {
-  const { setNodeRef } = useDroppable({
-    id,
-  });
+/* ================= DROPPABLE SLOT ================= */
+function DroppableSlot({ id, children }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
 
   return (
     <div
       ref={setNodeRef}
-      className={styles.slot}
+      className={`${styles.slot} ${isOver ? styles.slotOver : ""}`}
     >
       {children}
     </div>
   );
 }
 
-/* ================= MAIN ================= */
+/* ================= MAIN COMPONENT ================= */
 export default function OrderOfPlay() {
   const [grid, setGrid] = useState([]);
+
+  /*
+   * Activation constraints prevent click/tap from triggering drag:
+   * - Mouse: must move at least 8px before drag starts
+   * - Touch: must hold 200ms and move at most 8px tolerance
+   */
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 8 },
+    })
+  );
 
   useEffect(() => {
     fetchData();
@@ -177,70 +180,54 @@ export default function OrderOfPlay() {
     try {
       const eventsRes = await axios.get(
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
       let allMatches = [];
 
-      for (let ev of eventsRes.data.data) {
+      for (const ev of eventsRes.data.data) {
         const res = await axios.get(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
 
-        const matches =
-          res.data.data.filter(
-            (d) =>
-              d.Stage === "Round 1"
-          );
+        const matches = res.data.data
+          .filter((d) => d.Stage === "Round 1")
+          .map((m) => ({ ...m, category: ev.name }));
 
-        const withCategory =
-          matches.map((m) => ({
-            ...m,
-            category: ev.name,
-          }));
-
-        allMatches = [
-          ...allMatches,
-          ...withCategory,
-        ];
+        allMatches = [...allMatches, ...matches];
       }
 
       buildGrid(allMatches);
     } catch (err) {
       console.error(err);
-      toast.error("Error loading");
+      toast.error("Error loading matches");
     }
   };
 
   /* ================= BUILD GRID ================= */
+  /*
+   * grid[row][col] = {
+   *   match:  { _id, category, Team1, Team2, ...rest }
+   *   time:   string   ← FIXED to this row index forever
+   *   court:  number   ← FIXED to this col index forever
+   * }
+   */
   const buildGrid = (matches) => {
-    let temp = [];
+    const rows = Math.ceil(matches.length / COURTS);
+    const temp = [];
     let index = 0;
 
-    const rows = Math.ceil(
-      matches.length / COURTS
-    );
-
     for (let i = 0; i < rows; i++) {
-      let row = [];
-
+      const row = [];
       for (let j = 0; j < COURTS; j++) {
-        const match = matches[index];
-
         row.push({
-          match: match || null,
+          match: matches[index] || null,
           time: TIME_SLOTS[i] || "",
           court: j + 1,
         });
-
         index++;
       }
-
       temp.push(row);
     }
 
@@ -251,154 +238,113 @@ export default function OrderOfPlay() {
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
+    // Dropped outside any slot
     if (!over) return;
 
-    const activeId = active.id;
-    const overId = over.id;
+    const activeId = active.id;   // match._id of the dragged card
+    const overId   = over.id;     // "slot-{row}-{col}"
 
-    if (activeId === overId) return;
-
-    let activePos = null;
-    let overPos = null;
+    // Locate source (fromRow/fromCol) and target (toRow/toCol)
+    let fromRow = null, fromCol = null;
+    let toRow   = null, toCol   = null;
 
     grid.forEach((row, i) => {
       row.forEach((cell, j) => {
-        if (
-          cell?.match?._id === activeId
-        ) {
-          activePos = { i, j };
+        if (cell?.match?._id === activeId) {
+          fromRow = i; fromCol = j;
         }
-
-        if (
-          `slot-${i}-${j}` === overId
-        ) {
-          overPos = { i, j };
+        if (`slot-${i}-${j}` === overId) {
+          toRow = i; toCol = j;
         }
       });
     });
 
-    if (!activePos || !overPos)
-      return;
+    // Could not resolve positions
+    if (fromRow === null || toRow === null) return;
 
-    /* SAME SLOT */
-    if (
-      activePos.i === overPos.i &&
-      activePos.j === overPos.j
-    ) {
-      return;
-    }
+    // Same slot — nothing to do
+    if (fromRow === toRow && fromCol === toCol) return;
 
-    /* COPY GRID */
-    const newGrid = JSON.parse(
-      JSON.stringify(grid)
-    );
+    // Target slot must have a match to swap with
+    if (!grid[toRow]?.[toCol]?.match) return;
 
-    const dragged =
-      newGrid[activePos.i][activePos.j];
-
-    const target =
-      newGrid[overPos.i][overPos.j];
-
-    if (
-      !dragged?.match ||
-      !target?.match
-    ) {
-      return;
-    }
-
-    /* SAVE OLD */
-    const oldDraggedTeam1 =
-      dragged.match.Team1;
-
-    const oldDraggedTeam2 =
-      dragged.match.Team2;
-
-    const oldTargetTeam1 =
-      target.match.Team1;
-
-    const oldTargetTeam2 =
-      target.match.Team2;
-
-    /* TEMP SWAP */
-    dragged.match.Team1 =
-      oldTargetTeam1;
-
-    dragged.match.Team2 =
-      oldTargetTeam2;
-
-    target.match.Team1 =
-      oldDraggedTeam1;
-
-    target.match.Team2 =
-      oldDraggedTeam2;
-
-    /* VALIDATE */
-    const error =
-      validateGrid(newGrid);
-
-    /* INVALID => REVERT */
+    /* ---- Validate BEFORE mutating state ---- */
+    const error = validateSwap(grid, fromRow, fromCol, toRow, toCol);
     if (error) {
-      dragged.match.Team1 =
-        oldDraggedTeam1;
-
-      dragged.match.Team2 =
-        oldDraggedTeam2;
-
-      target.match.Team1 =
-        oldTargetTeam1;
-
-      target.match.Team2 =
-        oldTargetTeam2;
-
       toast.error(error);
-      return;
+      return; // grid is NOT modified — reverted by doing nothing
     }
 
-    /* SUCCESS */
+    /* ---- Swap ONLY Team1 / Team2 between the two slots ---- */
+    /*
+     * We shallow-copy every row and cell so React detects the change.
+     * time, court, category, _id all remain with their original slot.
+     */
+    const newGrid = grid.map((row) => row.map((cell) => ({ ...cell, match: cell.match ? { ...cell.match } : null })));
+
+    const fromTeams = {
+      Team1: newGrid[fromRow][fromCol].match.Team1,
+      Team2: newGrid[fromRow][fromCol].match.Team2,
+    };
+    const toTeams = {
+      Team1: newGrid[toRow][toCol].match.Team1,
+      Team2: newGrid[toRow][toCol].match.Team2,
+    };
+
+    newGrid[fromRow][fromCol].match.Team1 = toTeams.Team1;
+    newGrid[fromRow][fromCol].match.Team2 = toTeams.Team2;
+    newGrid[toRow][toCol].match.Team1     = fromTeams.Team1;
+    newGrid[toRow][toCol].match.Team2     = fromTeams.Team2;
+
     setGrid(newGrid);
   };
 
-  /* ================= UI ================= */
+  /* ================= RENDER ================= */
   return (
     <div className={styles.container}>
       <h1>ORDER OF PLAY</h1>
 
-      {/* HEADER */}
+      {/* COURT HEADER ROW */}
       <div className={styles.header}>
-        {[1, 2, 3, 4].map(
-          (court) => (
-            <div key={court}>
-              COURT {court}
-            </div>
-          )
-        )}
+        <div className={styles.timeLabel} />
+        {Array.from({ length: COURTS }, (_, i) => (
+          <div key={i} className={styles.courtLabel}>
+            COURT {i + 1}
+          </div>
+        ))}
       </div>
 
       {/* GRID */}
       <DndContext
-        collisionDetection={
-          closestCenter
-        }
+        sensors={sensors}
+        collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
         {grid.map((row, i) => (
-          <div
-            key={i}
-            className={styles.row}
-          >
+          <div key={i} className={styles.row}>
+
+            {/* Fixed time label pinned to left of each row */}
+            <div className={styles.timeLabel}>{row[0]?.time}</div>
+
             {row.map((cell, j) => (
-              <DroppableSlot
-                key={j}
-                id={`slot-${i}-${j}`}
-              >
+              <DroppableSlot key={j} id={`slot-${i}-${j}`}>
                 {cell?.match && (
+                  /*
+                   * We pass time and category from the SLOT (cell),
+                   * not from cell.match — so they stay fixed even
+                   * after teams are swapped into this slot.
+                   */
                   <DraggableMatch
-                    match={cell.match}
+                    matchId={cell.match._id}
                     time={cell.time}
+                    category={cell.match.category}
+                    team1Name={getTeamName(cell.match.Team1)}
+                    team2Name={getTeamName(cell.match.Team2)}
                   />
                 )}
               </DroppableSlot>
             ))}
+
           </div>
         ))}
       </DndContext>
