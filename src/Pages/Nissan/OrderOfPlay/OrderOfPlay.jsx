@@ -35,7 +35,6 @@ const getPlayers = (m) => {
 };
 
 /* ================= VALIDATION ================= */
-/* ================= VALIDATE GRID ================= */
 const validateGrid = (grid) => {
   let allMatches = [];
 
@@ -66,21 +65,16 @@ const validateGrid = (grid) => {
       /* NO SAME PLAYER */
       if (!samePlayer) continue;
 
-      /* ================= SAME TIME ================= */
+      /* SAME TIME */
       if (m1.timeIndex === m2.timeIndex) {
         return "❌ Same player cannot play at same time";
       }
 
-      /* ================= CONSECUTIVE ================= */
+      /* CONSECUTIVE */
       const diff = Math.abs(
         m1.timeIndex - m2.timeIndex
       );
 
-      /*
-        ONLY consecutive:
-        07:30 -> 08:15
-        08:15 -> 09:00
-      */
       if (diff === 1) {
         if (m1.court !== m2.court) {
           return "❌ Consecutive matches must be on same court";
@@ -116,8 +110,7 @@ function DraggableMatch({
     team
       ? `${team.partner1?.name || ""}${
           team.partner2
-            ? " & " +
-              team.partner2?.name
+            ? " & " + team.partner2?.name
             : ""
         }`
       : "TBD";
@@ -216,6 +209,7 @@ export default function OrderOfPlay() {
       }
 
       buildGrid(allMatches);
+
     } catch (err) {
       console.error(err);
       toast.error("Error loading");
@@ -324,7 +318,7 @@ export default function OrderOfPlay() {
     const oldTargetTeam2 =
       target.match.Team2;
 
-    /* TEMP SWAP */
+    /* SWAP ONLY TEAMS */
     dragged.match.Team1 =
       oldTargetTeam1;
 
