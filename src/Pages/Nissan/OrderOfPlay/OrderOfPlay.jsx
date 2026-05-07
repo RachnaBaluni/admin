@@ -10,7 +10,7 @@ import {
   useDroppable,
 } from "@dnd-kit/core";
 
-/* ================= TIME SLOTS ================= */
+/* ================= TIME ================= */
 const TIME_SLOTS = [
   "07:30",
   "08:15",
@@ -41,49 +41,61 @@ const getTimeIndex = (time) => {
 
 /* ================= VALIDATION ================= */
 const validateGrid = (grid) => {
-  let matches = [];
+  let playerMatches = {};
 
+  /* ALL MATCHES */
   grid.forEach((row) => {
-    row.forEach((cell) => {
-      if (cell) {
-        matches.push(cell);
-      }
+    row.forEach((match) => {
+      if (!match) return;
+
+      const players = getPlayers(match);
+
+      players.forEach((player) => {
+        if (!player) return;
+
+        if (!playerMatches[player]) {
+          playerMatches[player] = [];
+        }
+
+        playerMatches[player].push({
+          time: match.MatchTime,
+          court: match.CourtNumber,
+        });
+      });
     });
   });
 
-  for (let i = 0; i < matches.length; i++) {
-    for (let j = i + 1; j < matches.length; j++) {
-      const m1 = matches[i];
-      const m2 = matches[j];
+  /* VALIDATION */
+  for (let player in playerMatches) {
+    const matches = playerMatches[player];
 
-      const p1 = getPlayers(m1);
-      const p2 = getPlayers(m2);
+    /* SORT BY TIME */
+    matches.sort(
+      (a, b) =>
+        getTimeIndex(a.time) -
+        getTimeIndex(b.time)
+    );
 
-      /* SAME PLAYER */
-      const samePlayer = p1.some(
-        (p) => p && p2.includes(p)
-      );
+    for (let i = 0; i < matches.length - 1; i++) {
+      const current = matches[i];
+      const next = matches[i + 1];
 
-      if (!samePlayer) continue;
+      const diff =
+        getTimeIndex(next.time) -
+        getTimeIndex(current.time);
 
-      /* SAME TIME DIFFERENT COURT */
+      /* SAME TIME */
       if (
-        m1.MatchTime === m2.MatchTime &&
-        m1.CourtNumber !== m2.CourtNumber
+        diff === 0 &&
+        current.court !== next.court
       ) {
         return "❌ Same player cannot play on different courts at same time";
       }
 
-      /* CONSECUTIVE MATCH CHECK */
-      const time1 = getTimeIndex(m1.MatchTime);
-      const time2 = getTimeIndex(m2.MatchTime);
-
-      const consecutive =
-        Math.abs(time1 - time2) === 1;
-
+      /* CONSECUTIVE */
       if (
-        consecutive &&
-        m1.CourtNumber !== m2.CourtNumber
+        diff === 1 &&
+        current.court !== next.court
       ) {
         return "❌ Consecutive matches must be on same court";
       }
@@ -127,11 +139,6 @@ function DraggableMatch({ match }) {
       {...attributes}
       className={styles.card}
     >
-      {/* TIME FIXED */}
-      <div className={styles.time}>
-        {match.MatchTime}
-      </div>
-
       <div className={styles.category}>
         {match.category}
       </div>
@@ -219,7 +226,7 @@ export default function OrderOfPlay() {
     }
   };
 
-  /* ================= GRID ================= */
+  /* ================= BUILD GRID ================= */
   const buildGrid = (matches) => {
     let temp = [];
     let index = 0;
@@ -235,13 +242,15 @@ export default function OrderOfPlay() {
         let match = matches[index];
 
         if (match) {
-          match.MatchTime =
-            TIME_SLOTS[i] || "";
-
-          match.CourtNumber = j + 1;
+          row.push({
+            ...match,
+            MatchTime:
+              TIME_SLOTS[i] || "",
+            CourtNumber: j + 1,
+          });
+        } else {
+          row.push(null);
         }
-
-        row.push(match || null);
 
         index++;
       }
@@ -263,9 +272,7 @@ export default function OrderOfPlay() {
 
     if (activeId === overId) return;
 
-    const newGrid = grid.map((row) =>
-      [...row]
-    );
+    const newGrid = grid.map((row) => [...row]);
 
     let activePos = null;
     let overPos = null;
@@ -290,13 +297,15 @@ export default function OrderOfPlay() {
     const target =
       newGrid[overPos.i][overPos.j];
 
-    /* ONLY SWAP TEAMS */
-    newGrid[overPos.i][overPos.j] = {
-      ...dragged,
-      MatchTime:
-        TIME_SLOTS[overPos.i],
-      CourtNumber: overPos.j + 1,
-    };
+    /* SWAP */
+    newGrid[overPos.i][overPos.j] = dragged
+      ? {
+          ...dragged,
+          MatchTime:
+            TIME_SLOTS[overPos.i],
+          CourtNumber: overPos.j + 1,
+        }
+      : null;
 
     newGrid[activePos.i][activePos.j] = target
       ? {
@@ -314,7 +323,7 @@ export default function OrderOfPlay() {
     if (error) {
       toast.error(error);
 
-      /* STOP SWAP */
+      /* CANCEL SWAP */
       return;
     }
 
