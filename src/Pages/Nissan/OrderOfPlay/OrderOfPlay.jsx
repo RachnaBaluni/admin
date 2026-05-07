@@ -35,51 +35,56 @@ const getPlayers = (m) => {
 };
 
 /* ================= VALIDATION ================= */
+/* ================= VALIDATE GRID ================= */
 const validateGrid = (grid) => {
-  let matches = [];
+  let allMatches = [];
 
   grid.forEach((row, rowIndex) => {
     row.forEach((cell, colIndex) => {
       if (cell?.match) {
-        matches.push({
+        allMatches.push({
           ...cell.match,
           court: colIndex + 1,
-          time: cell.time,
-          row: rowIndex,
+          timeIndex: rowIndex,
         });
       }
     });
   });
 
-  for (let i = 0; i < matches.length; i++) {
-    for (let j = i + 1; j < matches.length; j++) {
-      const m1 = matches[i];
-      const m2 = matches[j];
+  for (let i = 0; i < allMatches.length; i++) {
+    for (let j = i + 1; j < allMatches.length; j++) {
+      const m1 = allMatches[i];
+      const m2 = allMatches[j];
 
       const p1 = getPlayers(m1);
       const p2 = getPlayers(m2);
 
       const samePlayer = p1.some((p) =>
-        p && p2.includes(p)
+        p2.includes(p)
       );
 
+      /* NO SAME PLAYER */
       if (!samePlayer) continue;
 
-      /* SAME TIME */
-      if (m1.time === m2.time) {
+      /* ================= SAME TIME ================= */
+      if (m1.timeIndex === m2.timeIndex) {
         return "❌ Same player cannot play at same time";
       }
 
-      /* CONSECUTIVE */
+      /* ================= CONSECUTIVE ================= */
       const diff = Math.abs(
-        m1.row - m2.row
+        m1.timeIndex - m2.timeIndex
       );
 
-      if (
-        diff === 1 &&
-        m1.court !== m2.court
-      ) {
-        return "❌ Consecutive matches must be on same court";
+      /*
+        ONLY consecutive:
+        07:30 -> 08:15
+        08:15 -> 09:00
+      */
+      if (diff === 1) {
+        if (m1.court !== m2.court) {
+          return "❌ Consecutive matches must be on same court";
+        }
       }
     }
   }
