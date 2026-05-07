@@ -11,6 +11,7 @@ import {
 } from "@dnd-kit/core";
 
 /* ================= TIME ================= */
+
 const TIME_SLOTS = [
   "07:30",
   "08:15",
@@ -25,6 +26,7 @@ const TIME_SLOTS = [
 const COURTS = 4;
 
 /* ================= PLAYERS ================= */
+
 const getPlayers = (m) => {
   return [
     m?.Team1?.partner1?._id,
@@ -35,6 +37,7 @@ const getPlayers = (m) => {
 };
 
 /* ================= VALIDATION ================= */
+
 const validateGrid = (grid) => {
   let matches = [];
 
@@ -65,18 +68,21 @@ const validateGrid = (grid) => {
 
       if (!samePlayer) continue;
 
-      /* SAME TIME => SAME COURT */
+      /* SAME TIME */
       if (m1.time === m2.time) {
         if (m1.court !== m2.court) {
-          return "Same player same time pe different court me nahi ho sakta";
+          return "Same player same time pe different courts me nahi ho sakta";
         }
       }
 
-      /* CONSECUTIVE MATCH => SAME COURT */
+      /* CONSECUTIVE MATCH */
       const t1 = TIME_SLOTS.indexOf(m1.time);
       const t2 = TIME_SLOTS.indexOf(m2.time);
 
-      if (Math.abs(t1 - t2) === 1) {
+      const isConsecutive =
+        Math.abs(t1 - t2) === 1;
+
+      if (isConsecutive) {
         if (m1.court !== m2.court) {
           return "Consecutive matches same court me hone chahiye";
         }
@@ -88,6 +94,7 @@ const validateGrid = (grid) => {
 };
 
 /* ================= CARD ================= */
+
 function DraggableMatch({ match }) {
   const { attributes, listeners, setNodeRef, transform } =
     useDraggable({
@@ -115,7 +122,7 @@ function DraggableMatch({ match }) {
       {...attributes}
       className={styles.card}
     >
-      {/* TIME FIXED */}
+      {/* FIXED TIME */}
       <div className={styles.time}>
         {match.MatchTime}
       </div>
@@ -134,6 +141,7 @@ function DraggableMatch({ match }) {
 }
 
 /* ================= DROP SLOT ================= */
+
 function DroppableSlot({ children, id }) {
   const { setNodeRef } = useDroppable({
     id,
@@ -147,6 +155,7 @@ function DroppableSlot({ children, id }) {
 }
 
 /* ================= MAIN ================= */
+
 export default function ViewOrderOfPlay() {
   const [grid, setGrid] = useState([]);
 
@@ -155,6 +164,7 @@ export default function ViewOrderOfPlay() {
   }, []);
 
   /* ================= FETCH ================= */
+
   const fetchData = async () => {
     try {
       const eventsRes = await axios.get(
@@ -187,11 +197,12 @@ export default function ViewOrderOfPlay() {
 
     } catch (err) {
       console.error(err);
-      toast.error("Error loading");
+      toast.error("Error loading order of play");
     }
   };
 
   /* ================= GRID ================= */
+
   const buildGrid = (matches) => {
     let temp = [];
     let index = 0;
@@ -227,6 +238,7 @@ export default function ViewOrderOfPlay() {
   };
 
   /* ================= DRAG END ================= */
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
@@ -244,6 +256,7 @@ export default function ViewOrderOfPlay() {
 
     newGrid.forEach((row, i) => {
       row.matches.forEach((cell, j) => {
+
         if (cell?._id === activeId) {
           activePos = { i, j };
         }
@@ -251,6 +264,7 @@ export default function ViewOrderOfPlay() {
         if (`slot-${i}-${j}` === overId) {
           overPos = { i, j };
         }
+
       });
     });
 
@@ -262,7 +276,7 @@ export default function ViewOrderOfPlay() {
     const targetMatch =
       newGrid[overPos.i].matches[overPos.j];
 
-    /* ================= ONLY TEAM MOVE ================= */
+    /* ================= SWAP ONLY MATCH ================= */
 
     newGrid[overPos.i].matches[overPos.j] = {
       ...draggedMatch,
@@ -288,20 +302,30 @@ export default function ViewOrderOfPlay() {
       return;
     }
 
+    /* ================= UPDATE ================= */
+
     setGrid([...newGrid]);
+
+    toast.success("Match swapped");
   };
 
   /* ================= UI ================= */
+
   return (
     <div className={styles.container}>
       <h1>ORDER OF PLAY</h1>
 
       {/* HEADER */}
+
       <div className={styles.header}>
         {[1, 2, 3, 4].map((court) => (
-          <div key={court}>COURT {court}</div>
+          <div key={court}>
+            COURT {court}
+          </div>
         ))}
       </div>
+
+      {/* GRID */}
 
       <DndContext
         collisionDetection={closestCenter}
@@ -309,6 +333,7 @@ export default function ViewOrderOfPlay() {
       >
         {grid.map((row, i) => (
           <div key={i} className={styles.row}>
+
             {row.matches.map((cell, j) => (
               <DroppableSlot
                 key={j}
@@ -319,6 +344,7 @@ export default function ViewOrderOfPlay() {
                 )}
               </DroppableSlot>
             ))}
+
           </div>
         ))}
       </DndContext>
