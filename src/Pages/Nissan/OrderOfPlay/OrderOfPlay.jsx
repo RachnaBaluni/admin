@@ -10,7 +10,7 @@ import {
   useDroppable,
 } from "@dnd-kit/core";
 
-/* ================= TIME ================= */
+/* ================= TIME SLOTS ================= */
 
 const TIME_SLOTS = [
   "07:30",
@@ -25,7 +25,7 @@ const TIME_SLOTS = [
 
 const COURTS = 4;
 
-/* ================= PLAYERS ================= */
+/* ================= GET PLAYERS ================= */
 
 const getPlayers = (m) => {
   return [
@@ -41,12 +41,11 @@ const getPlayers = (m) => {
 const validateGrid = (grid) => {
   let matches = [];
 
-  grid.forEach((row, rowIndex) => {
+  grid.forEach((row) => {
     row.forEach((cell, colIndex) => {
       if (cell) {
         matches.push({
           ...cell,
-          row: rowIndex,
           court: colIndex + 1,
         });
       }
@@ -63,6 +62,7 @@ const validateGrid = (grid) => {
       const p2 = getPlayers(m2);
 
       /* SAME PLAYER */
+
       const samePlayer = p1.some(
         (p) => p && p2.includes(p)
       );
@@ -71,24 +71,28 @@ const validateGrid = (grid) => {
 
       /* SAME TIME */
 
-      if (m1.MatchTime === m2.MatchTime) {
-        if (m1.CourtNumber !== m2.CourtNumber) {
-          return "❌ Same player cannot play on different courts at same time";
-        }
+      if (
+        m1.MatchTime === m2.MatchTime &&
+        m1.CourtNumber !== m2.CourtNumber
+      ) {
+        return "❌ Same player cannot play on different courts at same time";
       }
 
       /* CONSECUTIVE MATCH */
 
-      const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
-      const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
+      const idx1 = TIME_SLOTS.indexOf(m1.MatchTime);
+      const idx2 = TIME_SLOTS.indexOf(m2.MatchTime);
 
-      const isConsecutive =
-        Math.abs(t1 - t2) === 1;
+      if (idx1 === -1 || idx2 === -1) continue;
 
-      if (isConsecutive) {
-        if (m1.CourtNumber !== m2.CourtNumber) {
-          return "❌ Consecutive matches must be on same court";
-        }
+      const consecutive =
+        Math.abs(idx1 - idx2) === 1;
+
+      if (
+        consecutive &&
+        m1.CourtNumber !== m2.CourtNumber
+      ) {
+        return "❌ Consecutive matches must be on same court";
       }
     }
   }
@@ -100,10 +104,14 @@ const validateGrid = (grid) => {
 
 function DraggableMatch({ match }) {
 
-  const { attributes, listeners, setNodeRef, transform } =
-    useDraggable({
-      id: match._id,
-    });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+  } = useDraggable({
+    id: match._id,
+  });
 
   const style = transform
     ? {
@@ -130,6 +138,7 @@ function DraggableMatch({ match }) {
     >
 
       {/* FIXED TIME */}
+
       <div className={styles.time}>
         {match.MatchTime}
       </div>
@@ -154,9 +163,10 @@ function DraggableMatch({ match }) {
 
 function DroppableSlot({ children, id }) {
 
-  const { setNodeRef } = useDroppable({
-    id,
-  });
+  const { setNodeRef } =
+    useDroppable({
+      id,
+    });
 
   return (
     <div
@@ -181,6 +191,7 @@ export default function OrderOfPlay() {
   /* ================= FETCH ================= */
 
   const fetchData = async () => {
+
     try {
 
       const eventsRes = await axios.get(
@@ -199,14 +210,16 @@ export default function OrderOfPlay() {
 
         /* ONLY ROUND 1 */
 
-        const matches = res.data.data.filter(
-          (d) => d.Stage === "Round 1"
-        );
+        const matches =
+          res.data.data.filter(
+            (d) => d.Stage === "Round 1"
+          );
 
-        const withCategory = matches.map((m) => ({
-          ...m,
-          category: ev.name,
-        }));
+        const withCategory =
+          matches.map((m) => ({
+            ...m,
+            category: ev.name,
+          }));
 
         allMatches = [
           ...allMatches,
@@ -243,22 +256,24 @@ export default function OrderOfPlay() {
 
       for (let j = 0; j < COURTS; j++) {
 
-        let match = matches[index];
+        const match = matches[index];
 
         if (match) {
 
           row.push({
             ...match,
+
+            /* FIXED TIME */
             MatchTime:
               TIME_SLOTS[i] || "",
+
+            /* FIXED COURT */
             CourtNumber: j + 1,
           });
         }
 
         index++;
       }
-
-      /* REMOVE EMPTY ROW */
 
       if (row.length > 0) {
         temp.push(row);
@@ -280,8 +295,6 @@ export default function OrderOfPlay() {
     const overId = over.id;
 
     if (activeId === overId) return;
-
-    /* FIND POSITIONS */
 
     let activePos = null;
     let overPos = null;
@@ -320,11 +333,12 @@ export default function OrderOfPlay() {
     if (!draggedMatch || !targetMatch)
       return;
 
-    /* ================= ONLY SWAP TEAMS ================= */
+    /* ================= SWAP ONLY TEAMS ================= */
 
     const draggedTeams = {
       Team1: draggedMatch.Team1,
       Team2: draggedMatch.Team2,
+      category: draggedMatch.category,
     };
 
     draggedMatch.Team1 =
@@ -333,11 +347,17 @@ export default function OrderOfPlay() {
     draggedMatch.Team2 =
       targetMatch.Team2;
 
+    draggedMatch.category =
+      targetMatch.category;
+
     targetMatch.Team1 =
       draggedTeams.Team1;
 
     targetMatch.Team2 =
       draggedTeams.Team2;
+
+    targetMatch.category =
+      draggedTeams.category;
 
     /* ================= VALIDATION ================= */
 
@@ -349,7 +369,6 @@ export default function OrderOfPlay() {
       toast.error(error);
 
       /* STOP SWAP */
-
       return;
     }
 
