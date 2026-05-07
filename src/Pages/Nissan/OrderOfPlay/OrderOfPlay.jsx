@@ -11,8 +11,14 @@ import {
 
 /* ================= TIME ================= */
 const TIME_SLOTS = [
-  "07:30","08:15","09:00","09:45",
-  "10:30","11:15","12:00","12:45"
+  "07:30",
+  "08:15",
+  "09:00",
+  "09:45",
+  "10:30",
+  "11:15",
+  "12:00",
+  "12:45",
 ];
 
 const COURTS = 4;
@@ -50,15 +56,16 @@ const validateGrid = (grid) => {
       const p1 = getPlayers(m1);
       const p2 = getPlayers(m2);
 
-      const samePlayer = p1.some(p => p2.includes(p));
+      const samePlayer = p1.some((p) => p2.includes(p));
+
       if (!samePlayer) continue;
 
-      // SAME TIME
-      if (m1.MatchTime === m2.MatchTime && m1.court !== m2.court) {
-        return "❌ Same player same time different court";
+      /* ================= SAME TIME ================= */
+      if (m1.MatchTime === m2.MatchTime) {
+        return "❌ Same player cannot play at same time";
       }
 
-      // CONSECUTIVE
+      /* ================= CONSECUTIVE ================= */
       const t1 = TIME_SLOTS.indexOf(m1.MatchTime);
       const t2 = TIME_SLOTS.indexOf(m2.MatchTime);
 
@@ -75,7 +82,9 @@ const validateGrid = (grid) => {
 
 /* ================= CARD ================= */
 const MatchCard = ({ match }) => {
-  if (!match) return <div className={styles.empty}>—</div>;
+  if (!match) {
+    return <div className={styles.empty}>EMPTY</div>;
+  }
 
   const name = (t) =>
     t
@@ -87,27 +96,42 @@ const MatchCard = ({ match }) => {
   return (
     <div className={styles.card}>
       <div className={styles.time}>{match.MatchTime}</div>
-      <div className={styles.category}>{match.category}</div>
+
+      <div className={styles.category}>
+        {match.category}
+      </div>
 
       <div>{name(match.Team1)}</div>
+
       <div className={styles.vs}>VS</div>
+
       <div>{name(match.Team2)}</div>
     </div>
   );
 };
 
 /* ================= SLOT ================= */
-const Slot = ({ match }) => {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: match?._id,
+const Slot = ({ match, id }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+  } = useDraggable({
+    id,
+    disabled: !match,
   });
 
   const { setNodeRef: dropRef } = useDroppable({
-    id: match?._id,
+    id,
   });
 
   const style = transform
-    ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
+    ? {
+        transform: `translate(${transform.x}px, ${transform.y}px)`,
+        zIndex: 999,
+        position: "relative",
+      }
     : {};
 
   return (
@@ -118,8 +142,8 @@ const Slot = ({ match }) => {
       }}
       style={style}
       className={styles.slot}
-      {...listeners}
-      {...attributes}
+      {...(match ? listeners : {})}
+      {...(match ? attributes : {})}
     >
       <MatchCard match={match} />
     </div>
@@ -134,11 +158,14 @@ export default function OrderOfPlay() {
     fetchData();
   }, []);
 
+  /* ================= FETCH ================= */
   const fetchData = async () => {
     try {
       const eventsRes = await api.get(
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
 
       let allMatches = [];
@@ -146,16 +173,18 @@ export default function OrderOfPlay() {
       for (let ev of eventsRes.data.data) {
         const res = await api.get(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-          { withCredentials: true }
+          {
+            withCredentials: true,
+          }
         );
 
         const matches = res.data.data.filter(
           (d) => d.Stage === "Round 1"
         );
 
-        const withCat = matches.map(m => ({
+        const withCat = matches.map((m) => ({
           ...m,
-          category: ev.name
+          category: ev.name,
         }));
 
         allMatches = [...allMatches, ...withCat];
@@ -174,7 +203,7 @@ export default function OrderOfPlay() {
     let index = 0;
     let temp = [];
 
-    const rows = Math.ceil(matches.length / COURTS);
+    const rows = TIME_SLOTS.length;
 
     for (let i = 0; i < rows; i++) {
       let row = [];
@@ -188,6 +217,7 @@ export default function OrderOfPlay() {
         }
 
         row.push(m || null);
+
         index++;
       }
 
@@ -202,36 +232,38 @@ export default function OrderOfPlay() {
     if (!over || active.id === over.id) return;
 
     setGrid((prev) => {
-      // ✅ deep copy (IMPORTANT)
-      const copy = prev.map((r) => r.map(c => c ? { ...c } : null));
+      const copy = prev.map((r) => [...r]);
 
-      let s, t;
+      let sourcePos = null;
+      let targetPos = null;
 
       copy.forEach((row, i) => {
         row.forEach((cell, j) => {
-          if (cell?._id === active.id) s = [i, j];
-          if (cell?._id === over.id) t = [i, j];
+          const currentId = cell?._id || `empty-${i}-${j}`;
+
+          if (currentId === active.id) {
+            sourcePos = [i, j];
+          }
+
+          if (currentId === over.id) {
+            targetPos = [i, j];
+          }
         });
       });
 
-      if (!s || !t) return prev;
+      if (!sourcePos || !targetPos) {
+        return prev;
+      }
 
-      const source = copy[s[0]][s[1]];
-      const target = copy[t[0]][t[1]];
+      /* ================= SWAP ================= */
+      const temp = copy[sourcePos[0]][sourcePos[1]];
 
-      if (!source || !target) return prev;
+      copy[sourcePos[0]][sourcePos[1]] =
+        copy[targetPos[0]][targetPos[1]];
 
-      // ⭐ ONLY PLAYERS SWAP (TIME SAFE)
-      const tempTeam1 = source.Team1;
-      const tempTeam2 = source.Team2;
+      copy[targetPos[0]][targetPos[1]] = temp;
 
-      source.Team1 = target.Team1;
-      source.Team2 = target.Team2;
-
-      target.Team1 = tempTeam1;
-      target.Team2 = tempTeam2;
-
-      // 🕒 RESET TIME + COURT
+      /* ================= RESET ================= */
       copy.forEach((row, i) => {
         row.forEach((cell, j) => {
           if (cell) {
@@ -241,10 +273,14 @@ export default function OrderOfPlay() {
         });
       });
 
-      // ✅ VALIDATION
+      /* ================= VALIDATE ================= */
       const error = validateGrid(copy);
+
       if (error) {
-        toast.error(error, { duration: 1500 });
+        toast.error(error, {
+          duration: 1500,
+        });
+
         return prev;
       }
 
@@ -257,18 +293,28 @@ export default function OrderOfPlay() {
     <div className={styles.container}>
       <h1>ORDER OF PLAY</h1>
 
-      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        {/* HEADER */}
         <div className={styles.header}>
-          {[1,2,3,4].map(c => (
-            <div key={c}>COURT {c}</div>
+          {[1, 2, 3, 4].map((c) => (
+            <div key={c}>
+              COURT {c}
+            </div>
           ))}
         </div>
 
+        {/* GRID */}
         {grid.map((row, i) => (
           <div key={i} className={styles.row}>
             {row.map((cell, j) => (
-              <Slot key={cell?._id || j} match={cell} />
+              <Slot
+                key={cell?._id || `empty-${i}-${j}`}
+                id={cell?._id || `empty-${i}-${j}`}
+                match={cell}
+              />
             ))}
           </div>
         ))}
