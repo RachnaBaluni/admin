@@ -45,6 +45,7 @@ const validateGrid = (grid) => {
           ...cell.match,
           row: rowIndex,
           court: colIndex + 1,
+          timeIndex: rowIndex,
           time: cell.time,
         });
       }
@@ -65,10 +66,19 @@ const validateGrid = (grid) => {
 
       if (!samePlayer) continue;
 
-      /* SAME TIME VALIDATION */
+      /* SAME TIME CHECK */
       if (m1.time === m2.time) {
+        return "❌ Same player cannot play two matches at same time";
+      }
+
+      /* CONSECUTIVE MATCH CHECK */
+      const diff = Math.abs(
+        m1.timeIndex - m2.timeIndex
+      );
+
+      if (diff === 1) {
         if (m1.court !== m2.court) {
-          return "❌ Same player cannot play on different courts at same time";
+          return "❌ Consecutive matches must be on same court";
         }
       }
     }
@@ -93,7 +103,9 @@ function DraggableMatch({ match, time }) {
   const name = (team) =>
     team
       ? `${team.partner1?.name || ""}${
-          team.partner2 ? " & " + team.partner2?.name : ""
+          team.partner2
+            ? " & " + team.partner2?.name
+            : ""
         }`
       : "TBD";
 
@@ -160,7 +172,6 @@ export default function OrderOfPlay() {
           { withCredentials: true }
         );
 
-        /* ONLY ROUND 1 */
         const matches = res.data.data.filter(
           (d) => d.Stage === "Round 1"
         );
@@ -170,7 +181,10 @@ export default function OrderOfPlay() {
           category: ev.name,
         }));
 
-        allMatches = [...allMatches, ...withCategory];
+        allMatches = [
+          ...allMatches,
+          ...withCategory,
+        ];
       }
 
       buildGrid(allMatches);
@@ -186,7 +200,9 @@ export default function OrderOfPlay() {
     let temp = [];
     let index = 0;
 
-    const rows = Math.ceil(matches.length / COURTS);
+    const rows = Math.ceil(
+      matches.length / COURTS
+    );
 
     for (let i = 0; i < rows; i++) {
       let row = [];
@@ -194,21 +210,16 @@ export default function OrderOfPlay() {
       for (let j = 0; j < COURTS; j++) {
         const match = matches[index];
 
-        if (match) {
-          row.push({
-            match,
-            time: TIME_SLOTS[i] || "",
-            court: j + 1,
-          });
-        }
+        row.push({
+          match: match || null,
+          time: TIME_SLOTS[i] || "",
+          court: j + 1,
+        });
 
         index++;
       }
 
-      /* REMOVE EMPTY ROW */
-      if (row.length > 0) {
-        temp.push(row);
-      }
+      temp.push(row);
     }
 
     setGrid(temp);
@@ -225,12 +236,10 @@ export default function OrderOfPlay() {
 
     if (activeId === overId) return;
 
-    const newGrid = [...grid];
-
     let activePos = null;
     let overPos = null;
 
-    newGrid.forEach((row, i) => {
+    grid.forEach((row, i) => {
       row.forEach((cell, j) => {
         if (cell?.match?._id === activeId) {
           activePos = { i, j };
@@ -244,39 +253,48 @@ export default function OrderOfPlay() {
 
     if (!activePos || !overPos) return;
 
+    /* COPY GRID */
+    const newGrid = JSON.parse(
+      JSON.stringify(grid)
+    );
+
     const dragged =
       newGrid[activePos.i][activePos.j];
 
     const target =
       newGrid[overPos.i][overPos.j];
 
-    if (!dragged || !target) return;
+    if (!dragged?.match || !target?.match) return;
 
-    /* ================= ONLY SWAP TEAMS ================= */
+    /* STORE ORIGINAL */
+    const oldDraggedTeam1 =
+      dragged.match.Team1;
+    const oldDraggedTeam2 =
+      dragged.match.Team2;
 
-    const draggedTeams = {
-      Team1: dragged.match.Team1,
-      Team2: dragged.match.Team2,
-    };
+    const oldTargetTeam1 =
+      target.match.Team1;
+    const oldTargetTeam2 =
+      target.match.Team2;
 
-    dragged.match.Team1 = target.match.Team1;
-    dragged.match.Team2 = target.match.Team2;
+    /* SWAP ONLY TEAMS */
+    dragged.match.Team1 = oldTargetTeam1;
+    dragged.match.Team2 = oldTargetTeam2;
 
-    target.match.Team1 = draggedTeams.Team1;
-    target.match.Team2 = draggedTeams.Team2;
+    target.match.Team1 = oldDraggedTeam1;
+    target.match.Team2 = oldDraggedTeam2;
 
-    /* TIME FIXED */
-    /* COURT FIXED */
-    /* CATEGORY FIXED */
-
+    /* VALIDATION */
     const error = validateGrid(newGrid);
 
+    /* ERROR => NO SWAP */
     if (error) {
       toast.error(error);
       return;
     }
 
-    setGrid([...newGrid]);
+    /* SUCCESS */
+    setGrid(newGrid);
   };
 
   /* ================= UI ================= */
@@ -304,7 +322,7 @@ export default function OrderOfPlay() {
                 key={j}
                 id={`slot-${i}-${j}`}
               >
-                {cell && (
+                {cell?.match && (
                   <DraggableMatch
                     match={cell.match}
                     time={cell.time}
