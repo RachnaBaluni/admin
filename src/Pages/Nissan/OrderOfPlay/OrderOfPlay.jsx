@@ -62,7 +62,7 @@ function DraggableMatch({
             ? " & " + team.partner2?.name
             : ""
         }`
-      : "TBD";
+      : "BYE";
 
   return (
     <div
