@@ -63,7 +63,7 @@ const validateGrid = (grid) => {
         (p) => p && p2.includes(p)
       );
 
-      /* NO SAME PLAYER => SKIP */
+      /* SKIP IF NO COMMON PLAYER */
       if (!samePlayer) continue;
 
       /* ================= SAME TIME ================= */
@@ -72,17 +72,14 @@ const validateGrid = (grid) => {
       }
 
       /* ================= CONSECUTIVE ================= */
-      const diff = Math.abs(
-        m1.timeIndex - m2.timeIndex
-      );
 
-      /*
-        ONLY CHECK:
-        07:30 -> 08:15
-        08:15 -> 09:00
-        etc
-      */
-      if (diff === 1) {
+      const t1 = TIME_SLOTS.indexOf(m1.time);
+      const t2 = TIME_SLOTS.indexOf(m2.time);
+
+      const isConsecutive =
+        Math.abs(t1 - t2) === 1;
+
+      if (isConsecutive) {
         if (m1.court !== m2.court) {
           return "❌ Consecutive matches must be on same court";
         }
@@ -262,7 +259,7 @@ export default function OrderOfPlay() {
 
     if (!activePos || !overPos) return;
 
-    /* ================= COPY GRID ================= */
+    /* DEEP COPY */
     const newGrid = JSON.parse(
       JSON.stringify(grid)
     );
@@ -277,25 +274,47 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* ================= SWAP ONLY TEAMS ================= */
+    /* SAVE ORIGINAL */
+    const originalDraggedTeam1 =
+      dragged.match.Team1;
+    const originalDraggedTeam2 =
+      dragged.match.Team2;
 
-    const draggedTeams = {
-      Team1: dragged.match.Team1,
-      Team2: dragged.match.Team2,
-    };
+    const originalTargetTeam1 =
+      target.match.Team1;
+    const originalTargetTeam2 =
+      target.match.Team2;
 
-    dragged.match.Team1 = target.match.Team1;
-    dragged.match.Team2 = target.match.Team2;
+    /* TEMP SWAP */
+    dragged.match.Team1 =
+      originalTargetTeam1;
 
-    target.match.Team1 = draggedTeams.Team1;
-    target.match.Team2 = draggedTeams.Team2;
+    dragged.match.Team2 =
+      originalTargetTeam2;
 
-    /* ================= VALIDATION ================= */
+    target.match.Team1 =
+      originalDraggedTeam1;
 
+    target.match.Team2 =
+      originalDraggedTeam2;
+
+    /* VALIDATE */
     const error = validateGrid(newGrid);
 
-    /* ERROR => NO SWAP */
+    /* ERROR => RESTORE */
     if (error) {
+      dragged.match.Team1 =
+        originalDraggedTeam1;
+
+      dragged.match.Team2 =
+        originalDraggedTeam2;
+
+      target.match.Team1 =
+        originalTargetTeam1;
+
+      target.match.Team2 =
+        originalTargetTeam2;
+
       toast.error(error);
       return;
     }
