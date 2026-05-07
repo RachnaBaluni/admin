@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import styles from "./ViewOrderOfPlay.module.css";
+import styles from "./OrderOfPlay.module.css";
 import { toast } from "sonner";
 
 import {
