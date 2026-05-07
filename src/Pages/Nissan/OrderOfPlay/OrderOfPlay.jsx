@@ -34,52 +34,47 @@ const getPlayers = (m) => {
   ].filter(Boolean);
 };
 
-/* ================= VALIDATION ================= */
-const validateGrid = (grid) => {
-  let allMatches = [];
+/* ================= VALIDATE ONLY SWAPPED ================= */
+const validateOnlySwapped = (
+  dragged,
+  target
+) => {
 
-  grid.forEach((row, rowIndex) => {
-    row.forEach((cell, colIndex) => {
-      if (cell?.match) {
-        allMatches.push({
-          ...cell.match,
-          court: colIndex + 1,
-          timeIndex: rowIndex,
-        });
-      }
-    });
-  });
+  const draggedPlayers =
+    getPlayers(dragged.match);
 
-  for (let i = 0; i < allMatches.length; i++) {
-    for (let j = i + 1; j < allMatches.length; j++) {
-      const m1 = allMatches[i];
-      const m2 = allMatches[j];
+  const targetPlayers =
+    getPlayers(target.match);
 
-      const p1 = getPlayers(m1);
-      const p2 = getPlayers(m2);
+  const samePlayer =
+    draggedPlayers.some((p) =>
+      targetPlayers.includes(p)
+    );
 
-      const samePlayer = p1.some((p) =>
-        p2.includes(p)
-      );
+  /* NO SAME PLAYER */
+  if (!samePlayer) {
+    return null;
+  }
 
-      /* NO SAME PLAYER */
-      if (!samePlayer) continue;
+  /* SAME TIME */
+  if (dragged.time === target.time) {
+    return "❌ Same player cannot play at same time";
+  }
 
-      /* SAME TIME */
-      if (m1.timeIndex === m2.timeIndex) {
-        return "❌ Same player cannot play at same time";
-      }
+  /* CONSECUTIVE */
+  const t1 = TIME_SLOTS.indexOf(
+    dragged.time
+  );
 
-      /* CONSECUTIVE */
-      const diff = Math.abs(
-        m1.timeIndex - m2.timeIndex
-      );
+  const t2 = TIME_SLOTS.indexOf(
+    target.time
+  );
 
-      if (diff === 1) {
-        if (m1.court !== m2.court) {
-          return "❌ Consecutive matches must be on same court";
-        }
-      }
+  const diff = Math.abs(t1 - t2);
+
+  if (diff === 1) {
+    if (dragged.court !== target.court) {
+      return "❌ Consecutive matches must be on same court";
     }
   }
 
@@ -123,7 +118,6 @@ function DraggableMatch({
       {...attributes}
       className={styles.card}
     >
-      {/* FIXED TIME */}
       <div className={styles.fixedTime}>
         {time}
       </div>
@@ -164,6 +158,7 @@ function DroppableSlot({
 
 /* ================= MAIN ================= */
 export default function OrderOfPlay() {
+
   const [grid, setGrid] = useState([]);
 
   useEffect(() => {
@@ -173,6 +168,7 @@ export default function OrderOfPlay() {
   /* ================= FETCH ================= */
   const fetchData = async () => {
     try {
+
       const eventsRes = await axios.get(
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
         {
@@ -183,6 +179,7 @@ export default function OrderOfPlay() {
       let allMatches = [];
 
       for (let ev of eventsRes.data.data) {
+
         const res = await axios.get(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
           {
@@ -218,6 +215,7 @@ export default function OrderOfPlay() {
 
   /* ================= BUILD GRID ================= */
   const buildGrid = (matches) => {
+
     let temp = [];
     let index = 0;
 
@@ -226,9 +224,11 @@ export default function OrderOfPlay() {
     );
 
     for (let i = 0; i < rows; i++) {
+
       let row = [];
 
       for (let j = 0; j < COURTS; j++) {
+
         const match = matches[index];
 
         row.push({
@@ -248,6 +248,7 @@ export default function OrderOfPlay() {
 
   /* ================= DRAG END ================= */
   const handleDragEnd = (event) => {
+
     const { active, over } = event;
 
     if (!over) return;
@@ -262,6 +263,7 @@ export default function OrderOfPlay() {
 
     grid.forEach((row, i) => {
       row.forEach((cell, j) => {
+
         if (
           cell?.match?._id === activeId
         ) {
@@ -276,8 +278,9 @@ export default function OrderOfPlay() {
       });
     });
 
-    if (!activePos || !overPos)
+    if (!activePos || !overPos) {
       return;
+    }
 
     /* SAME SLOT */
     if (
@@ -305,53 +308,38 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* SAVE OLD */
+    /* VALIDATE */
+    const error =
+      validateOnlySwapped(
+        dragged,
+        target
+      );
+
+    /* INVALID */
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    /* ================= SWAP ONLY TEAMS ================= */
+
     const oldDraggedTeam1 =
       dragged.match.Team1;
 
     const oldDraggedTeam2 =
       dragged.match.Team2;
 
-    const oldTargetTeam1 =
+    dragged.match.Team1 =
       target.match.Team1;
 
-    const oldTargetTeam2 =
-      target.match.Team2;
-
-    /* SWAP ONLY TEAMS */
-    dragged.match.Team1 =
-      oldTargetTeam1;
-
     dragged.match.Team2 =
-      oldTargetTeam2;
+      target.match.Team2;
 
     target.match.Team1 =
       oldDraggedTeam1;
 
     target.match.Team2 =
       oldDraggedTeam2;
-
-    /* VALIDATE */
-    const error =
-      validateGrid(newGrid);
-
-    /* INVALID => REVERT */
-    if (error) {
-      dragged.match.Team1 =
-        oldDraggedTeam1;
-
-      dragged.match.Team2 =
-        oldDraggedTeam2;
-
-      target.match.Team1 =
-        oldTargetTeam1;
-
-      target.match.Team2 =
-        oldTargetTeam2;
-
-      toast.error(error);
-      return;
-    }
 
     /* SUCCESS */
     setGrid(newGrid);
@@ -360,6 +348,7 @@ export default function OrderOfPlay() {
   /* ================= UI ================= */
   return (
     <div className={styles.container}>
+
       <h1>ORDER OF PLAY</h1>
 
       {/* HEADER */}
@@ -380,27 +369,38 @@ export default function OrderOfPlay() {
         }
         onDragEnd={handleDragEnd}
       >
+
         {grid.map((row, i) => (
+
           <div
             key={i}
             className={styles.row}
           >
+
             {row.map((cell, j) => (
+
               <DroppableSlot
                 key={j}
                 id={`slot-${i}-${j}`}
               >
+
                 {cell?.match && (
                   <DraggableMatch
                     match={cell.match}
                     time={cell.time}
                   />
                 )}
+
               </DroppableSlot>
+
             ))}
+
           </div>
+
         ))}
+
       </DndContext>
+
     </div>
   );
 }
