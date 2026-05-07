@@ -24,13 +24,69 @@ const TIME_SLOTS = [
 
 const COURTS = 4;
 
+/* ================= PLAYERS ================= */
+const getPlayers = (m) => {
+  return [
+    m?.Team1?.partner1?._id,
+    m?.Team1?.partner2?._id,
+    m?.Team2?.partner1?._id,
+    m?.Team2?.partner2?._id,
+  ].filter(Boolean);
+};
+
+/* ================= VALIDATION ================= */
+const validateGrid = (grid) => {
+  let matches = [];
+
+  grid.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      if (cell) {
+        matches.push({
+          ...cell,
+          row: rowIndex,
+          court: colIndex + 1,
+        });
+      }
+    });
+  });
+
+  for (let i = 0; i < matches.length; i++) {
+    for (let j = i + 1; j < matches.length; j++) {
+      const m1 = matches[i];
+      const m2 = matches[j];
+
+      const p1 = getPlayers(m1);
+      const p2 = getPlayers(m2);
+
+      const samePlayer = p1.some(
+        (p) => p && p2.includes(p)
+      );
+
+      if (!samePlayer) continue;
+
+      /* SAME TIME */
+      if (m1.row === m2.row) {
+        if (m1.court !== m2.court) {
+          return "❌ Same player cannot play on different courts at same time";
+        }
+      }
+
+      /* CONSECUTIVE */
+      if (Math.abs(m1.row - m2.row) === 1) {
+        if (m1.court !== m2.court) {
+          return "❌ Consecutive matches must be on same court";
+        }
+      }
+    }
+  }
+
+  return null;
+};
+
 /* ================= DRAG CARD ================= */
 function DraggableMatch({ match }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: match._id,
-    data: {
-      match,
-    },
   });
 
   const style = transform
@@ -54,7 +110,9 @@ function DraggableMatch({ match }) {
       {...attributes}
       className={styles.card}
     >
-      <div className={styles.time}>{match.MatchTime}</div>
+      <div className={styles.time}>
+        {match.MatchTime}
+      </div>
 
       <div className={styles.category}>
         {match.category}
@@ -142,13 +200,17 @@ export default function ViewOrderOfPlay() {
         if (match) {
           match.MatchTime = TIME_SLOTS[i] || "";
           match.CourtNumber = j + 1;
+
+          row.push(match);
         }
 
-        row.push(match || null);
         index++;
       }
 
-      temp.push(row);
+      /* EMPTY ROW REMOVE */
+      if (row.length > 0) {
+        temp.push(row);
+      }
     }
 
     setGrid(temp);
@@ -192,8 +254,7 @@ export default function ViewOrderOfPlay() {
 
     /* SWAP */
     newGrid[overPos.i][overPos.j] = draggedMatch;
-    newGrid[activePos.i][activePos.j] =
-      targetMatch;
+    newGrid[activePos.i][activePos.j] = targetMatch;
 
     /* UPDATE TIME + COURT */
     newGrid.forEach((row, rowIndex) => {
@@ -204,6 +265,14 @@ export default function ViewOrderOfPlay() {
         }
       });
     });
+
+    /* VALIDATION */
+    const error = validateGrid(newGrid);
+
+    if (error) {
+      toast.error(error);
+      return;
+    }
 
     setGrid([...newGrid]);
   };
@@ -231,10 +300,8 @@ export default function ViewOrderOfPlay() {
                 key={j}
                 id={`slot-${i}-${j}`}
               >
-                {cell ? (
+                {cell && (
                   <DraggableMatch match={cell} />
-                ) : (
-                  <div className={styles.empty}>—</div>
                 )}
               </DroppableSlot>
             ))}
