@@ -134,7 +134,7 @@ function DroppableSlot({ children, id }) {
 }
 
 /* ================= MAIN ================= */
-export default function ViewOrderOfPlay() {
+export default function OrderOfPlay() {
   const [grid, setGrid] = useState([]);
 
   useEffect(() => {
