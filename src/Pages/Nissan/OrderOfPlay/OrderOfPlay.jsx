@@ -34,47 +34,53 @@ const getPlayers = (m) => {
   ].filter(Boolean);
 };
 
-/* ================= VALIDATE SWAP ================= */
-const validateSwap = (
-  draggedMatch,
-  targetMatch,
-  draggedCourt,
-  targetCourt,
-  draggedTime,
-  targetTime
-) => {
-  const draggedPlayers =
-    getPlayers(draggedMatch);
+/* ================= VALIDATION ================= */
+const validateGrid = (grid) => {
+  let matches = [];
 
-  const targetPlayers =
-    getPlayers(targetMatch);
+  grid.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      if (cell?.match) {
+        matches.push({
+          ...cell.match,
+          court: colIndex + 1,
+          time: cell.time,
+          row: rowIndex,
+        });
+      }
+    });
+  });
 
-  const samePlayer =
-    draggedPlayers.some((p) =>
-      targetPlayers.includes(p)
-    );
+  for (let i = 0; i < matches.length; i++) {
+    for (let j = i + 1; j < matches.length; j++) {
+      const m1 = matches[i];
+      const m2 = matches[j];
 
-  /* SAME TIME */
-  if (
-    samePlayer &&
-    draggedTime === targetTime
-  ) {
-    return "❌ Same player cannot play at same time";
-  }
+      const p1 = getPlayers(m1);
+      const p2 = getPlayers(m2);
 
-  /* CONSECUTIVE */
-  const t1 =
-    TIME_SLOTS.indexOf(draggedTime);
+      const samePlayer = p1.some((p) =>
+        p && p2.includes(p)
+      );
 
-  const t2 =
-    TIME_SLOTS.indexOf(targetTime);
+      if (!samePlayer) continue;
 
-  const isConsecutive =
-    Math.abs(t1 - t2) === 1;
+      /* SAME TIME */
+      if (m1.time === m2.time) {
+        return "❌ Same player cannot play at same time";
+      }
 
-  if (samePlayer && isConsecutive) {
-    if (draggedCourt !== targetCourt) {
-      return "❌ Consecutive matches must be on same court";
+      /* CONSECUTIVE */
+      const diff = Math.abs(
+        m1.row - m2.row
+      );
+
+      if (
+        diff === 1 &&
+        m1.court !== m2.court
+      ) {
+        return "❌ Consecutive matches must be on same court";
+      }
     }
   }
 
@@ -82,7 +88,10 @@ const validateSwap = (
 };
 
 /* ================= DRAG CARD ================= */
-function DraggableMatch({ match, time }) {
+function DraggableMatch({
+  match,
+  time,
+}) {
   const {
     attributes,
     listeners,
@@ -102,7 +111,8 @@ function DraggableMatch({ match, time }) {
     team
       ? `${team.partner1?.name || ""}${
           team.partner2
-            ? " & " + team.partner2?.name
+            ? " & " +
+              team.partner2?.name
             : ""
         }`
       : "TBD";
@@ -126,7 +136,9 @@ function DraggableMatch({ match, time }) {
 
       <div>{name(match.Team1)}</div>
 
-      <div className={styles.vs}>VS</div>
+      <div className={styles.vs}>
+        VS
+      </div>
 
       <div>{name(match.Team2)}</div>
     </div>
@@ -199,7 +211,6 @@ export default function OrderOfPlay() {
       }
 
       buildGrid(allMatches);
-
     } catch (err) {
       console.error(err);
       toast.error("Error loading");
@@ -269,7 +280,7 @@ export default function OrderOfPlay() {
     if (!activePos || !overPos)
       return;
 
-    /* SAME SLOT => NO ACTION */
+    /* SAME SLOT */
     if (
       activePos.i === overPos.i &&
       activePos.j === overPos.j
@@ -295,41 +306,56 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* VALIDATE */
-    const error = validateSwap(
-      dragged.match,
-      target.match,
-      dragged.court,
-      target.court,
-      dragged.time,
-      target.time
-    );
+    /* SAVE OLD */
+    const oldDraggedTeam1 =
+      dragged.match.Team1;
 
+    const oldDraggedTeam2 =
+      dragged.match.Team2;
+
+    const oldTargetTeam1 =
+      target.match.Team1;
+
+    const oldTargetTeam2 =
+      target.match.Team2;
+
+    /* TEMP SWAP */
+    dragged.match.Team1 =
+      oldTargetTeam1;
+
+    dragged.match.Team2 =
+      oldTargetTeam2;
+
+    target.match.Team1 =
+      oldDraggedTeam1;
+
+    target.match.Team2 =
+      oldDraggedTeam2;
+
+    /* VALIDATE */
+    const error =
+      validateGrid(newGrid);
+
+    /* INVALID => REVERT */
     if (error) {
+      dragged.match.Team1 =
+        oldDraggedTeam1;
+
+      dragged.match.Team2 =
+        oldDraggedTeam2;
+
+      target.match.Team1 =
+        oldTargetTeam1;
+
+      target.match.Team2 =
+        oldTargetTeam2;
+
       toast.error(error);
       return;
     }
 
-    /* SWAP ONLY TEAMS */
-    const draggedTeams = {
-      Team1: dragged.match.Team1,
-      Team2: dragged.match.Team2,
-    };
-
-    dragged.match.Team1 =
-      target.match.Team1;
-
-    dragged.match.Team2 =
-      target.match.Team2;
-
-    target.match.Team1 =
-      draggedTeams.Team1;
-
-    target.match.Team2 =
-      draggedTeams.Team2;
-
-    /* UPDATE */
-    setGrid([...newGrid]);
+    /* SUCCESS */
+    setGrid(newGrid);
   };
 
   /* ================= UI ================= */
