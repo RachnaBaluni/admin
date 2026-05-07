@@ -34,70 +34,42 @@ const getPlayers = (m) => {
   ].filter(Boolean);
 };
 
-/* ================= TIME INDEX ================= */
-const getTimeIndex = (time) => {
-  return TIME_SLOTS.indexOf(time);
-};
-
 /* ================= VALIDATION ================= */
 const validateGrid = (grid) => {
-  let playerMatches = {};
+  let matches = [];
 
-  /* ALL MATCHES */
-  grid.forEach((row) => {
-    row.forEach((match) => {
-      if (!match) return;
-
-      const players = getPlayers(match);
-
-      players.forEach((player) => {
-        if (!player) return;
-
-        if (!playerMatches[player]) {
-          playerMatches[player] = [];
-        }
-
-        playerMatches[player].push({
-          time: match.MatchTime,
-          court: match.CourtNumber,
+  grid.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      if (cell?.match) {
+        matches.push({
+          ...cell.match,
+          row: rowIndex,
+          court: colIndex + 1,
+          time: cell.time,
         });
-      });
+      }
     });
   });
 
-  /* VALIDATION */
-  for (let player in playerMatches) {
-    const matches = playerMatches[player];
+  for (let i = 0; i < matches.length; i++) {
+    for (let j = i + 1; j < matches.length; j++) {
+      const m1 = matches[i];
+      const m2 = matches[j];
 
-    /* SORT BY TIME */
-    matches.sort(
-      (a, b) =>
-        getTimeIndex(a.time) -
-        getTimeIndex(b.time)
-    );
+      const p1 = getPlayers(m1);
+      const p2 = getPlayers(m2);
 
-    for (let i = 0; i < matches.length - 1; i++) {
-      const current = matches[i];
-      const next = matches[i + 1];
+      const samePlayer = p1.some(
+        (p) => p && p2.includes(p)
+      );
 
-      const diff =
-        getTimeIndex(next.time) -
-        getTimeIndex(current.time);
+      if (!samePlayer) continue;
 
-      /* SAME TIME */
-      if (
-        diff === 0 &&
-        current.court !== next.court
-      ) {
-        return "❌ Same player cannot play on different courts at same time";
-      }
-
-      /* CONSECUTIVE */
-      if (
-        diff === 1 &&
-        current.court !== next.court
-      ) {
-        return "❌ Consecutive matches must be on same court";
+      /* SAME TIME VALIDATION */
+      if (m1.time === m2.time) {
+        if (m1.court !== m2.court) {
+          return "❌ Same player cannot play on different courts at same time";
+        }
       }
     }
   }
@@ -106,15 +78,11 @@ const validateGrid = (grid) => {
 };
 
 /* ================= DRAG CARD ================= */
-function DraggableMatch({ match }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-  } = useDraggable({
-    id: match._id,
-  });
+function DraggableMatch({ match, time }) {
+  const { attributes, listeners, setNodeRef, transform } =
+    useDraggable({
+      id: match._id,
+    });
 
   const style = transform
     ? {
@@ -125,9 +93,7 @@ function DraggableMatch({ match }) {
   const name = (team) =>
     team
       ? `${team.partner1?.name || ""}${
-          team.partner2
-            ? " & " + team.partner2?.name
-            : ""
+          team.partner2 ? " & " + team.partner2?.name : ""
         }`
       : "TBD";
 
@@ -139,6 +105,11 @@ function DraggableMatch({ match }) {
       {...attributes}
       className={styles.card}
     >
+      {/* FIXED TIME */}
+      <div className={styles.time}>
+        {time}
+      </div>
+
       <div className={styles.category}>
         {match.category}
       </div>
@@ -153,25 +124,13 @@ function DraggableMatch({ match }) {
 }
 
 /* ================= DROP SLOT ================= */
-function DroppableSlot({
-  children,
-  id,
-  time,
-}) {
+function DroppableSlot({ children, id }) {
   const { setNodeRef } = useDroppable({
     id,
   });
 
   return (
-    <div
-      ref={setNodeRef}
-      className={styles.slot}
-    >
-      {/* FIXED TIME */}
-      <div className={styles.fixedTime}>
-        {time}
-      </div>
-
+    <div ref={setNodeRef} className={styles.slot}>
       {children}
     </div>
   );
@@ -201,21 +160,17 @@ export default function OrderOfPlay() {
           { withCredentials: true }
         );
 
+        /* ONLY ROUND 1 */
         const matches = res.data.data.filter(
           (d) => d.Stage === "Round 1"
         );
 
-        const withCategory = matches.map(
-          (m) => ({
-            ...m,
-            category: ev.name,
-          })
-        );
+        const withCategory = matches.map((m) => ({
+          ...m,
+          category: ev.name,
+        }));
 
-        allMatches = [
-          ...allMatches,
-          ...withCategory,
-        ];
+        allMatches = [...allMatches, ...withCategory];
       }
 
       buildGrid(allMatches);
@@ -226,36 +181,34 @@ export default function OrderOfPlay() {
     }
   };
 
-  /* ================= BUILD GRID ================= */
+  /* ================= GRID ================= */
   const buildGrid = (matches) => {
     let temp = [];
     let index = 0;
 
-    const rows = Math.ceil(
-      matches.length / COURTS
-    );
+    const rows = Math.ceil(matches.length / COURTS);
 
     for (let i = 0; i < rows; i++) {
       let row = [];
 
       for (let j = 0; j < COURTS; j++) {
-        let match = matches[index];
+        const match = matches[index];
 
         if (match) {
           row.push({
-            ...match,
-            MatchTime:
-              TIME_SLOTS[i] || "",
-            CourtNumber: j + 1,
+            match,
+            time: TIME_SLOTS[i] || "",
+            court: j + 1,
           });
-        } else {
-          row.push(null);
         }
 
         index++;
       }
 
-      temp.push(row);
+      /* REMOVE EMPTY ROW */
+      if (row.length > 0) {
+        temp.push(row);
+      }
     }
 
     setGrid(temp);
@@ -272,14 +225,14 @@ export default function OrderOfPlay() {
 
     if (activeId === overId) return;
 
-    const newGrid = grid.map((row) => [...row]);
+    const newGrid = [...grid];
 
     let activePos = null;
     let overPos = null;
 
     newGrid.forEach((row, i) => {
       row.forEach((cell, j) => {
-        if (cell?._id === activeId) {
+        if (cell?.match?._id === activeId) {
           activePos = { i, j };
         }
 
@@ -297,37 +250,33 @@ export default function OrderOfPlay() {
     const target =
       newGrid[overPos.i][overPos.j];
 
-    /* SWAP */
-    newGrid[overPos.i][overPos.j] = dragged
-      ? {
-          ...dragged,
-          MatchTime:
-            TIME_SLOTS[overPos.i],
-          CourtNumber: overPos.j + 1,
-        }
-      : null;
+    if (!dragged || !target) return;
 
-    newGrid[activePos.i][activePos.j] = target
-      ? {
-          ...target,
-          MatchTime:
-            TIME_SLOTS[activePos.i],
-          CourtNumber:
-            activePos.j + 1,
-        }
-      : null;
+    /* ================= ONLY SWAP TEAMS ================= */
 
-    /* VALIDATION */
+    const draggedTeams = {
+      Team1: dragged.match.Team1,
+      Team2: dragged.match.Team2,
+    };
+
+    dragged.match.Team1 = target.match.Team1;
+    dragged.match.Team2 = target.match.Team2;
+
+    target.match.Team1 = draggedTeams.Team1;
+    target.match.Team2 = draggedTeams.Team2;
+
+    /* TIME FIXED */
+    /* COURT FIXED */
+    /* CATEGORY FIXED */
+
     const error = validateGrid(newGrid);
 
     if (error) {
       toast.error(error);
-
-      /* CANCEL SWAP */
       return;
     }
 
-    setGrid(newGrid);
+    setGrid([...newGrid]);
   };
 
   /* ================= UI ================= */
@@ -349,19 +298,16 @@ export default function OrderOfPlay() {
         onDragEnd={handleDragEnd}
       >
         {grid.map((row, i) => (
-          <div
-            key={i}
-            className={styles.row}
-          >
+          <div key={i} className={styles.row}>
             {row.map((cell, j) => (
               <DroppableSlot
                 key={j}
                 id={`slot-${i}-${j}`}
-                time={TIME_SLOTS[i]}
               >
                 {cell && (
                   <DraggableMatch
-                    match={cell}
+                    match={cell.match}
+                    time={cell.time}
                   />
                 )}
               </DroppableSlot>
