@@ -43,10 +43,9 @@ const validateGrid = (grid) => {
       if (cell?.match) {
         matches.push({
           ...cell.match,
-          row: rowIndex,
           court: colIndex + 1,
-          timeIndex: rowIndex,
           time: cell.time,
+          timeIndex: rowIndex,
         });
       }
     });
@@ -64,18 +63,25 @@ const validateGrid = (grid) => {
         (p) => p && p2.includes(p)
       );
 
+      /* NO SAME PLAYER => SKIP */
       if (!samePlayer) continue;
 
-      /* SAME TIME CHECK */
+      /* ================= SAME TIME ================= */
       if (m1.time === m2.time) {
-        return "❌ Same player cannot play two matches at same time";
+        return "❌ Same player cannot play at same time";
       }
 
-      /* CONSECUTIVE MATCH CHECK */
+      /* ================= CONSECUTIVE ================= */
       const diff = Math.abs(
         m1.timeIndex - m2.timeIndex
       );
 
+      /*
+        ONLY CHECK:
+        07:30 -> 08:15
+        08:15 -> 09:00
+        etc
+      */
       if (diff === 1) {
         if (m1.court !== m2.court) {
           return "❌ Consecutive matches must be on same court";
@@ -118,7 +124,7 @@ function DraggableMatch({ match, time }) {
       className={styles.card}
     >
       {/* FIXED TIME */}
-      <div className={styles.time}>
+      <div className={styles.fixedTime}>
         {time}
       </div>
 
@@ -142,7 +148,10 @@ function DroppableSlot({ children, id }) {
   });
 
   return (
-    <div ref={setNodeRef} className={styles.slot}>
+    <div
+      ref={setNodeRef}
+      className={styles.slot}
+    >
       {children}
     </div>
   );
@@ -195,7 +204,7 @@ export default function OrderOfPlay() {
     }
   };
 
-  /* ================= GRID ================= */
+  /* ================= BUILD GRID ================= */
   const buildGrid = (matches) => {
     let temp = [];
     let index = 0;
@@ -253,7 +262,7 @@ export default function OrderOfPlay() {
 
     if (!activePos || !overPos) return;
 
-    /* COPY GRID */
+    /* ================= COPY GRID ================= */
     const newGrid = JSON.parse(
       JSON.stringify(grid)
     );
@@ -264,27 +273,25 @@ export default function OrderOfPlay() {
     const target =
       newGrid[overPos.i][overPos.j];
 
-    if (!dragged?.match || !target?.match) return;
+    if (!dragged?.match || !target?.match) {
+      return;
+    }
 
-    /* STORE ORIGINAL */
-    const oldDraggedTeam1 =
-      dragged.match.Team1;
-    const oldDraggedTeam2 =
-      dragged.match.Team2;
+    /* ================= SWAP ONLY TEAMS ================= */
 
-    const oldTargetTeam1 =
-      target.match.Team1;
-    const oldTargetTeam2 =
-      target.match.Team2;
+    const draggedTeams = {
+      Team1: dragged.match.Team1,
+      Team2: dragged.match.Team2,
+    };
 
-    /* SWAP ONLY TEAMS */
-    dragged.match.Team1 = oldTargetTeam1;
-    dragged.match.Team2 = oldTargetTeam2;
+    dragged.match.Team1 = target.match.Team1;
+    dragged.match.Team2 = target.match.Team2;
 
-    target.match.Team1 = oldDraggedTeam1;
-    target.match.Team2 = oldDraggedTeam2;
+    target.match.Team1 = draggedTeams.Team1;
+    target.match.Team2 = draggedTeams.Team2;
 
-    /* VALIDATION */
+    /* ================= VALIDATION ================= */
+
     const error = validateGrid(newGrid);
 
     /* ERROR => NO SWAP */
@@ -311,12 +318,16 @@ export default function OrderOfPlay() {
         ))}
       </div>
 
+      {/* GRID */}
       <DndContext
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
         {grid.map((row, i) => (
-          <div key={i} className={styles.row}>
+          <div
+            key={i}
+            className={styles.row}
+          >
             {row.map((cell, j) => (
               <DroppableSlot
                 key={j}
