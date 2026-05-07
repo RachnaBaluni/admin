@@ -1,137 +1,58 @@
-/* ================= CONTAINER ================= */
 .container {
-  padding: 24px;
-  font-family: "DM Mono", monospace, sans-serif;
-  background: #0f1117;
-  min-height: 100vh;
-  color: #e8e8e8;
+  padding: 20px;
 }
 
-.container h1 {
-  font-size: 1.6rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #ffffff;
-  margin-bottom: 20px;
-}
-
-/* ================= HEADER ROW ================= */
+/* HEADER */
 .header {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 6px;
-  padding-left: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.courtLabel {
-  flex: 1;
+.header div {
+  background: #e6ffe6;
+  padding: 12px;
   text-align: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #888;
-  padding: 6px 0;
-  border-bottom: 1px solid #2a2a2a;
+  font-weight: bold;
+  border: 1px solid #ccc;
 }
 
-/* ================= ROW ================= */
+/* ROW */
 .row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: start;
 }
 
-/* Fixed time label on the left of each row */
-.timeLabel {
-  width: 56px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: #555;
-}
-
-/* ================= DROPPABLE SLOT ================= */
+/* SLOT */
 .slot {
-  flex: 1;
-  min-height: 110px;
-  border: 1px dashed #2a2a2a;
-  border-radius: 8px;
-  display: flex;
-  align-items: stretch;
-  transition: background 0.15s, border-color 0.15s;
+  width: 100%;
 }
 
-.slotOver {
-  background: #1a2a1a;
-  border-color: #3a7a3a;
-}
-
-/* ================= DRAGGABLE CARD ================= */
+/* CARD */
 .card {
-  flex: 1;
-  background: #1a1d26;
-  border: 1px solid #2c2f3e;
-  border-radius: 7px;
-  padding: 10px 12px;
+  border: 1px dashed #bbb;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fafafa;
+  text-align: center;
   cursor: grab;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  transition: box-shadow 0.15s, background 0.15s;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: none;
 }
 
-.card:hover {
-  background: #20243a;
-  border-color: #4a5080;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-.dragging {
-  background: #22263a;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-  cursor: grabbing;
-  opacity: 0.9;
-}
-
-/* ================= CARD INTERNALS ================= */
-.fixedTime {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #5b8cff;
-  text-transform: uppercase;
+.time {
+  font-weight: bold;
+  color: blue;
 }
 
 .category {
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  color: #aaa;
-  text-transform: uppercase;
-  margin-bottom: 2px;
-}
-
-.teamName {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #e0e0e0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: green;
+  font-size: 12px;
 }
 
 .vs {
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  color: #ff5b5b;
-  text-align: center;
+  color: red;
+  font-weight: bold;
 }
