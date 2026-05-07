@@ -6,6 +6,8 @@
 .header {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .header div {
@@ -20,14 +22,14 @@
 .row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: start;
 }
 
 /* SLOT */
 .slot {
-  border: 1px solid #ddd;
-  padding: 10px;
-  min-height: 120px;
-  background: #fff;
+  width: 100%;
 }
 
 /* CARD */
@@ -37,6 +39,7 @@
   border-radius: 8px;
   background: #fafafa;
   text-align: center;
+  cursor: grab;
 }
 
 .time {
@@ -52,9 +55,4 @@
 .vs {
   color: red;
   font-weight: bold;
-}
-
-.empty {
-  text-align: center;
-  color: #aaa;
 }
