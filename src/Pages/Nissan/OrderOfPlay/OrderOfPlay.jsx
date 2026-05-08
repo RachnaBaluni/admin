@@ -20,6 +20,9 @@ const TIME_SLOTS = [
   "11:15",
   "12:00",
   "12:45",
+  "13:30",
+  "14:15",
+  "15:00"
 ];
 
 const COURTS = 4;
@@ -186,7 +189,7 @@ export default function OrderOfPlay() {
 
       let row = [];
 
-      for (let j = 0; j < COURTS; j++) {
+      for (let j = 0; j < COURTS; j++) {//courts in each row
 
         const match = matches[index];
 
