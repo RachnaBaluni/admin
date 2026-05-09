@@ -14,15 +14,6 @@ import {
 const TIME_SLOTS = [
   "07:30",
   "08:15",
-  "09:00",
-  "09:45",
-  "10:30",
-  "11:15",
-  "12:00",
-  "12:45",
-  "13:30",
-  "14:15",
-  "15:00"
 ];
 
 const COURTS = 4;
@@ -76,21 +67,25 @@ function DraggableMatch({
       className={styles.card}
     >
 
-      {/* FIXED TIME */}
+      {/* TIME */}
       <div className={styles.fixedTime}>
         {time}
       </div>
 
+      {/* CATEGORY */}
       <div className={styles.category}>
         {match.category}
       </div>
 
+      {/* TEAM 1 */}
       <div>{name(match.Team1)}</div>
 
+      {/* VS */}
       <div className={styles.vs}>
         VS
       </div>
 
+      {/* TEAM 2 */}
       <div>{name(match.Team2)}</div>
 
     </div>
@@ -189,13 +184,14 @@ export default function OrderOfPlay() {
 
       let row = [];
 
-      for (let j = 0; j < COURTS; j++) {//courts in each row
+      for (let j = 0; j < COURTS; j++) {
 
         const match = matches[index];
 
         row.push({
           match: match || null,
-          time: TIME_SLOTS[i] || "",
+          time:
+            TIME_SLOTS[i] || "Followed By",
           court: j + 1,
         });
 
@@ -281,7 +277,7 @@ export default function OrderOfPlay() {
 
     target.match = temp;
 
-    /* ================= VALIDATE ONLY SWAPPED AGAINST GRID ================= */
+    /* ================= VALIDATION ================= */
 
     const swappedMatches = [
       {
@@ -389,9 +385,7 @@ export default function OrderOfPlay() {
 
       {/* GRID */}
       <DndContext
-        collisionDetection={
-          closestCenter
-        }
+        collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
 
@@ -410,10 +404,12 @@ export default function OrderOfPlay() {
               >
 
                 {cell?.match && (
+
                   <DraggableMatch
                     match={cell.match}
                     time={cell.time}
                   />
+
                 )}
 
               </DroppableSlot>
