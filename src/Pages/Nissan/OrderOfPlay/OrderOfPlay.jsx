@@ -13,7 +13,8 @@ import {
 /* ================= TIME ================= */
 const TIME_SLOTS = [
   "07:30",
-  "08:15",
+  "08:15"
+  
 ];
 
 const COURTS = 4;
@@ -190,8 +191,7 @@ export default function OrderOfPlay() {
 
         row.push({
           match: match || null,
-          time:
-            TIME_SLOTS[i] || "Followed By",
+          time: TIME_SLOTS[i] || `Followed By ${i - 1}`,
           court: j + 1,
         });
 
@@ -407,7 +407,11 @@ export default function OrderOfPlay() {
 
                   <DraggableMatch
                     match={cell.match}
-                    time={cell.time}
+                    time={
+                      cell.time.includes("Followed")
+                        ? "Followed By"
+                        : cell.time
+                    }
                   />
 
                 )}
