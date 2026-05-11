@@ -10,13 +10,16 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  gap: 12px;
 }
 
 .buttonGroup {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
+/* RESET BUTTON */
 .resetBtn {
   background: #dc2626;
   color: white;
@@ -25,12 +28,14 @@
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
+  transition: 0.2s;
 }
 
 .resetBtn:hover {
   background: #b91c1c;
 }
 
+/* GENERATE BUTTON */
 .generateBtn {
   background: #2563eb;
   color: white;
@@ -39,10 +44,27 @@
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
+  transition: 0.2s;
 }
 
 .generateBtn:hover {
   background: #1d4ed8;
+}
+
+/* PRINT BUTTON */
+.printBtn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.printBtn:hover {
+  background: #15803d;
 }
 
 /* HEADER */
@@ -88,30 +110,42 @@
   min-height: 80px;
   box-sizing: border-box;
   word-break: break-word;
+  transition: 0.2s;
 }
 
-/* TEXT */
-.time {
+.card:hover {
+  background: #f3f4f6;
+}
+
+/* TIME */
+.fixedTime {
   font-weight: bold;
-  color: blue;
+  color: #2563eb;
   font-size: 14px;
+  margin-bottom: 6px;
 }
 
+/* CATEGORY */
 .category {
   color: green;
   font-size: 12px;
   margin-top: 4px;
+  margin-bottom: 6px;
+  font-weight: 600;
 }
 
+/* VS */
 .vs {
   color: red;
   font-weight: bold;
   margin-top: 6px;
+  margin-bottom: 6px;
   font-size: 14px;
 }
 
 /* ================= TABLET ================= */
 @media (max-width: 1024px) {
+
   .header,
   .row {
     grid-template-columns: repeat(2, 1fr);
@@ -127,17 +161,19 @@
 
   .topBar {
     flex-direction: column;
-    gap: 10px;
     align-items: stretch;
   }
 
   .buttonGroup {
     width: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   .resetBtn,
-  .generateBtn {
-    flex: 1;
+  .generateBtn,
+  .printBtn {
+    width: 100%;
   }
 
   .header,
@@ -156,7 +192,7 @@
     min-height: auto;
   }
 
-  .time {
+  .fixedTime {
     font-size: 13px;
   }
 
@@ -166,5 +202,21 @@
 
   .vs {
     font-size: 13px;
+  }
+}
+
+/* ================= PRINT ================= */
+@media print {
+
+  .buttonGroup {
+    display: none;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  .card {
+    break-inside: avoid;
   }
 }
