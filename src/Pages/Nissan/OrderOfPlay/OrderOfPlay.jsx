@@ -383,7 +383,10 @@ export default function OrderOfPlay() {
 
   /* ================= UI ================= */
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      id="print-area"
+    >
 
       {/* TOP BAR */}
       <div className={styles.topBar}>
