@@ -424,6 +424,13 @@ export default function OrderOfPlay() {
             Reset Order
           </button>
 
+           <button
+      className={styles.generateBtn}
+      onClick={fetchData}
+    >
+      Generate Again
+    </button>
+
           <button
             className={styles.printBtn}
             onClick={handlePrint}
