@@ -34,6 +34,7 @@ function DraggableMatch({
   match,
   time,
 }) {
+
   const {
     attributes,
     listeners,
@@ -165,7 +166,9 @@ export default function OrderOfPlay() {
       buildGrid(allMatches);
 
     } catch (err) {
+
       console.error(err);
+
       toast.error("Error loading");
     }
   };
@@ -211,6 +214,11 @@ export default function OrderOfPlay() {
     toast.success(
       "✅ Order Of Play Reset Successfully"
     );
+  };
+
+  /* ================= PRINT ================= */
+  const handlePrint = () => {
+    window.print();
   };
 
   /* ================= DRAG END ================= */
@@ -278,16 +286,14 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* ================= TEMP SWAP ================= */
-
+    /* TEMP SWAP */
     const temp = dragged.match;
 
     dragged.match = target.match;
 
     target.match = temp;
 
-    /* ================= VALIDATION ================= */
-
+    /* VALIDATION */
     const swappedMatches = [
       {
         match: dragged.match,
@@ -386,7 +392,7 @@ export default function OrderOfPlay() {
 
         <div className={styles.buttonGroup}>
 
-          {/* RESET BUTTON */}
+          {/* RESET */}
           <button
             className={styles.resetBtn}
             onClick={handleReset}
@@ -402,12 +408,21 @@ export default function OrderOfPlay() {
             Generate Again
           </button>
 
+          {/* PRINT */}
+          <button
+            className={styles.printBtn}
+            onClick={handlePrint}
+          >
+            Print PDF
+          </button>
+
         </div>
 
       </div>
 
       {/* HEADER */}
       <div className={styles.header}>
+
         {[1, 2, 3, 4].map(
           (court) => (
             <div key={court}>
@@ -415,6 +430,7 @@ export default function OrderOfPlay() {
             </div>
           )
         )}
+
       </div>
 
       {/* GRID */}
