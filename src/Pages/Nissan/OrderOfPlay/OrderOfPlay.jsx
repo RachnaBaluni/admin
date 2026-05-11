@@ -304,7 +304,7 @@ export default function OrderOfPlay() {
 
   /* ================= RESET ================= */
   const handleReset = () => {
-
+    setGrid([]);
     setShowFilters(true);
 
   };
