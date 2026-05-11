@@ -1,6 +1,7 @@
 import React, {
   useEffect,
   useState,
+  useRef,
 } from "react";
 
 import axios from "axios";
@@ -19,6 +20,9 @@ const TIME_SLOTS = [
   "07:30",
   "08:15",
 ];
+
+/* ================= COURTS ================= */
+const COURTS = 4;
 
 /* ================= PLAYERS ================= */
 const getPlayers = (m) => {
@@ -69,20 +73,25 @@ function DraggableMatch({
       className={styles.card}
     >
 
+      {/* TIME */}
       <div className={styles.fixedTime}>
         {time}
       </div>
 
+      {/* CATEGORY */}
       <div className={styles.category}>
         {match.category}
       </div>
 
+      {/* TEAM 1 */}
       <div>{name(match.Team1)}</div>
 
+      {/* VS */}
       <div className={styles.vs}>
         VS
       </div>
 
+      {/* TEAM 2 */}
       <div>{name(match.Team2)}</div>
 
     </div>
@@ -114,13 +123,7 @@ export default function OrderOfPlay() {
 
   const [grid, setGrid] = useState([]);
 
-  const [events, setEvents] = useState([]);
-
-  const [selectedCategories, setSelectedCategories] =
-    useState([]);
-
-  const [courtCount, setCourtCount] =
-    useState(4);
+  const printRef = useRef();
 
   useEffect(() => {
     fetchData();
@@ -138,38 +141,23 @@ export default function OrderOfPlay() {
         }
       );
 
-      setEvents(eventsRes.data.data);
-
-      const filteredEvents =
-        selectedCategories.length > 0
-          ? eventsRes.data.data.filter((ev) =>
-              selectedCategories.includes(ev.name)
-            )
-          : eventsRes.data.data;
-
-      const allResponses = await Promise.all(
-
-        filteredEvents.map((ev) =>
-
-          axios.get(
-            `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-            {
-              withCredentials: true,
-            }
-          )
-
-        )
-
-      );
-
       let allMatches = [];
 
-      allResponses.forEach((res, index) => {
+      for (let ev of eventsRes.data.data) {
 
-        const ev = filteredEvents[index];
+        const res = await axios.get(
+          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
+          {
+            withCredentials: true,
+          }
+        );
 
-        const matches = res.data.data;
-
+        const matches =
+        res.data.data.filter(
+         (d) =>
+          d.Stage === "Round 1"
+  );
+         
         const withCategory =
           matches.map((m) => ({
             ...m,
@@ -180,7 +168,7 @@ export default function OrderOfPlay() {
           ...allMatches,
           ...withCategory,
         ];
-      });
+      }
 
       buildGrid(allMatches);
 
@@ -195,32 +183,18 @@ export default function OrderOfPlay() {
   /* ================= BUILD GRID ================= */
   const buildGrid = (matches) => {
 
-    const roundOrder = {
-      "Round 1": 1,
-      "Round 2": 2,
-      "Quarter Final": 3,
-      "Semi Final": 4,
-      "Final": 5,
-    };
-
-    matches.sort(
-      (a, b) =>
-        (roundOrder[a.Stage] || 99) -
-        (roundOrder[b.Stage] || 99)
-    );
-
     let temp = [];
     let index = 0;
 
     const rows = Math.ceil(
-      matches.length / courtCount
+      matches.length / COURTS
     );
 
     for (let i = 0; i < rows; i++) {
 
       let row = [];
 
-      for (let j = 0; j < courtCount; j++) {
+      for (let j = 0; j < COURTS; j++) {
 
         const match = matches[index];
 
@@ -245,142 +219,198 @@ export default function OrderOfPlay() {
     setGrid([]);
 
     toast.success(
-      "✅ Order Reset Successfully"
+      "✅ Order Of Play Reset Successfully"
     );
   };
 
   /* ================= PRINT ================= */
-  const handlePrint = () => {
+  /* ================= PRINT ================= */
+const handlePrint = () => {
 
-    const printWindow = window.open(
-      "",
-      "_blank"
-    );
+  const printWindow = window.open(
+    "",
+    "_blank"
+  );
 
-    let html = `
-      <html>
-      <head>
+  let html = `
+    <html>
 
-        <title>Order Of Play</title>
+    <head>
 
-        <style>
+      <title>
+        Order Of Play
+      </title>
 
-          body{
-            font-family:Arial;
-            padding:20px;
-          }
+      <style>
 
-          .table{
-            display:grid;
-            grid-template-columns:repeat(${courtCount},1fr);
-            gap:10px;
-          }
-
-          .court{
-            border:1px solid #000;
-            padding:10px;
-            text-align:center;
-            font-weight:bold;
-            background:#e6ffe6;
-          }
-
-          .card{
-            border:1px solid #999;
-            padding:10px;
-            border-radius:8px;
-            text-align:center;
-          }
-
-        </style>
-
-      </head>
-
-      <body>
-
-        <h1>
-          ORDER OF PLAY
-        </h1>
-
-        <div class="table">
-    `;
-
-    for (let i = 1; i <= courtCount; i++) {
-
-      html += `
-        <div class="court">
-          COURT ${i}
-        </div>
-      `;
-    }
-
-    grid.forEach((row) => {
-
-      row.forEach((cell) => {
-
-        if (!cell?.match) {
-
-          html += `<div></div>`;
-
-          return;
+        body{
+          font-family: Arial;
+          padding:20px;
+          background:white;
         }
 
-        const teamName = (team) =>
-          team
-            ? `${team.partner1?.name || ""}
-               ${
-                 team.partner2
-                   ? " & " + team.partner2?.name
-                   : ""
-               }`
-            : "BYE";
+        h1{
+          text-align:center;
+          margin-bottom:30px;
+        }
 
-        html += `
-          <div class="card">
+        .table{
+          display:grid;
+          grid-template-columns:repeat(4,1fr);
+          gap:12px;
+        }
 
-            <b>
-              ${
-                cell.time.includes("Followed")
-                  ? "Followed By"
-                  : cell.time
-              }
-            </b>
+        .court{
+          border:1px solid #000;
+          padding:12px;
+          text-align:center;
+          font-weight:bold;
+          background:#e6ffe6;
+          border-radius:6px;
+        }
 
-            <br/><br/>
+        .card{
+          border:1px solid #999;
+          border-radius:8px;
+          padding:12px;
+          text-align:center;
+          min-height:100px;
+          background:#fafafa;
+        }
+
+        .time{
+          color:#2563eb;
+          font-weight:bold;
+          margin-bottom:6px;
+          font-size:14px;
+        }
+
+        .category{
+          color:green;
+          font-size:12px;
+          font-weight:bold;
+          margin-bottom:8px;
+        }
+
+        .vs{
+          color:red;
+          font-weight:bold;
+          margin:8px 0;
+        }
+
+      </style>
+
+    </head>
+
+    <body>
+
+      <h1>
+        ORDER OF PLAY
+      </h1>
+
+      <div class="table">
+
+        <div class="court">
+          COURT 1
+        </div>
+
+        <div class="court">
+          COURT 2
+        </div>
+
+        <div class="court">
+          COURT 3
+        </div>
+
+        <div class="court">
+          COURT 4
+        </div>
+  `;
+
+  grid.forEach((row) => {
+
+    row.forEach((cell) => {
+
+      if (!cell?.match) {
+
+        html += `<div></div>`;
+
+        return;
+      }
+
+      const teamName = (team) =>
+        team
+          ? `${team.partner1?.name || ""}
+             ${
+               team.partner2
+                 ? " & " + team.partner2?.name
+                 : ""
+             }`
+          : "BYE";
+
+      html += `
+
+        <div class="card">
+
+          <div class="time">
+
+            ${
+              cell.time.includes("Followed")
+                ? "Followed By"
+                : cell.time
+            }
+
+          </div>
+
+          <div class="category">
 
             ${cell.match.category}
 
-            <br/><br/>
+          </div>
+
+          <div>
 
             ${teamName(cell.match.Team1)}
 
-            <br/><br/>
+          </div>
 
-            <b>VS</b>
+          <div class="vs">
 
-            <br/><br/>
+            VS
+
+          </div>
+
+          <div>
 
             ${teamName(cell.match.Team2)}
 
           </div>
-        `;
-      });
 
+        </div>
+      `;
     });
 
-    html += `
-        </div>
-      </body>
-      </html>
-    `;
+  });
 
-    printWindow.document.write(html);
+  html += `
 
-    printWindow.document.close();
+      </div>
 
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
-  };
+    </body>
+
+    </html>
+  `;
+
+  printWindow.document.write(html);
+
+  printWindow.document.close();
+
+  setTimeout(() => {
+
+    printWindow.print();
+
+  }, 500);
+};
 
   /* ================= DRAG END ================= */
   const handleDragEnd = (event) => {
@@ -421,6 +451,15 @@ export default function OrderOfPlay() {
       return;
     }
 
+    /* SAME SLOT */
+    if (
+      activePos.i === overPos.i &&
+      activePos.j === overPos.j
+    ) {
+      return;
+    }
+
+    /* COPY GRID */
     const newGrid = JSON.parse(
       JSON.stringify(grid)
     );
@@ -438,93 +477,132 @@ export default function OrderOfPlay() {
       return;
     }
 
+    /* TEMP SWAP */
     const temp = dragged.match;
 
     dragged.match = target.match;
 
     target.match = temp;
 
-    for (let i = 0; i < newGrid.length; i++) {
+    /* VALIDATION */
+    const swappedMatches = [
+      {
+        match: dragged.match,
+        time: dragged.time,
+        court: dragged.court,
+        timeIndex: activePos.i,
+      },
+      {
+        match: target.match,
+        time: target.time,
+        court: target.court,
+        timeIndex: overPos.i,
+      },
+    ];
 
-      for (let j = 0; j < newGrid[i].length; j++) {
+    for (const swapped of swappedMatches) {
 
-        const cell = newGrid[i][j];
+      const swappedPlayers =
+        getPlayers(swapped.match);
 
-        if (!cell?.match) continue;
+      for (let i = 0; i < newGrid.length; i++) {
 
-        const players1 =
-          getPlayers(cell.match);
+        for (let j = 0; j < newGrid[i].length; j++) {
 
-        for (let x = 0; x < newGrid.length; x++) {
+          const cell = newGrid[i][j];
 
-          for (let y = 0; y < newGrid[x].length; y++) {
+          if (!cell?.match) continue;
 
-            if (
-              i === x &&
-              j === y
-            ) continue;
+          /* SKIP SAME CELL */
+          if (
+            i === swapped.timeIndex &&
+            j === swapped.court - 1
+          ) {
+            continue;
+          }
 
-            const compare =
-              newGrid[x][y];
+          const cellPlayers =
+            getPlayers(cell.match);
 
-            if (!compare?.match) continue;
+          const samePlayer =
+            swappedPlayers.some((p) =>
+              cellPlayers.includes(p)
+            );
 
-            const players2 =
-              getPlayers(compare.match);
+          if (!samePlayer) continue;
 
-            const samePlayer =
-              players1.some((p) =>
-                players2.includes(p)
-              );
+          /* SAME TIME */
+          if (
+            swapped.time === cell.time &&
+            swapped.court !== cell.court
+          ) {
 
-            if (
-              samePlayer &&
-              cell.time === compare.time &&
-              cell.court !== compare.court
-            ) {
+            toast.error(
+              "❌ Same player cannot play on different courts at same time"
+            );
 
-              toast.error(
-                "❌ Same player conflict"
-              );
+            return;
+          }
 
-              return;
-            }
+          /* CONSECUTIVE */
+          const diff = Math.abs(
+            swapped.timeIndex - i
+          );
+
+          if (
+            diff === 1 &&
+            swapped.court !== cell.court
+          ) {
+
+            toast.error(
+              "❌ Consecutive matches must be on same court"
+            );
+
+            return;
           }
         }
       }
     }
 
+    /* SUCCESS */
     setGrid(newGrid);
 
     toast.success(
-      "✅ Match swapped"
+      "✅ Match swapped successfully"
     );
   };
 
   /* ================= UI ================= */
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      ref={printRef}
+    >
 
+      {/* TOP BAR */}
       <div className={styles.topBar}>
 
         <h1>ORDER OF PLAY</h1>
 
         <div className={styles.buttonGroup}>
 
+          {/* RESET */}
           <button
             className={styles.resetBtn}
             onClick={handleReset}
           >
-            Reset
+            Reset Order
           </button>
 
+          {/* GENERATE AGAIN */}
           <button
             className={styles.generateBtn}
             onClick={fetchData}
           >
-            Generate
+            Generate Again
           </button>
 
+          {/* PRINT */}
           <button
             className={styles.printBtn}
             onClick={handlePrint}
@@ -536,81 +614,13 @@ export default function OrderOfPlay() {
 
       </div>
 
-      {/* CONTROLS */}
-      <div className={styles.controls}>
-
-        <div className={styles.categoryBox}>
-
-          <h3>Select Categories</h3>
-
-          {events.map((ev) => (
-
-            <label
-              key={ev._id}
-              className={styles.checkboxLabel}
-            >
-
-              <input
-                type="checkbox"
-                checked={selectedCategories.includes(ev.name)}
-                onChange={(e) => {
-
-                  if (e.target.checked) {
-
-                    setSelectedCategories([
-                      ...selectedCategories,
-                      ev.name,
-                    ]);
-
-                  } else {
-
-                    setSelectedCategories(
-                      selectedCategories.filter(
-                        (c) => c !== ev.name
-                      )
-                    );
-                  }
-                }}
-              />
-
-              {ev.name}
-
-            </label>
-
-          ))}
-
-        </div>
-
-        <div className={styles.courtBox}>
-
-          <h3>Number Of Courts</h3>
-
-          <input
-            type="number"
-            min="1"
-            value={courtCount}
-            onChange={(e) =>
-              setCourtCount(Number(e.target.value))
-            }
-            className={styles.courtInput}
-          />
-
-        </div>
-
-      </div>
-
       {/* HEADER */}
-      <div
-        className={styles.header}
-        style={{
-          gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
-        }}
-      >
+      <div className={styles.header}>
 
-        {Array.from({ length: courtCount }).map(
-          (_, index) => (
-            <div key={index}>
-              COURT {index + 1}
+        {[1, 2, 3, 4].map(
+          (court) => (
+            <div key={court}>
+              COURT {court}
             </div>
           )
         )}
@@ -628,9 +638,6 @@ export default function OrderOfPlay() {
           <div
             key={i}
             className={styles.row}
-            style={{
-              gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
-            }}
           >
 
             {row.map((cell, j) => (
