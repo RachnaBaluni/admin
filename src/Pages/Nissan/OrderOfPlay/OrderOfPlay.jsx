@@ -1,4 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+} from "react";
+
 import axios from "axios";
 import styles from "./OrderOfPlay.module.css";
 import { toast } from "sonner";
@@ -118,6 +123,8 @@ export default function OrderOfPlay() {
 
   const [grid, setGrid] = useState([]);
 
+  const printRef = useRef();
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -218,7 +225,78 @@ export default function OrderOfPlay() {
 
   /* ================= PRINT ================= */
   const handlePrint = () => {
-    window.print();
+
+    const printContents =
+      printRef.current.innerHTML;
+
+    const newWindow = window.open(
+      "",
+      "",
+      "width=1200,height=800"
+    );
+
+    newWindow.document.write(`
+      <html>
+
+        <head>
+
+          <title>
+            Order Of Play
+          </title>
+
+          <style>
+
+            body{
+              font-family: Arial;
+              padding:20px;
+            }
+
+            h1{
+              text-align:center;
+              margin-bottom:20px;
+            }
+
+            .header,
+            .row{
+              display:grid;
+              grid-template-columns:repeat(4,1fr);
+              gap:10px;
+              margin-bottom:10px;
+            }
+
+            .header div{
+              background:#e6ffe6;
+              padding:12px;
+              text-align:center;
+              font-weight:bold;
+              border:1px solid #000;
+              border-radius:6px;
+            }
+
+            .card{
+              border:1px solid #999;
+              padding:10px;
+              border-radius:8px;
+              text-align:center;
+              min-height:80px;
+            }
+
+          </style>
+
+        </head>
+
+        <body>
+
+          ${printContents}
+
+        </body>
+
+      </html>
+    `);
+
+    newWindow.document.close();
+
+    newWindow.print();
   };
 
   /* ================= DRAG END ================= */
@@ -385,7 +463,7 @@ export default function OrderOfPlay() {
   return (
     <div
       className={styles.container}
-      id="print-section"
+      ref={printRef}
     >
 
       {/* TOP BAR */}
