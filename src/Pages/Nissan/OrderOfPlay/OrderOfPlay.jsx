@@ -216,7 +216,7 @@ export default function OrderOfPlay() {
             const roundMatch =
               selectedRounds.length > 0
                 ? selectedRounds.includes(d.Stage)
-                : true;
+                : d.Stage==="Round 1";
 
             return roundMatch;
           }
