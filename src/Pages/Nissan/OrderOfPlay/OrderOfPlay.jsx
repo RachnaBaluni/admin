@@ -1,7 +1,6 @@
 import React, {
   useEffect,
   useState,
-  useRef,
 } from "react";
 
 import axios from "axios";
@@ -20,9 +19,6 @@ const TIME_SLOTS = [
   "07:30",
   "08:15",
 ];
-
-/* ================= COURTS ================= */
-const COURTS = 4;
 
 /* ================= PLAYERS ================= */
 const getPlayers = (m) => {
@@ -73,25 +69,20 @@ function DraggableMatch({
       className={styles.card}
     >
 
-      {/* TIME */}
       <div className={styles.fixedTime}>
         {time}
       </div>
 
-      {/* CATEGORY */}
       <div className={styles.category}>
         {match.category}
       </div>
 
-      {/* TEAM 1 */}
       <div>{name(match.Team1)}</div>
 
-      {/* VS */}
       <div className={styles.vs}>
         VS
       </div>
 
-      {/* TEAM 2 */}
       <div>{name(match.Team2)}</div>
 
     </div>
@@ -123,7 +114,13 @@ export default function OrderOfPlay() {
 
   const [grid, setGrid] = useState([]);
 
-  const printRef = useRef();
+  const [events, setEvents] = useState([]);
+
+  const [selectedCategories, setSelectedCategories] =
+    useState([]);
+
+  const [courtCount, setCourtCount] =
+    useState(4);
 
   useEffect(() => {
     fetchData();
@@ -141,23 +138,38 @@ export default function OrderOfPlay() {
         }
       );
 
+      setEvents(eventsRes.data.data);
+
+      const filteredEvents =
+        selectedCategories.length > 0
+          ? eventsRes.data.data.filter((ev) =>
+              selectedCategories.includes(ev.name)
+            )
+          : eventsRes.data.data;
+
+      const allResponses = await Promise.all(
+
+        filteredEvents.map((ev) =>
+
+          axios.get(
+            `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
+            {
+              withCredentials: true,
+            }
+          )
+
+        )
+
+      );
+
       let allMatches = [];
 
-      for (let ev of eventsRes.data.data) {
+      allResponses.forEach((res, index) => {
 
-        const res = await axios.get(
-          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-          {
-            withCredentials: true,
-          }
-        );
+        const ev = filteredEvents[index];
 
-        const matches =
-        res.data.data.filter(
-         (d) =>
-          d.Stage === "Round 1"
-         );
-         
+        const matches = res.data.data;
+
         const withCategory =
           matches.map((m) => ({
             ...m,
@@ -168,7 +180,7 @@ export default function OrderOfPlay() {
           ...allMatches,
           ...withCategory,
         ];
-      }
+      });
 
       buildGrid(allMatches);
 
@@ -183,18 +195,32 @@ export default function OrderOfPlay() {
   /* ================= BUILD GRID ================= */
   const buildGrid = (matches) => {
 
+    const roundOrder = {
+      "Round 1": 1,
+      "Round 2": 2,
+      "Quarter Final": 3,
+      "Semi Final": 4,
+      "Final": 5,
+    };
+
+    matches.sort(
+      (a, b) =>
+        (roundOrder[a.Stage] || 99) -
+        (roundOrder[b.Stage] || 99)
+    );
+
     let temp = [];
     let index = 0;
 
     const rows = Math.ceil(
-      matches.length / COURTS
+      matches.length / courtCount
     );
 
     for (let i = 0; i < rows; i++) {
 
       let row = [];
 
-      for (let j = 0; j < COURTS; j++) {
+      for (let j = 0; j < courtCount; j++) {
 
         const match = matches[index];
 
@@ -219,198 +245,142 @@ export default function OrderOfPlay() {
     setGrid([]);
 
     toast.success(
-      "✅ Order Of Play Reset Successfully"
+      "✅ Order Reset Successfully"
     );
   };
 
   /* ================= PRINT ================= */
-  /* ================= PRINT ================= */
-const handlePrint = () => {
+  const handlePrint = () => {
 
-  const printWindow = window.open(
-    "",
-    "_blank"
-  );
+    const printWindow = window.open(
+      "",
+      "_blank"
+    );
 
-  let html = `
-    <html>
+    let html = `
+      <html>
+      <head>
 
-    <head>
+        <title>Order Of Play</title>
 
-      <title>
-        Order Of Play
-      </title>
+        <style>
 
-      <style>
+          body{
+            font-family:Arial;
+            padding:20px;
+          }
 
-        body{
-          font-family: Arial;
-          padding:20px;
-          background:white;
-        }
+          .table{
+            display:grid;
+            grid-template-columns:repeat(${courtCount},1fr);
+            gap:10px;
+          }
 
-        h1{
-          text-align:center;
-          margin-bottom:30px;
-        }
+          .court{
+            border:1px solid #000;
+            padding:10px;
+            text-align:center;
+            font-weight:bold;
+            background:#e6ffe6;
+          }
 
-        .table{
-          display:grid;
-          grid-template-columns:repeat(4,1fr);
-          gap:12px;
-        }
+          .card{
+            border:1px solid #999;
+            padding:10px;
+            border-radius:8px;
+            text-align:center;
+          }
 
-        .court{
-          border:1px solid #000;
-          padding:12px;
-          text-align:center;
-          font-weight:bold;
-          background:#e6ffe6;
-          border-radius:6px;
-        }
+        </style>
 
-        .card{
-          border:1px solid #999;
-          border-radius:8px;
-          padding:12px;
-          text-align:center;
-          min-height:100px;
-          background:#fafafa;
-        }
+      </head>
 
-        .time{
-          color:#2563eb;
-          font-weight:bold;
-          margin-bottom:6px;
-          font-size:14px;
-        }
+      <body>
 
-        .category{
-          color:green;
-          font-size:12px;
-          font-weight:bold;
-          margin-bottom:8px;
-        }
+        <h1>
+          ORDER OF PLAY
+        </h1>
 
-        .vs{
-          color:red;
-          font-weight:bold;
-          margin:8px 0;
-        }
+        <div class="table">
+    `;
 
-      </style>
-
-    </head>
-
-    <body>
-
-      <h1>
-        ORDER OF PLAY
-      </h1>
-
-      <div class="table">
-
-        <div class="court">
-          COURT 1
-        </div>
-
-        <div class="court">
-          COURT 2
-        </div>
-
-        <div class="court">
-          COURT 3
-        </div>
-
-        <div class="court">
-          COURT 4
-        </div>
-  `;
-
-  grid.forEach((row) => {
-
-    row.forEach((cell) => {
-
-      if (!cell?.match) {
-
-        html += `<div></div>`;
-
-        return;
-      }
-
-      const teamName = (team) =>
-        team
-          ? `${team.partner1?.name || ""}
-             ${
-               team.partner2
-                 ? " & " + team.partner2?.name
-                 : ""
-             }`
-          : "BYE";
+    for (let i = 1; i <= courtCount; i++) {
 
       html += `
+        <div class="court">
+          COURT ${i}
+        </div>
+      `;
+    }
 
-        <div class="card">
+    grid.forEach((row) => {
 
-          <div class="time">
+      row.forEach((cell) => {
 
-            ${
-              cell.time.includes("Followed")
-                ? "Followed By"
-                : cell.time
-            }
+        if (!cell?.match) {
 
-          </div>
+          html += `<div></div>`;
 
-          <div class="category">
+          return;
+        }
+
+        const teamName = (team) =>
+          team
+            ? `${team.partner1?.name || ""}
+               ${
+                 team.partner2
+                   ? " & " + team.partner2?.name
+                   : ""
+               }`
+            : "BYE";
+
+        html += `
+          <div class="card">
+
+            <b>
+              ${
+                cell.time.includes("Followed")
+                  ? "Followed By"
+                  : cell.time
+              }
+            </b>
+
+            <br/><br/>
 
             ${cell.match.category}
 
-          </div>
-
-          <div>
+            <br/><br/>
 
             ${teamName(cell.match.Team1)}
 
-          </div>
+            <br/><br/>
 
-          <div class="vs">
+            <b>VS</b>
 
-            VS
-
-          </div>
-
-          <div>
+            <br/><br/>
 
             ${teamName(cell.match.Team2)}
 
           </div>
+        `;
+      });
 
-        </div>
-      `;
     });
 
-  });
+    html += `
+        </div>
+      </body>
+      </html>
+    `;
 
-  html += `
+    printWindow.document.write(html);
 
-      </div>
+    printWindow.document.close();
 
-    </body>
-
-    </html>
-  `;
-
-  printWindow.document.write(html);
-
-  printWindow.document.close();
-
-  setTimeout(() => {
-
-    printWindow.print();
-
-  }, 500);
-};
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
 
   /* ================= DRAG END ================= */
   const handleDragEnd = (event) => {
@@ -451,15 +421,6 @@ const handlePrint = () => {
       return;
     }
 
-    /* SAME SLOT */
-    if (
-      activePos.i === overPos.i &&
-      activePos.j === overPos.j
-    ) {
-      return;
-    }
-
-    /* COPY GRID */
     const newGrid = JSON.parse(
       JSON.stringify(grid)
     );
@@ -477,132 +438,93 @@ const handlePrint = () => {
       return;
     }
 
-    /* TEMP SWAP */
     const temp = dragged.match;
 
     dragged.match = target.match;
 
     target.match = temp;
 
-    /* VALIDATION */
-    const swappedMatches = [
-      {
-        match: dragged.match,
-        time: dragged.time,
-        court: dragged.court,
-        timeIndex: activePos.i,
-      },
-      {
-        match: target.match,
-        time: target.time,
-        court: target.court,
-        timeIndex: overPos.i,
-      },
-    ];
+    for (let i = 0; i < newGrid.length; i++) {
 
-    for (const swapped of swappedMatches) {
+      for (let j = 0; j < newGrid[i].length; j++) {
 
-      const swappedPlayers =
-        getPlayers(swapped.match);
+        const cell = newGrid[i][j];
 
-      for (let i = 0; i < newGrid.length; i++) {
+        if (!cell?.match) continue;
 
-        for (let j = 0; j < newGrid[i].length; j++) {
+        const players1 =
+          getPlayers(cell.match);
 
-          const cell = newGrid[i][j];
+        for (let x = 0; x < newGrid.length; x++) {
 
-          if (!cell?.match) continue;
+          for (let y = 0; y < newGrid[x].length; y++) {
 
-          /* SKIP SAME CELL */
-          if (
-            i === swapped.timeIndex &&
-            j === swapped.court - 1
-          ) {
-            continue;
-          }
+            if (
+              i === x &&
+              j === y
+            ) continue;
 
-          const cellPlayers =
-            getPlayers(cell.match);
+            const compare =
+              newGrid[x][y];
 
-          const samePlayer =
-            swappedPlayers.some((p) =>
-              cellPlayers.includes(p)
-            );
+            if (!compare?.match) continue;
 
-          if (!samePlayer) continue;
+            const players2 =
+              getPlayers(compare.match);
 
-          /* SAME TIME */
-          if (
-            swapped.time === cell.time &&
-            swapped.court !== cell.court
-          ) {
+            const samePlayer =
+              players1.some((p) =>
+                players2.includes(p)
+              );
 
-            toast.error(
-              "❌ Same player cannot play on different courts at same time"
-            );
+            if (
+              samePlayer &&
+              cell.time === compare.time &&
+              cell.court !== compare.court
+            ) {
 
-            return;
-          }
+              toast.error(
+                "❌ Same player conflict"
+              );
 
-          /* CONSECUTIVE */
-          const diff = Math.abs(
-            swapped.timeIndex - i
-          );
-
-          if (
-            diff === 1 &&
-            swapped.court !== cell.court
-          ) {
-
-            toast.error(
-              "❌ Consecutive matches must be on same court"
-            );
-
-            return;
+              return;
+            }
           }
         }
       }
     }
 
-    /* SUCCESS */
     setGrid(newGrid);
 
     toast.success(
-      "✅ Match swapped successfully"
+      "✅ Match swapped"
     );
   };
 
   /* ================= UI ================= */
   return (
-    <div
-      className={styles.container}
-      ref={printRef}
-    >
+    <div className={styles.container}>
 
-      {/* TOP BAR */}
       <div className={styles.topBar}>
 
         <h1>ORDER OF PLAY</h1>
 
         <div className={styles.buttonGroup}>
 
-          {/* RESET */}
           <button
             className={styles.resetBtn}
             onClick={handleReset}
           >
-            Reset Order
+            Reset
           </button>
 
-          {/* GENERATE AGAIN */}
           <button
             className={styles.generateBtn}
             onClick={fetchData}
           >
-            Generate Again
+            Generate
           </button>
 
-          {/* PRINT */}
           <button
             className={styles.printBtn}
             onClick={handlePrint}
@@ -614,13 +536,81 @@ const handlePrint = () => {
 
       </div>
 
-      {/* HEADER */}
-      <div className={styles.header}>
+      {/* CONTROLS */}
+      <div className={styles.controls}>
 
-        {[1, 2, 3, 4].map(
-          (court) => (
-            <div key={court}>
-              COURT {court}
+        <div className={styles.categoryBox}>
+
+          <h3>Select Categories</h3>
+
+          {events.map((ev) => (
+
+            <label
+              key={ev._id}
+              className={styles.checkboxLabel}
+            >
+
+              <input
+                type="checkbox"
+                checked={selectedCategories.includes(ev.name)}
+                onChange={(e) => {
+
+                  if (e.target.checked) {
+
+                    setSelectedCategories([
+                      ...selectedCategories,
+                      ev.name,
+                    ]);
+
+                  } else {
+
+                    setSelectedCategories(
+                      selectedCategories.filter(
+                        (c) => c !== ev.name
+                      )
+                    );
+                  }
+                }}
+              />
+
+              {ev.name}
+
+            </label>
+
+          ))}
+
+        </div>
+
+        <div className={styles.courtBox}>
+
+          <h3>Number Of Courts</h3>
+
+          <input
+            type="number"
+            min="1"
+            value={courtCount}
+            onChange={(e) =>
+              setCourtCount(Number(e.target.value))
+            }
+            className={styles.courtInput}
+          />
+
+        </div>
+
+      </div>
+
+      {/* HEADER */}
+      <div
+        className={styles.header}
+        style={{
+          gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
+        }}
+      >
+
+        {Array.from({ length: courtCount }).map(
+          (_, index) => (
+            <div key={index}>
+              COURT {index + 1}
             </div>
           )
         )}
@@ -638,6 +628,9 @@ const handlePrint = () => {
           <div
             key={i}
             className={styles.row}
+            style={{
+              gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
+            }}
           >
 
             {row.map((cell, j) => (
