@@ -149,9 +149,7 @@ export default function OrderOfPlay() {
     "Round 3",
     "Round 4",
     "Round 5",
-    "Quarter Final",
-    "Semi Final",
-    "Final",
+    
   ];
 
   /* ================= LOAD EVENTS ================= */
