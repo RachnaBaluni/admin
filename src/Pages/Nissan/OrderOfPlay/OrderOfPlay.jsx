@@ -152,12 +152,8 @@ export default function OrderOfPlay() {
           }
         );
 
-        const matches =
-          res.data.data.filter(
-            (d) =>
-              d.Stage === "Round 1"
-          );
-
+        const matches = res.data.data;
+         
         const withCategory =
           matches.map((m) => ({
             ...m,
