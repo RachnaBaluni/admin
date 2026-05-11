@@ -206,6 +206,14 @@
     display: none !important;
   }
 
+  aside,
+  nav,
+  .sidebar,
+  .menu,
+  header {
+    display: none !important;
+  }
+
   body {
     background: white;
   }
