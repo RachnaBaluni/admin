@@ -131,14 +131,29 @@ export default function OrderOfPlay() {
   const roundsList = [
     "Round 1",
     "Round 2",
-    "Quarter Final",
-    "Semi Final",
-    "Final",
+    "Round 3",
+    "Round 4",
+    "Round 5",
+    
   ];
 
+  /* ================= LOAD EVENTS ================= */
   useEffect(() => {
+
     fetchEvents();
+
   }, []);
+
+  /* ================= AUTO LOAD ================= */
+  useEffect(() => {
+
+    if (events.length > 0) {
+
+      fetchData();
+
+    }
+
+  }, [events]);
 
   /* ================= FETCH EVENTS ================= */
   const fetchEvents = async () => {
@@ -241,9 +256,12 @@ export default function OrderOfPlay() {
     const roundOrder = {
       "Round 1": 1,
       "Round 2": 2,
-      "Quarter Final": 3,
-      "Semi Final": 4,
-      "Final": 5,
+      "Round 3": 3,
+      "Round 4": 4,
+      "Round 5": 5,
+      "Quarter Final": 6,
+      "Semi Final": 7,
+      "Final": 8,
     };
 
     matches.sort(
@@ -269,7 +287,9 @@ export default function OrderOfPlay() {
 
         row.push({
           match: match || null,
-          time: TIME_SLOTS[i] || `Followed By ${i - 1}`,
+          time:
+            TIME_SLOTS[i] ||
+            `Followed By ${i}`,
           court: j + 1,
         });
 
@@ -285,9 +305,8 @@ export default function OrderOfPlay() {
   /* ================= RESET ================= */
   const handleReset = () => {
 
-    setGrid([]);
-
     setShowFilters(true);
+
   };
 
   /* ================= PRINT ================= */
@@ -352,6 +371,28 @@ export default function OrderOfPlay() {
       return;
     }
 
+    /* VALIDATION */
+    const draggedPlayers =
+      getPlayers(dragged.match);
+
+    const targetPlayers =
+      getPlayers(target.match);
+
+    const samePlayer =
+      draggedPlayers.some((p) =>
+        targetPlayers.includes(p)
+      );
+
+    if (samePlayer) {
+
+      toast.error(
+        "❌ Same player conflict"
+      );
+
+      return;
+    }
+
+    /* SWAP */
     const temp = dragged.match;
 
     dragged.match = target.match;
