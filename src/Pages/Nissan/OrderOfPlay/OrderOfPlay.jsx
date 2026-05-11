@@ -13,10 +13,10 @@ import {
 /* ================= TIME ================= */
 const TIME_SLOTS = [
   "07:30",
-  "08:15",
+  "08:15"
+  
 ];
 
-/* ================= COURTS ================= */
 const COURTS = 4;
 
 /* ================= PLAYERS ================= */
@@ -27,15 +27,6 @@ const getPlayers = (m) => {
     m?.Team2?.partner1?._id,
     m?.Team2?.partner2?._id,
   ].filter(Boolean);
-};
-
-/* ================= ROUND ORDER ================= */
-const stageOrder = {
-  "Round 1": 1,
-  "Round 2": 2,
-  "Round 3": 3,
-  "Round 4": 4,
-  "Round 5": 5,
 };
 
 /* ================= DRAG CARD ================= */
@@ -85,11 +76,6 @@ function DraggableMatch({
       {/* CATEGORY */}
       <div className={styles.category}>
         {match.category}
-      </div>
-
-      {/* ROUND */}
-      <div className={styles.stage}>
-        {match.Stage}
       </div>
 
       {/* TEAM 1 */}
@@ -159,12 +145,10 @@ export default function OrderOfPlay() {
           }
         );
 
-        /* ================= ALL ROUNDS ================= */
-        const matches = res.data.data
-          .sort(
-            (a, b) =>
-              (stageOrder[a.Stage] || 999) -
-              (stageOrder[b.Stage] || 999)
+        const matches =
+          res.data.data.filter(
+            (d) =>
+              d.Stage === "Round 1"
           );
 
         const withCategory =
@@ -207,9 +191,7 @@ export default function OrderOfPlay() {
 
         row.push({
           match: match || null,
-          time:
-            TIME_SLOTS[i] ||
-            `Followed By ${i}`,
+          time: TIME_SLOTS[i] || `Followed By ${i - 1}`,
           court: j + 1,
         });
 
@@ -287,14 +269,16 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* TEMP SWAP */
+    /* ================= TEMP SWAP ================= */
+
     const temp = dragged.match;
 
     dragged.match = target.match;
 
     target.match = temp;
 
-    /* VALIDATION */
+    /* ================= VALIDATION ================= */
+
     const swappedMatches = [
       {
         match: dragged.match,
@@ -314,11 +298,6 @@ export default function OrderOfPlay() {
 
       const swappedPlayers =
         getPlayers(swapped.match);
-
-      /* SKIP BYE */
-      if (swappedPlayers.length === 0) {
-        continue;
-      }
 
       for (let i = 0; i < newGrid.length; i++) {
 
@@ -346,9 +325,9 @@ export default function OrderOfPlay() {
 
           if (!samePlayer) continue;
 
-          /* SAME TIME VALIDATION */
+          /* SAME TIME */
           if (
-            swapped.timeIndex === i &&
+            swapped.time === cell.time &&
             swapped.court !== cell.court
           ) {
 
@@ -359,7 +338,7 @@ export default function OrderOfPlay() {
             return;
           }
 
-          /* CONSECUTIVE MATCH VALIDATION */
+          /* CONSECUTIVE */
           const diff = Math.abs(
             swapped.timeIndex - i
           );
