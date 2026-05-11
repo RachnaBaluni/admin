@@ -161,10 +161,6 @@ export default function OrderOfPlay() {
 
         /* ================= ALL ROUNDS ================= */
         const matches = res.data.data
-          .filter(
-            (d) =>
-              d.Team1 || d.Team2
-          )
           .sort(
             (a, b) =>
               (stageOrder[a.Stage] || 999) -
@@ -213,7 +209,7 @@ export default function OrderOfPlay() {
           match: match || null,
           time:
             TIME_SLOTS[i] ||
-            `Followed By ${i - 1}`,
+            `Followed By ${i}`,
           court: j + 1,
         });
 
@@ -319,6 +315,11 @@ export default function OrderOfPlay() {
       const swappedPlayers =
         getPlayers(swapped.match);
 
+      /* SKIP BYE */
+      if (swappedPlayers.length === 0) {
+        continue;
+      }
+
       for (let i = 0; i < newGrid.length; i++) {
 
         for (let j = 0; j < newGrid[i].length; j++) {
@@ -345,9 +346,9 @@ export default function OrderOfPlay() {
 
           if (!samePlayer) continue;
 
-          /* SAME TIME */
+          /* SAME TIME VALIDATION */
           if (
-            swapped.time === cell.time &&
+            swapped.timeIndex === i &&
             swapped.court !== cell.court
           ) {
 
@@ -358,7 +359,7 @@ export default function OrderOfPlay() {
             return;
           }
 
-          /* CONSECUTIVE */
+          /* CONSECUTIVE MATCH VALIDATION */
           const diff = Math.abs(
             swapped.timeIndex - i
           );
