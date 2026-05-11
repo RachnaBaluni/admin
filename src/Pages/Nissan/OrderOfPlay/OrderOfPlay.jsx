@@ -53,11 +53,12 @@ function DraggableMatch({
 
   const name = (team) =>
     team
-      ? `${team.partner1?.name || ""}${
-          team.partner2
-            ? " & " + team.partner2?.name
-            : ""
-        }`
+      ? `${team.partner1?.name || ""}
+         ${
+           team.partner2
+             ? " & " + team.partner2?.name
+             : ""
+         }`
       : "BYE";
 
   return (
@@ -69,21 +70,35 @@ function DraggableMatch({
       className={styles.card}
     >
 
+      {/* TIME */}
       <div className={styles.fixedTime}>
         {time}
       </div>
 
+      {/* ROUND */}
+      <div className={styles.round}>
+        {match.Stage}
+      </div>
+
+      {/* CATEGORY */}
       <div className={styles.category}>
         {match.category}
       </div>
 
-      <div>{name(match.Team1)}</div>
+      {/* TEAM 1 */}
+      <div className={styles.team}>
+        {name(match.Team1)}
+      </div>
 
+      {/* VS */}
       <div className={styles.vs}>
         VS
       </div>
 
-      <div>{name(match.Team2)}</div>
+      {/* TEAM 2 */}
+      <div className={styles.team}>
+        {name(match.Team2)}
+      </div>
 
     </div>
   );
@@ -134,7 +149,9 @@ export default function OrderOfPlay() {
     "Round 3",
     "Round 4",
     "Round 5",
-    
+    "Quarter Final",
+    "Semi Final",
+    "Final",
   ];
 
   /* ================= LOAD EVENTS ================= */
@@ -144,7 +161,7 @@ export default function OrderOfPlay() {
 
   }, []);
 
-  /* ================= AUTO LOAD ================= */
+  /* ================= AUTO LOAD ROUND 1 ================= */
   useEffect(() => {
 
     if (events.length > 0) {
@@ -213,12 +230,12 @@ export default function OrderOfPlay() {
         const matches = res.data.data.filter(
           (d) => {
 
-            const roundMatch =
-              selectedRounds.length > 0
-                ? selectedRounds.includes(d.Stage)
-                : d.Stage==="Round 1";
+            /* DEFAULT ROUND 1 */
+            if (selectedRounds.length === 0) {
+              return d.Stage === "Round 1";
+            }
 
-            return roundMatch;
+            return selectedRounds.includes(d.Stage);
           }
         );
 
@@ -304,7 +321,9 @@ export default function OrderOfPlay() {
 
   /* ================= RESET ================= */
   const handleReset = () => {
+
     setGrid([]);
+
     setShowFilters(true);
 
   };
@@ -313,6 +332,7 @@ export default function OrderOfPlay() {
   const handlePrint = () => {
 
     window.print();
+
   };
 
   /* ================= DRAG END ================= */
@@ -371,7 +391,8 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* VALIDATION */
+    /* ================= VALIDATION ================= */
+
     const draggedPlayers =
       getPlayers(dragged.match);
 
@@ -392,7 +413,8 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* SWAP */
+    /* ================= SWAP ================= */
+
     const temp = dragged.match;
 
     dragged.match = target.match;
@@ -417,6 +439,7 @@ export default function OrderOfPlay() {
 
         <div className={styles.buttonGroup}>
 
+          {/* RESET */}
           <button
             className={styles.resetBtn}
             onClick={handleReset}
@@ -424,25 +447,36 @@ export default function OrderOfPlay() {
             Reset Order
           </button>
 
-           <button
-      className={styles.generateBtn}
-      onClick={fetchData}
-    >
-      Generate Again
-    </button>
+          {/* GENERATE AGAIN */}
+          {
+            !showFilters && (
+              <button
+                className={styles.generateBtn}
+                onClick={fetchData}
+              >
+                Generate Again
+              </button>
+            )
+          }
 
-          <button
-            className={styles.printBtn}
-            onClick={handlePrint}
-          >
-            Print PDF
-          </button>
+          {/* PRINT */}
+          {
+            !showFilters && (
+              <button
+                className={styles.printBtn}
+                onClick={handlePrint}
+              >
+                Print PDF
+              </button>
+            )
+          }
 
         </div>
 
       </div>
 
-      {/* FILTER FORM */}
+      {/* ================= FILTER FORM ================= */}
+
       {
         showFilters && (
 
@@ -563,69 +597,77 @@ export default function OrderOfPlay() {
         )
       }
 
-      {/* HEADER */}
-      <div
-        className={styles.header}
-        style={{
-          gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
-        }}
-      >
+      {/* ================= ONLY SHOW GRID WHEN FILTER CLOSED ================= */}
 
-        {Array.from({ length: courtCount }).map(
-          (_, index) => (
-            <div key={index}>
-              COURT {index + 1}
+      {
+        !showFilters && (
+          <>
+            {/* HEADER */}
+            <div
+              className={styles.header}
+              style={{
+                gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
+              }}
+            >
+
+              {Array.from({ length: courtCount }).map(
+                (_, index) => (
+                  <div key={index}>
+                    COURT {index + 1}
+                  </div>
+                )
+              )}
+
             </div>
-          )
-        )}
 
-      </div>
+            {/* GRID */}
+            <DndContext
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
 
-      {/* GRID */}
-      <DndContext
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
+              {grid.map((row, i) => (
 
-        {grid.map((row, i) => (
+                <div
+                  key={i}
+                  className={styles.row}
+                  style={{
+                    gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
+                  }}
+                >
 
-          <div
-            key={i}
-            className={styles.row}
-            style={{
-              gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
-            }}
-          >
+                  {row.map((cell, j) => (
 
-            {row.map((cell, j) => (
+                    <DroppableSlot
+                      key={j}
+                      id={`slot-${i}-${j}`}
+                    >
 
-              <DroppableSlot
-                key={j}
-                id={`slot-${i}-${j}`}
-              >
+                      {cell?.match && (
 
-                {cell?.match && (
+                        <DraggableMatch
+                          match={cell.match}
+                          time={
+                            cell.time.includes("Followed")
+                              ? "Followed By"
+                              : cell.time
+                          }
+                        />
 
-                  <DraggableMatch
-                    match={cell.match}
-                    time={
-                      cell.time.includes("Followed")
-                        ? "Followed By"
-                        : cell.time
-                    }
-                  />
+                      )}
 
-                )}
+                    </DroppableSlot>
 
-              </DroppableSlot>
+                  ))}
 
-            ))}
+                </div>
 
-          </div>
+              ))}
 
-        ))}
-
-      </DndContext>
+            </DndContext>
+          </>
+        )
+      }
 
     </div>
   );
