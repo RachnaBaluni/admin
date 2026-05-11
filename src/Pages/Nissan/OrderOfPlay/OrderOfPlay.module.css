@@ -1,5 +1,7 @@
 .container {
   padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* HEADER */
@@ -16,6 +18,8 @@
   text-align: center;
   font-weight: bold;
   border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 /* ROW */
@@ -40,19 +44,70 @@
   background: #fafafa;
   text-align: center;
   cursor: grab;
+  min-height: 80px;
+  box-sizing: border-box;
+  word-break: break-word;
 }
 
+/* TEXT */
 .time {
   font-weight: bold;
   color: blue;
+  font-size: 14px;
 }
 
 .category {
   color: green;
   font-size: 12px;
+  margin-top: 4px;
 }
 
 .vs {
   color: red;
   font-weight: bold;
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+/* ================= TABLET ================= */
+@media (max-width: 1024px) {
+  .header,
+  .row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 600px) {
+  .container {
+    padding: 10px;
+  }
+
+  .header,
+  .row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .header div {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .card {
+    padding: 12px;
+    min-height: auto;
+  }
+
+  .time {
+    font-size: 13px;
+  }
+
+  .category {
+    font-size: 11px;
+  }
+
+  .vs {
+    font-size: 13px;
+  }
 }
