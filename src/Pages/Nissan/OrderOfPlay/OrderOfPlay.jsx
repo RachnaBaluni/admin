@@ -385,7 +385,7 @@ export default function OrderOfPlay() {
   return (
     <div
       className={styles.container}
-      id="print-area"
+      
     >
 
       {/* TOP BAR */}
