@@ -13,10 +13,10 @@ import {
 /* ================= TIME ================= */
 const TIME_SLOTS = [
   "07:30",
-  "08:15"
-  
+  "08:15",
 ];
 
+/* ================= COURTS ================= */
 const COURTS = 4;
 
 /* ================= PLAYERS ================= */
@@ -34,7 +34,6 @@ function DraggableMatch({
   match,
   time,
 }) {
-
   const {
     attributes,
     listeners,
@@ -204,6 +203,16 @@ export default function OrderOfPlay() {
     setGrid(temp);
   };
 
+  /* ================= RESET ================= */
+  const handleReset = () => {
+
+    setGrid([]);
+
+    toast.success(
+      "✅ Order Of Play Reset Successfully"
+    );
+  };
+
   /* ================= DRAG END ================= */
   const handleDragEnd = (event) => {
 
@@ -370,7 +379,32 @@ export default function OrderOfPlay() {
   return (
     <div className={styles.container}>
 
-      <h1>ORDER OF PLAY</h1>
+      {/* TOP BAR */}
+      <div className={styles.topBar}>
+
+        <h1>ORDER OF PLAY</h1>
+
+        <div className={styles.buttonGroup}>
+
+          {/* RESET BUTTON */}
+          <button
+            className={styles.resetBtn}
+            onClick={handleReset}
+          >
+            Reset Order
+          </button>
+
+          {/* GENERATE AGAIN */}
+          <button
+            className={styles.generateBtn}
+            onClick={fetchData}
+          >
+            Generate Again
+          </button>
+
+        </div>
+
+      </div>
 
       {/* HEADER */}
       <div className={styles.header}>
