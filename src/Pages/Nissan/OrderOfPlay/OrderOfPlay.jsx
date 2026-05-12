@@ -149,7 +149,9 @@ export default function OrderOfPlay() {
     "Round 3",
     "Round 4",
     "Round 5",
-    
+    "Quarter Final",
+    "Semi Final",
+    "Final",
   ];
 
   /* ================= LOAD EVENTS ================= */
@@ -389,36 +391,95 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* ================= VALIDATION ================= */
-
-    const draggedPlayers =
-      getPlayers(dragged.match);
-
-    const targetPlayers =
-      getPlayers(target.match);
-
-    const samePlayer =
-      draggedPlayers.some((p) =>
-        targetPlayers.includes(p)
-      );
-
-    if (samePlayer) {
-
-      toast.error(
-        "❌ Same player in both matches. Cannot swap"
-      );
-
-      return;
-    }
-
-    /* ================= SWAP ================= */
-
-    const temp = dragged.match;
+    /* TEMP SWAP */
+    const tempMatch = dragged.match;
 
     dragged.match = target.match;
 
-    target.match = temp;
+    target.match = tempMatch;
 
+    /* ================= VALIDATION ================= */
+
+    const swappedMatches = [
+      {
+        match: dragged.match,
+        time: dragged.time,
+        court: dragged.court,
+        rowIndex: activePos.i,
+      },
+      {
+        match: target.match,
+        time: target.time,
+        court: target.court,
+        rowIndex: overPos.i,
+      },
+    ];
+
+    for (const swapped of swappedMatches) {
+
+      const swappedPlayers =
+        getPlayers(swapped.match);
+
+      for (let i = 0; i < newGrid.length; i++) {
+
+        for (let j = 0; j < newGrid[i].length; j++) {
+
+          const cell = newGrid[i][j];
+
+          if (!cell?.match) continue;
+
+          /* SKIP SAME CELL */
+          if (
+            i === swapped.rowIndex &&
+            j === swapped.court - 1
+          ) {
+            continue;
+          }
+
+          const cellPlayers =
+            getPlayers(cell.match);
+
+          const samePlayer =
+            swappedPlayers.some((p) =>
+              cellPlayers.includes(p)
+            );
+
+          if (!samePlayer) continue;
+
+          /* SAME TIME */
+          if (
+            swapped.time === cell.time &&
+            swapped.court !== cell.court
+          ) {
+
+            toast.error(
+              "❌ Same player cannot play on different courts at same time"
+            );
+
+            return;
+          }
+
+          /* CONSECUTIVE */
+          const diff = Math.abs(
+            swapped.rowIndex - i
+          );
+
+          if (
+            diff === 1 &&
+            swapped.court !== cell.court
+          ) {
+
+            toast.error(
+              "❌ Consecutive matches must be on same court"
+            );
+
+            return;
+          }
+        }
+      }
+    }
+
+    /* SUCCESS */
     setGrid(newGrid);
 
     toast.success(
@@ -473,8 +534,7 @@ export default function OrderOfPlay() {
 
       </div>
 
-      {/* ================= FILTER FORM ================= */}
-
+      {/* FILTER FORM */}
       {
         showFilters && (
 
@@ -595,8 +655,7 @@ export default function OrderOfPlay() {
         )
       }
 
-      {/* ================= ONLY SHOW GRID WHEN FILTER CLOSED ================= */}
-
+      {/* GRID */}
       {
         !showFilters && (
           <>
@@ -618,7 +677,7 @@ export default function OrderOfPlay() {
 
             </div>
 
-            {/* GRID */}
+            {/* MATCHES */}
             <DndContext
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
