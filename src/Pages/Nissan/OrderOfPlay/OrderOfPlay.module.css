@@ -165,66 +165,58 @@
 }
 
 /* ================= MOBILE ================= */
-@media (max-width: 768px) {
-
-  .container {
-    padding: 10px;
-  }
-
-  .topBar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .buttonGroup {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .resetBtn,
-  .generateBtn,
-  .printBtn {
-    width: 100%;
-  }
-
-  .filterBox {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .header,
-  .row {
-    grid-template-columns: 1fr !important;
-  }
-
-  .card {
-    min-height: auto;
-  }
-}
-
 /* ================= PRINT ================= */
 @media print {
+
+  body * {
+    visibility: hidden;
+  }
+
+  .container,
+  .container * {
+    visibility: visible;
+  }
+
+  .container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 10px;
+    background: white;
+  }
 
   .topBar,
   .filterBox {
     display: none !important;
   }
 
-  body {
-    background: white;
-  }
-
-  .container {
-    padding: 0;
-  }
-
-  .card {
-    border: 1px solid #999;
-    break-inside: avoid;
-    page-break-inside: avoid;
+  .header {
+    margin-bottom: 10px;
   }
 
   .header div {
     border: 1px solid #000;
+    background: #f3f4f6 !important;
+    color: black !important;
   }
+
+  .row {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .slot {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .card {
+    border: 1px solid #999;
+    background: white !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    min-height: auto;
+  }
+
 }
