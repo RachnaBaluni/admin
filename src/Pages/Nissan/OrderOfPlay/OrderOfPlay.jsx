@@ -149,9 +149,6 @@ export default function OrderOfPlay() {
     "Round 3",
     "Round 4",
     "Round 5",
-    "Quarter Final",
-    "Semi Final",
-    "Final",
   ];
 
   /* ================= LOAD EVENTS ================= */
@@ -230,7 +227,6 @@ export default function OrderOfPlay() {
         const matches = res.data.data.filter(
           (d) => {
 
-            /* DEFAULT ROUND 1 */
             if (selectedRounds.length === 0) {
               return d.Stage === "Round 1";
             }
@@ -254,6 +250,8 @@ export default function OrderOfPlay() {
       buildGrid(allMatches);
 
       setShowFilters(false);
+
+      toast.success("✅ Order Generated");
 
     } catch (err) {
 
@@ -331,6 +329,67 @@ export default function OrderOfPlay() {
 
   };
 
+  /* ================= CONSECUTIVE CHECK ================= */
+  const checkConsecutive = (
+    gridData,
+    movingMatch,
+    targetRow
+  ) => {
+
+    const movingPlayers =
+      getPlayers(movingMatch);
+
+    /* PREVIOUS ROW */
+    const prevRow =
+      gridData[targetRow - 1];
+
+    if (prevRow) {
+
+      for (const cell of prevRow) {
+
+        if (!cell?.match) continue;
+
+        const prevPlayers =
+          getPlayers(cell.match);
+
+        const clash =
+          movingPlayers.some((p) =>
+            prevPlayers.includes(p)
+          );
+
+        if (clash) {
+          return true;
+        }
+      }
+    }
+
+    /* NEXT ROW */
+    const nextRow =
+      gridData[targetRow + 1];
+
+    if (nextRow) {
+
+      for (const cell of nextRow) {
+
+        if (!cell?.match) continue;
+
+        const nextPlayers =
+          getPlayers(cell.match);
+
+        const clash =
+          movingPlayers.some((p) =>
+            nextPlayers.includes(p)
+          );
+
+        if (clash) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
   /* ================= DRAG END ================= */
   const handleDragEnd = (event) => {
 
@@ -341,9 +400,7 @@ export default function OrderOfPlay() {
     const activeId = active.id;
     const overId = over.id;
 
-    if (activeId === overId) {
-      return;
-    }
+    if (activeId === overId) return;
 
     let activePos = null;
     let overPos = null;
@@ -372,14 +429,6 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* SAME SLOT */
-    if (
-      activePos.i === overPos.i &&
-      activePos.j === overPos.j
-    ) {
-      return;
-    }
-
     const newGrid = JSON.parse(
       JSON.stringify(grid)
     );
@@ -397,95 +446,68 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* TEMP SWAP */
-    const tempMatch = dragged.match;
+    /* ================= SAME MATCH VALIDATION ================= */
 
-    dragged.match = target.match;
+    const draggedPlayers =
+      getPlayers(dragged.match);
 
-    target.match = tempMatch;
+    const targetPlayers =
+      getPlayers(target.match);
 
-    /* ================= VALIDATION ================= */
+    const samePlayer =
+      draggedPlayers.some((p) =>
+        targetPlayers.includes(p)
+      );
 
-    const swappedMatches = [
-      {
-        match: dragged.match,
-        time: dragged.time,
-        court: dragged.court,
-        rowIndex: activePos.i,
-      },
-      {
-        match: target.match,
-        time: target.time,
-        court: target.court,
-        rowIndex: overPos.i,
-      },
-    ];
+    if (samePlayer) {
 
-    for (const swapped of swappedMatches) {
+      toast.error(
+        "❌ Same player in both matches"
+      );
 
-      const swappedPlayers =
-        getPlayers(swapped.match);
-
-      for (let i = 0; i < newGrid.length; i++) {
-
-        for (let j = 0; j < newGrid[i].length; j++) {
-
-          const cell = newGrid[i][j];
-
-          if (!cell?.match) continue;
-
-          /* SKIP SAME CELL */
-          if (
-            i === swapped.rowIndex &&
-            j === swapped.court - 1
-          ) {
-            continue;
-          }
-
-          const cellPlayers =
-            getPlayers(cell.match);
-
-          const samePlayer =
-            swappedPlayers.some((p) =>
-              cellPlayers.includes(p)
-            );
-
-          if (!samePlayer) continue;
-
-          /* SAME TIME */
-          if (
-            swapped.time === cell.time &&
-            swapped.court !== cell.court
-          ) {
-
-            toast.error(
-              "❌ Same player cannot play on different courts at same time"
-            );
-
-            return;
-          }
-
-          /* CONSECUTIVE */
-          const diff = Math.abs(
-            swapped.rowIndex - i
-          );
-
-          if (
-            diff === 1 &&
-            swapped.court !== cell.court
-          ) {
-
-            toast.error(
-              "❌ Consecutive matches must be on same court"
-            );
-
-            return;
-          }
-        }
-      }
+      return;
     }
 
-    /* SUCCESS */
+    /* ================= TEMP SWAP ================= */
+
+    const tempMatch = dragged.match;
+
+    newGrid[activePos.i][activePos.j].match =
+      target.match;
+
+    newGrid[overPos.i][overPos.j].match =
+      tempMatch;
+
+    /* ================= CONSECUTIVE CHECK ================= */
+
+    const draggedConsecutive =
+      checkConsecutive(
+        newGrid,
+        newGrid[overPos.i][overPos.j].match,
+        overPos.i
+      );
+
+    const targetConsecutive =
+      checkConsecutive(
+        newGrid,
+        newGrid[activePos.i][activePos.j].match,
+        activePos.i
+      );
+
+    if (
+      draggedConsecutive ||
+      targetConsecutive
+    ) {
+
+      toast.error(
+        "❌ Consecutive match detected"
+      );
+
+      return;
+    }
+
+    /* ================= FINAL UPDATE ================= */
+
     setGrid(newGrid);
 
     toast.success(
@@ -504,7 +526,6 @@ export default function OrderOfPlay() {
 
         <div className={styles.buttonGroup}>
 
-          {/* RESET */}
           <button
             className={styles.resetBtn}
             onClick={handleReset}
@@ -512,7 +533,6 @@ export default function OrderOfPlay() {
             Reset Order
           </button>
 
-          {/* GENERATE AGAIN */}
           {
             !showFilters && (
               <button
@@ -524,7 +544,6 @@ export default function OrderOfPlay() {
             )
           }
 
-          {/* PRINT */}
           {
             !showFilters && (
               <button
@@ -683,7 +702,6 @@ export default function OrderOfPlay() {
 
             </div>
 
-            {/* MATCHES */}
             <DndContext
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
