@@ -161,7 +161,7 @@ export default function OrderOfPlay() {
 
   }, []);
 
-  /* ================= AUTO LOAD ROUND 1 ================= */
+  /* ================= AUTO LOAD ================= */
   useEffect(() => {
 
     if (events.length > 0) {
@@ -255,10 +255,6 @@ export default function OrderOfPlay() {
 
       setShowFilters(false);
 
-      toast.success(
-        "✅ Order Generated"
-      );
-
     } catch (err) {
 
       console.error(err);
@@ -345,7 +341,9 @@ export default function OrderOfPlay() {
     const activeId = active.id;
     const overId = over.id;
 
-    if (activeId === overId) return;
+    if (activeId === overId) {
+      return;
+    }
 
     let activePos = null;
     let overPos = null;
@@ -371,6 +369,14 @@ export default function OrderOfPlay() {
     });
 
     if (!activePos || !overPos) {
+      return;
+    }
+
+    /* SAME SLOT */
+    if (
+      activePos.i === overPos.i &&
+      activePos.j === overPos.j
+    ) {
       return;
     }
 
@@ -534,7 +540,7 @@ export default function OrderOfPlay() {
 
       </div>
 
-      {/* FILTER FORM */}
+      {/* FILTERS */}
       {
         showFilters && (
 
