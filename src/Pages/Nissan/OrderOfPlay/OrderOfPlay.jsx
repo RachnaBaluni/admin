@@ -22,6 +22,7 @@ const TIME_SLOTS = [
 
 /* ================= PLAYERS ================= */
 const getPlayers = (m) => {
+
   return [
     m?.Team1?.partner1?._id,
     m?.Team1?.partner2?._id,
@@ -54,50 +55,46 @@ function DraggableMatch({
   /* ================= TEAM NAME ================= */
   const name = (team, side) => {
 
-    /* ================= REAL PLAYERS ================= */
+    /* REAL PLAYERS */
     if (team?.partner1?.name) {
 
       return `${team.partner1?.name || ""}
-        ${
-          team.partner2
-            ? " & " + team.partner2?.name
-            : ""
-        }`;
+      ${
+        team.partner2
+          ? " & " + team.partner2?.name
+          : ""
+      }`;
     }
 
-    /* ================= TBD WINNERS ================= */
-
-    // GET ROUND NUMBER
+    /* ROUND NUMBER */
     const roundNumber =
       Number(match.Stage?.replace("Round ", ""));
 
-    // IF ROUND 1
+    /* ROUND 1 */
     if (!roundNumber || roundNumber === 1) {
       return "TBD";
     }
 
-    // PREVIOUS ROUND
+    /* PREVIOUS ROUND */
     const prevRound = roundNumber - 1;
 
-    // CURRENT MATCH NUMBER
+    /* MATCH NUMBER */
     const currentMatchNo =
       match.matchNo || 1;
 
-    // LEFT SIDE MATCH
     const leftMatch =
       (currentMatchNo * 2) - 1;
 
-    // RIGHT SIDE MATCH
     const rightMatch =
       currentMatchNo * 2;
 
-    // TEAM 1
+    /* TEAM 1 */
     if (side === 1) {
 
       return `R${prevRound} M${leftMatch} Winner`;
     }
 
-    // TEAM 2
+    /* TEAM 2 */
     return `R${prevRound} M${rightMatch} Winner`;
   };
 
@@ -174,22 +171,20 @@ export default function OrderOfPlay() {
   const [selectedCategories, setSelectedCategories] =
     useState([]);
 
-  const [selectedRounds, setSelectedRounds] =
-    useState([]);
+  /* ================= ROUND SELECTION ================= */
+  const [startRound, setStartRound] =
+    useState(1);
 
+  const [nextRound, setNextRound] =
+    useState(2);
+
+  /* ================= COURTS ================= */
   const [courtCount, setCourtCount] =
     useState(4);
 
+  /* ================= FILTER SCREEN ================= */
   const [showFilters, setShowFilters] =
-    useState(false);
-
-  const roundsList = [
-    "Round 1",
-    "Round 2",
-    "Round 3",
-    "Round 4",
-    "Round 5",
-  ];
+    useState(true);
 
   /* ================= LOAD EVENTS ================= */
   useEffect(() => {
@@ -197,17 +192,6 @@ export default function OrderOfPlay() {
     fetchEvents();
 
   }, []);
-
-  /* ================= AUTO LOAD ================= */
-  useEffect(() => {
-
-    if (events.length > 0) {
-
-      fetchData();
-
-    }
-
-  }, [events]);
 
   /* ================= FETCH EVENTS ================= */
   const fetchEvents = async () => {
@@ -264,19 +248,18 @@ export default function OrderOfPlay() {
 
         const ev = filteredEvents[index];
 
+        /* ONLY 2 CONSECUTIVE ROUNDS */
         const matches = res.data.data.filter(
           (d) => {
 
-            /* DEFAULT ROUND 1 */
-            if (selectedRounds.length === 0) {
-              return d.Stage === "Round 1";
-            }
-
-            return selectedRounds.includes(d.Stage);
+            return (
+              d.Stage === `Round ${startRound}` ||
+              d.Stage === `Round ${nextRound}`
+            );
           }
         );
 
-        /* ADD CATEGORY + MATCH NUMBER */
+        /* ADD CATEGORY + MATCH NO */
         const withCategory =
           matches.map((m, idx) => ({
             ...m,
@@ -311,6 +294,7 @@ export default function OrderOfPlay() {
       "Round 3": 3,
       "Round 4": 4,
       "Round 5": 5,
+      "Round 6": 6,
     };
 
     matches.sort(
@@ -408,14 +392,6 @@ export default function OrderOfPlay() {
       return;
     }
 
-    /* SAME SLOT */
-    if (
-      activePos.i === overPos.i &&
-      activePos.j === overPos.j
-    ) {
-      return;
-    }
-
     const newGrid = JSON.parse(
       JSON.stringify(grid)
     );
@@ -440,8 +416,7 @@ export default function OrderOfPlay() {
 
     target.match = tempMatch;
 
-    /* ================= VALIDATION ================= */
-
+    /* VALIDATION */
     const swappedMatches = [
       {
         match: dragged.match,
@@ -625,46 +600,94 @@ export default function OrderOfPlay() {
 
             </div>
 
-            {/* ROUNDS */}
-            <div>
+            {/* ROUND SELECTOR */}
+            <div className={styles.roundSelector}>
 
-              <h3>Select Rounds</h3>
+              <h3>Select Consecutive Rounds</h3>
 
-              {roundsList.map((round) => (
+              <div className={styles.roundButtons}>
 
-                <label
-                  key={round}
-                  className={styles.checkboxLabel}
+                <button
+                  type="button"
+                  className={
+                    startRound === 1
+                      ? styles.activeRoundBtn
+                      : styles.roundBtn
+                  }
+                  onClick={() => {
+
+                    setStartRound(1);
+                    setNextRound(2);
+                  }}
                 >
+                  Round 1 → Round 2
+                </button>
 
-                  <input
-                    type="checkbox"
-                    checked={selectedRounds.includes(round)}
-                    onChange={(e) => {
+                <button
+                  type="button"
+                  className={
+                    startRound === 2
+                      ? styles.activeRoundBtn
+                      : styles.roundBtn
+                  }
+                  onClick={() => {
 
-                      if (e.target.checked) {
+                    setStartRound(2);
+                    setNextRound(3);
+                  }}
+                >
+                  Round 2 → Round 3
+                </button>
 
-                        setSelectedRounds([
-                          ...selectedRounds,
-                          round,
-                        ]);
+                <button
+                  type="button"
+                  className={
+                    startRound === 3
+                      ? styles.activeRoundBtn
+                      : styles.roundBtn
+                  }
+                  onClick={() => {
 
-                      } else {
+                    setStartRound(3);
+                    setNextRound(4);
+                  }}
+                >
+                  Round 3 → Round 4
+                </button>
 
-                        setSelectedRounds(
-                          selectedRounds.filter(
-                            (r) => r !== round
-                          )
-                        );
-                      }
-                    }}
-                  />
+                <button
+                  type="button"
+                  className={
+                    startRound === 4
+                      ? styles.activeRoundBtn
+                      : styles.roundBtn
+                  }
+                  onClick={() => {
 
-                  {round}
+                    setStartRound(4);
+                    setNextRound(5);
+                  }}
+                >
+                  Round 4 → Round 5
+                </button>
 
-                </label>
+                <button
+                  type="button"
+                  className={
+                    startRound === 5
+                      ? styles.activeRoundBtn
+                      : styles.roundBtn
+                  }
+                  onClick={() => {
 
-              ))}
+                    setStartRound(5);
+                    setNextRound(6);
+                  }}
+                >
+                  Round 5 → Round 6
+                </button>
+
+              </div>
 
             </div>
 
