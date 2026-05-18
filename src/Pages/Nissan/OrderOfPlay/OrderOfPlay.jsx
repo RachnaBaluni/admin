@@ -54,7 +54,7 @@ function DraggableMatch({
   /* ================= TEAM NAME ================= */
   const name = (team, side) => {
 
-    // IF PLAYERS EXIST -> SHOW REAL NAMES
+    /* ================= REAL PLAYERS ================= */
     if (team?.partner1?.name) {
 
       return `${team.partner1?.name || ""}
@@ -65,23 +65,40 @@ function DraggableMatch({
         }`;
     }
 
-    // IF ROUND 2+ AND TEAM IS TBD
-    if (match.Stage !== "Round 1") {
+    /* ================= TBD WINNERS ================= */
 
-      const currentMatchNo =
-        match.matchNo || 1;
+    // GET ROUND NUMBER
+    const roundNumber =
+      Number(match.Stage?.replace("Round ", ""));
 
-      // LEFT SIDE
-      if (side === 1) {
-
-        return `R1 M${(currentMatchNo * 2) - 1} Winner`;
-      }
-
-      // RIGHT SIDE
-      return `R1 M${currentMatchNo * 2} Winner`;
+    // IF ROUND 1
+    if (!roundNumber || roundNumber === 1) {
+      return "TBD";
     }
 
-    return "TBD";
+    // PREVIOUS ROUND
+    const prevRound = roundNumber - 1;
+
+    // CURRENT MATCH NUMBER
+    const currentMatchNo =
+      match.matchNo || 1;
+
+    // LEFT SIDE MATCH
+    const leftMatch =
+      (currentMatchNo * 2) - 1;
+
+    // RIGHT SIDE MATCH
+    const rightMatch =
+      currentMatchNo * 2;
+
+    // TEAM 1
+    if (side === 1) {
+
+      return `R${prevRound} M${leftMatch} Winner`;
+    }
+
+    // TEAM 2
+    return `R${prevRound} M${rightMatch} Winner`;
   };
 
   return (
@@ -677,6 +694,77 @@ export default function OrderOfPlay() {
             </button>
 
           </div>
+        )
+      }
+
+      {/* GRID */}
+      {
+        !showFilters && (
+          <>
+            {/* HEADER */}
+            <div
+              className={styles.header}
+              style={{
+                gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
+              }}
+            >
+
+              {Array.from({ length: courtCount }).map(
+                (_, index) => (
+                  <div key={index}>
+                    COURT {index + 1}
+                  </div>
+                )
+              )}
+
+            </div>
+
+            {/* MATCHES */}
+            <DndContext
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+
+              {grid.map((row, i) => (
+
+                <div
+                  key={i}
+                  className={styles.row}
+                  style={{
+                    gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
+                  }}
+                >
+
+                  {row.map((cell, j) => (
+
+                    <DroppableSlot
+                      key={j}
+                      id={`slot-${i}-${j}`}
+                    >
+
+                      {cell?.match && (
+
+                        <DraggableMatch
+                          match={cell.match}
+                          time={
+                            cell.time.includes("Followed")
+                              ? "Followed By"
+                              : cell.time
+                          }
+                        />
+
+                      )}
+
+                    </DroppableSlot>
+
+                  ))}
+
+                </div>
+
+              ))}
+
+            </DndContext>
+          </>
         )
       }
 
