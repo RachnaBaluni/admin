@@ -89,23 +89,25 @@
 .roundSelector {
   display: flex;
   flex-direction: column;
+  min-width: 260px;
 }
 
 .roundButtons {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .roundBtn {
   border: 1px solid #ccc;
   background: white;
   padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   transition: 0.2s;
+  font-size: 14px;
 }
 
 .roundBtn:hover {
@@ -117,9 +119,31 @@
   background: #2563eb;
   color: white;
   padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 14px;
+}
+
+/* ================= SETTINGS BOX ================= */
+
+.settingsBox {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 220px;
+}
+
+.settingItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settingItem label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
 }
 
 /* ================= CHECKBOX ================= */
@@ -132,14 +156,19 @@
   font-size: 14px;
 }
 
-/* ================= COURT INPUT ================= */
+/* ================= INPUT ================= */
 
 .courtInput {
-  width: 120px;
+  width: 160px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  margin-top: 10px;
+  margin-top: 4px;
+  outline: none;
+}
+
+.courtInput:focus {
+  border-color: #2563eb;
 }
 
 /* ================= HEADER ================= */
@@ -263,6 +292,14 @@
 
   .roundBtn,
   .activeRoundBtn {
+    width: 100%;
+  }
+
+  .settingsBox {
+    width: 100%;
+  }
+
+  .courtInput {
     width: 100%;
   }
 }
