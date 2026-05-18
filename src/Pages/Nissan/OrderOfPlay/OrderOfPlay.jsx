@@ -416,90 +416,105 @@ export default function OrderOfPlay() {
 
   /* ================= BUILD GRID ================= */
 
-  const buildGrid = (
-    matches
-  ) => {
+  const buildGrid = (matches) => {
 
-    let temp = [];
+  let temp = [];
 
-    let matchIndex = 0;
+  const maxRows = Math.max(
+    ...Object.values(matchesPerCourt)
+  );
 
-    const maxRows =
-      Math.max(
-        ...Object.values(
-          matchesPerCourt
-        )
-      );
+  // empty grid create
+  for (let i = 0; i < maxRows; i++) {
 
-    for (
-      let i = 0;
-      i < maxRows;
-      i++
-    ) {
+    let row = [];
 
-      let row = [];
+    for (let j = 0; j < courtCount; j++) {
 
-      for (
-        let j = 0;
-        j < courtCount;
-        j++
-      ) {
-
-        const courtNo =
-          j + 1;
-
-        const allowedMatches =
-          matchesPerCourt[
-            courtNo
-          ] || 0;
-
-        if (
-          i < allowedMatches
-        ) {
-
-          const match =
-            matches[
-              matchIndex
-            ];
-
-          row.push({
-            match:
-              match || null,
-            time:
-              TIME_SLOTS[i]
-              ||
-              `Followed By ${i}`,
-            court:
-              courtNo,
-          });
-
-          if (match) {
-            matchIndex++;
-          }
-
-        } else {
-
-          row.push({
-            match: null,
-            time:
-              TIME_SLOTS[i]
-              ||
-              `Followed By ${i}`,
-            court:
-              courtNo,
-          });
-
-        }
-      }
-
-      temp.push(row);
+      row.push({
+        match: null,
+        time:
+          TIME_SLOTS[i] ||
+          `Followed By ${i}`,
+        court: j + 1,
+      });
 
     }
 
-    setGrid(temp);
+    temp.push(row);
 
-  };
+  }
 
+  // track players by time slot
+  const timeSlotPlayers = {};
+
+  matches.forEach((match) => {
+
+    const players = getPlayers(match);
+
+    let placed = false;
+
+    // loop rows (time slots)
+    for (let i = 0; i < maxRows; i++) {
+
+      const time =
+        TIME_SLOTS[i] ||
+        `Followed By ${i}`;
+
+      // create set if not exists
+      if (!timeSlotPlayers[time]) {
+        timeSlotPlayers[time] = new Set();
+      }
+
+      // check if player already exists at same time
+      const hasConflict = players.some((p) =>
+        timeSlotPlayers[time].has(p)
+      );
+
+      if (hasConflict) {
+        continue;
+      }
+
+      // find empty court in that row
+      for (let j = 0; j < courtCount; j++) {
+
+        const courtNo = j + 1;
+
+        const allowedMatches =
+          matchesPerCourt[courtNo] || 0;
+
+        if (i >= allowedMatches) {
+          continue;
+        }
+
+        if (!temp[i][j].match) {
+
+          temp[i][j].match = match;
+
+          // store players in this time slot
+          players.forEach((p) =>
+            timeSlotPlayers[time].add(p)
+          );
+
+          placed = true;
+
+          break;
+
+        }
+
+      }
+
+      if (placed) {
+        break;
+      }
+
+    }
+
+  });
+
+  setGrid(temp);
+
+};
   /* ================= RESET ================= */
 
   const handleReset =
