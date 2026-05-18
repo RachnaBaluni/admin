@@ -1200,6 +1200,11 @@ export default function OrderOfPlay() {
         )
       }
 
+     {
+  !hideGrid && (
+
+    <>
+
       {/* HEADER */}
 
       <div
@@ -1210,7 +1215,7 @@ export default function OrderOfPlay() {
           display: "grid",
           gridTemplateColumns:
             `repeat(${courtCount}, 1fr)`,
-            gap: "20px",
+          gap: "20px",
         }}
       >
 
@@ -1241,90 +1246,86 @@ export default function OrderOfPlay() {
 
       {/* MATCHES */}
 
-      {/* MATCHES */}
+      <DndContext
+        collisionDetection={
+          closestCenter
+        }
+        onDragEnd={
+          handleDragEnd
+        }
+      >
 
-{
-  !hideGrid && (
+        {
+          grid.map(
+            (
+              row,
+              i
+            ) => (
 
-    <DndContext
-      collisionDetection={
-        closestCenter
-      }
-      onDragEnd={
-        handleDragEnd
-      }
-    >
+              <div
+                key={i}
+                className={
+                  styles.row
+                }
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    `repeat(${courtCount}, 1fr)`,
+                  gap: "20px",
+                }}
+              >
 
-      {
-        grid.map(
-          (
-            row,
-            i
-          ) => (
+                {
+                  row.map(
+                    (
+                      cell,
+                      j
+                    ) => (
 
-            <div
-              key={i}
-              className={
-                styles.row
-              }
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  `repeat(${courtCount}, 1fr)`,
-                gap: "20px",
-              }}
-            >
+                      <DroppableSlot
+                        key={
+                          j
+                        }
+                        id={`slot-${i}-${j}`}
+                      >
 
-              {
-                row.map(
-                  (
-                    cell,
-                    j
-                  ) => (
+                        {
+                          cell?.match && (
 
-                    <DroppableSlot
-                      key={
-                        j
-                      }
-                      id={`slot-${i}-${j}`}
-                    >
+                            <DraggableMatch
+                              match={
+                                cell.match
+                              }
+                              time={
+                                cell.time.includes(
+                                  "Followed"
+                                )
+                                  ? "Followed By"
+                                  : cell.time
+                              }
+                            />
 
-                      {
-                        cell?.match && (
+                          )
+                        }
 
-                          <DraggableMatch
-                            match={
-                              cell.match
-                            }
-                            time={
-                              cell.time.includes(
-                                "Followed"
-                              )
-                                ? "Followed By"
-                                : cell.time
-                            }
-                          />
+                      </DroppableSlot>
 
-                        )
-                      }
-
-                    </DroppableSlot>
-
+                    )
                   )
-                )
-              }
+                }
 
-            </div>
+              </div>
 
+            )
           )
-        )
-      }
+        }
 
-    </DndContext>
+      </DndContext>
+
+    </>
 
   )
 }
-
 </div>
-);
+  );
 }
