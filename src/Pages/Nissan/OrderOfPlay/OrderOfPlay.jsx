@@ -233,6 +233,7 @@ export default function OrderOfPlay() {
     showFilters,
     setShowFilters,
   ] = useState(false);
+  const [hideGrid, setHideGrid] = useState(false);
 
   /* MATCHES PER COURT */
 
@@ -402,6 +403,7 @@ export default function OrderOfPlay() {
       buildGrid(allMatches);
 
       setShowFilters(false);
+      setHideGrid(false);
 
     } catch (err) {
 
@@ -523,6 +525,7 @@ export default function OrderOfPlay() {
       setShowFilters(
         !showFilters
       );
+           setHideGrid(true);
 
     };
 
@@ -1238,82 +1241,90 @@ export default function OrderOfPlay() {
 
       {/* MATCHES */}
 
-      <DndContext
-        collisionDetection={
-          closestCenter
-        }
-        onDragEnd={
-          handleDragEnd
-        }
-      >
+      {/* MATCHES */}
 
-        {
-          grid.map(
-            (
-              row,
-              i
-            ) => (
+{
+  !hideGrid && (
 
-              <div
-                key={i}
-                className={
-                  styles.row
-                }
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    `repeat(${courtCount}, 1fr)`,
-                    gap: "20px",
-                }}
-              >
+    <DndContext
+      collisionDetection={
+        closestCenter
+      }
+      onDragEnd={
+        handleDragEnd
+      }
+    >
 
-                {
-                  row.map(
-                    (
-                      cell,
-                      j
-                    ) => (
+      {
+        grid.map(
+          (
+            row,
+            i
+          ) => (
 
-                      <DroppableSlot
-                        key={
-                          j
-                        }
-                        id={`slot-${i}-${j}`}
-                      >
+            <div
+              key={i}
+              className={
+                styles.row
+              }
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  `repeat(${courtCount}, 1fr)`,
+                gap: "20px",
+              }}
+            >
 
-                        {
-                          cell?.match && (
+              {
+                row.map(
+                  (
+                    cell,
+                    j
+                  ) => (
 
-                            <DraggableMatch
-                              match={
-                                cell.match
-                              }
-                              time={
-                                cell.time.includes(
-                                  "Followed"
-                                )
-                                  ? "Followed By"
-                                  : cell.time
-                              }
-                            />
+                    <DroppableSlot
+                      key={
+                        j
+                      }
+                      id={`slot-${i}-${j}`}
+                    >
 
-                          )
-                        }
+                      {
+                        cell?.match && (
 
-                      </DroppableSlot>
+                          <DraggableMatch
+                            match={
+                              cell.match
+                            }
+                            time={
+                              cell.time.includes(
+                                "Followed"
+                              )
+                                ? "Followed By"
+                                : cell.time
+                            }
+                          />
 
-                    )
+                        )
+                      }
+
+                    </DroppableSlot>
+
                   )
-                }
+                )
+              }
 
-              </div>
+            </div>
 
-            )
           )
-        }
+        )
+      }
 
-      </DndContext>
+    </DndContext>
 
-    </div>
-  );
+  )
+}
+
+</div>
+);
 }
