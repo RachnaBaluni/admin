@@ -2,8 +2,7 @@
   padding: 20px;
   width: 100%;
   box-sizing: border-box;
-  background: #f5f7fb;
-  min-height: 100vh;
+  background: white;
 }
 
 /* ================= TOP BAR ================= */
@@ -19,10 +18,6 @@
 
 .topBar h1 {
   margin: 0;
-  font-size: 38px;
-  font-weight: 800;
-  color: #111827;
-  letter-spacing: 1px;
 }
 
 .buttonGroup {
@@ -38,18 +33,11 @@
 .printBtn {
   color: white;
   border: none;
-  padding: 11px 20px;
-  border-radius: 10px;
+  padding: 10px 18px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
   transition: 0.2s;
-  font-size: 14px;
-}
-
-.resetBtn:hover,
-.generateBtn:hover,
-.printBtn:hover {
-  transform: translateY(-1px);
 }
 
 /* RESET */
@@ -85,17 +73,15 @@
 /* ================= FILTER BOX ================= */
 
 .filterBox {
-  background: white;
-  border-radius: 18px;
-  padding: 24px;
-  margin-bottom: 24px;
+  background: #f8fafc;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
   display: flex;
-  gap: 50px;
+  gap: 40px;
   flex-wrap: wrap;
   align-items: flex-start;
-  box-shadow:
-    0 4px 12px rgba(0,0,0,0.05);
-  border: 1px solid #e5e7eb;
 }
 
 /* ================= ROUND SELECTOR ================= */
@@ -103,51 +89,40 @@
 .roundSelector {
   display: flex;
   flex-direction: column;
-  min-width: 320px;
-}
-
-.roundSelector h3 {
-  margin: 0;
-  font-size: 20px;
-  color: #111827;
+  min-width: 260px;
 }
 
 .roundButtons {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .roundBtn {
-  border: 2px solid #d1d5db;
+  border: 1px solid #ccc;
   background: white;
-  padding: 12px 18px;
-  border-radius: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
   transition: 0.2s;
   font-size: 14px;
-  min-width: 110px;
 }
 
 .roundBtn:hover {
-  background: #eff6ff;
-  border-color: #2563eb;
+  background: #f3f4f6;
 }
 
 .activeRoundBtn {
-  border: 2px solid #2563eb;
+  border: 1px solid #2563eb;
   background: #2563eb;
   color: white;
-  padding: 12px 18px;
-  border-radius: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 14px;
-  min-width: 110px;
-  box-shadow:
-    0 4px 10px rgba(37,99,235,0.25);
 }
 
 /* ================= SETTINGS BOX ================= */
@@ -155,25 +130,19 @@
 .settingsBox {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  min-width: 260px;
-}
-
-.settingsBox h3 {
-  margin: 0;
-  font-size: 20px;
-  color: #111827;
+  gap: 14px;
+  min-width: 220px;
 }
 
 .settingItem {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .settingItem label {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: #111827;
 }
 
@@ -190,160 +159,121 @@
 /* ================= INPUT ================= */
 
 .courtInput {
-  width: 180px;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
+  width: 160px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 4px;
   outline: none;
-  font-size: 14px;
-  transition: 0.2s;
-  background: white;
 }
 
 .courtInput:focus {
   border-color: #2563eb;
-  box-shadow:
-    0 0 0 4px rgba(37,99,235,0.12);
 }
 
 /* ================= HEADER ================= */
 
 .header {
   display: grid;
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .header div {
-  background: linear-gradient(
-    135deg,
-    #dcfce7,
-    #bbf7d0
-  );
-  padding: 16px;
+  background: #e6ffe6;
+  padding: 12px;
   text-align: center;
-  font-weight: 800;
-  border-radius: 14px;
-  font-size: 16px;
-  color: #14532d;
-  border: 1px solid #86efac;
-  box-shadow:
-    0 3px 8px rgba(0,0,0,0.04);
+  font-weight: bold;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 /* ================= ROW ================= */
 
 .row {
   display: grid;
-  gap: 16px;
-  margin-bottom: 18px;
-  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: start;
 }
 
 /* ================= SLOT ================= */
 
 .slot {
   width: 100%;
-  min-height: 220px;
 }
 
 /* ================= CARD ================= */
 
 .card {
-  border-radius: 18px;
-  background: white;
+  border: 1px dashed #bbb;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fafafa;
   text-align: center;
   cursor: grab;
-  min-height: 220px;
+  min-height: 80px;
   box-sizing: border-box;
   word-break: break-word;
   transition: 0.2s;
-  padding: 18px 16px;
-  border: 2px solid #e5e7eb;
-  box-shadow:
-    0 6px 16px rgba(0,0,0,0.05);
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 10px 20px rgba(0,0,0,0.08);
+  background: #f3f4f6;
 }
 
 /* ================= TIME ================= */
 
 .fixedTime {
-  font-weight: 800;
+  font-weight: bold;
   color: #2563eb;
-  font-size: 22px;
-  margin-bottom: 14px;
+  font-size: 14px;
+  margin-bottom: 6px;
 }
 
 /* ================= ROUND ================= */
 
 .round {
-  font-size: 16px;
-  font-weight: 800;
-  margin-bottom: 10px;
-  color: #111827;
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 6px;
 }
 
 /* ================= CATEGORY ================= */
 
 .category {
-  color: #16a34a;
-  font-size: 14px;
-  margin-bottom: 14px;
-  font-weight: 700;
+  color: green;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 6px;
+  font-weight: 600;
 }
 
 /* ================= TEAM ================= */
 
 .team {
-  font-size: 17px;
-  line-height: 1.7;
-  font-weight: 600;
-  color: #111827;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* ================= VS ================= */
 
 .vs {
-  color: #dc2626;
-  font-weight: 900;
-  margin-top: 12px;
-  margin-bottom: 12px;
-  font-size: 20px;
-}
-
-/* ================= EMPTY SLOT ================= */
-
-.emptySlot {
-  min-height: 220px;
-  border-radius: 18px;
-  border: 2px dashed #d1d5db;
-  background: #f9fafb;
+  color: red;
+  font-weight: bold;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
 }
 
 /* ================= MOBILE ================= */
 
 @media (max-width: 768px) {
 
-  .container {
-    padding: 14px;
-  }
-
   .topBar {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .topBar h1 {
-    font-size: 28px;
   }
 
   .buttonGroup {
@@ -371,15 +301,6 @@
 
   .courtInput {
     width: 100%;
-  }
-
-  .slot {
-    min-height: auto;
-  }
-
-  .card {
-    min-height: auto;
-    padding: 16px;
   }
 }
 
@@ -436,6 +357,5 @@
     break-inside: avoid;
     page-break-inside: avoid;
     min-height: auto;
-    box-shadow: none;
   }
 }
