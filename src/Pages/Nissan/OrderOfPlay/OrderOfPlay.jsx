@@ -1189,8 +1189,10 @@ export default function OrderOfPlay() {
           styles.header
         }
         style={{
+          display: "grid",
           gridTemplateColumns:
             `repeat(${courtCount}, 1fr)`,
+            gap: "20px",
         }}
       >
 
@@ -1243,8 +1245,10 @@ export default function OrderOfPlay() {
                   styles.row
                 }
                 style={{
+                  display: "grid",
                   gridTemplateColumns:
                     `repeat(${courtCount}, 1fr)`,
+                    gap: "20px",
                 }}
               >
 
