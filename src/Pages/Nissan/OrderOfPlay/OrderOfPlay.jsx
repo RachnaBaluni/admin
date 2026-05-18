@@ -1062,138 +1062,142 @@ export default function OrderOfPlay() {
             </div>
 
             {/* SETTINGS */}
+{/* SETTINGS */}
 
-            <div
-              className={
-                styles.settingsBox
-              }
+{/* SETTINGS */}
+
+<div className={styles.settingsBox}>
+
+  <h3
+    style={{
+      fontWeight: "bold",
+      marginBottom: "20px",
+    }}
+  >
+    Court Settings
+  </h3>
+
+  {/* NUMBER OF COURTS */}
+
+  <div
+    style={{
+      marginBottom: "25px",
+    }}
+  >
+
+    <label
+      style={{
+        fontWeight: "bold",
+        display: "block",
+        marginBottom: "10px",
+      }}
+    >
+      Number Of Courts
+    </label>
+
+    <input
+      type="number"
+      min="1"
+      value={courtCount}
+      onChange={(e) =>
+        setCourtCount(
+          Number(e.target.value)
+        )
+      }
+      className={styles.courtInput}
+      style={{
+        width: "120px",
+      }}
+    />
+
+  </div>
+
+  {/* MATCHES PER COURT */}
+
+  <div>
+
+    <label
+      style={{
+        fontWeight: "bold",
+        display: "block",
+        marginBottom: "15px",
+      }}
+    >
+      Max No. Of Matches Per Court
+    </label>
+
+    {/* COURTS IN SINGLE ROW */}
+
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "25px",
+        flexWrap: "wrap",
+      }}
+    >
+
+      {
+        Array.from({
+          length: courtCount,
+        }).map((_, index) => (
+
+          <div
+            key={index}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+
+            <span
+              style={{
+                fontWeight: "600",
+              }}
             >
+              Court {index + 1}
+            </span>
 
-              <div
-                className={
-                  styles.settingItem
-                }
-              >
+            <input
+              type="number"
+              min="1"
+              value={
+                matchesPerCourt[index + 1] || 1
+              }
+              onChange={(e) =>
+                setMatchesPerCourt({
+                  ...matchesPerCourt,
+                  [index + 1]:
+                    Number(e.target.value),
+                })
+              }
+              className={styles.courtInput}
+              style={{
+                width: "80px",
+              }}
+            />
 
-                <label>
-                  Number Of Courts
-                </label>
+          </div>
 
-                <input
-                  type="number"
-                  min="1"
-                  value={
-                    courtCount
-                  }
-                  onChange={(
-                    e
-                  ) =>
-                    setCourtCount(
-                      Number(
-                        e.target
-                          .value
-                      )
-                    )
-                  }
-                  className={
-                    styles.courtInput
-                  }
-                />
+        ))
+      }
 
-              </div>
+    </div>
 
-              <div
-                className={
-                  styles.settingItem
-                }
-              >
+  </div>
 
-                <label>
-                  Matches Per Court
-                </label>
+  <button
+    className={styles.generateBtn}
+    onClick={fetchData}
+    style={{
+      marginTop: "25px",
+    }}
+  >
+    Apply Changes
+  </button>
 
-                {
-                  Array.from({
-                    length:
-                      courtCount,
-                  }).map(
-                    (
-                      _,
-                      index
-                    ) => (
-
-                      <div
-                        key={
-                          index
-                        }
-                        style={{
-                          marginBottom:
-                            "10px",
-                        }}
-                      >
-
-                        <label>
-                          Court{" "}
-                          {
-                            index + 1
-                          }
-                        </label>
-
-                        <input
-                          type="number"
-                          min="1"
-                          value={
-                            matchesPerCourt[
-                              index +
-                                1
-                            ] ||
-                            1
-                          }
-                          onChange={(
-                            e
-                          ) =>
-
-                            setMatchesPerCourt(
-                              {
-                                ...matchesPerCourt,
-                                [
-                                  index +
-                                    1
-                                ]:
-                                  Number(
-                                    e
-                                      .target
-                                      .value
-                                  ),
-                              }
-                            )
-
-                          }
-                          className={
-                            styles.courtInput
-                          }
-                        />
-
-                      </div>
-
-                    )
-                  )
-                }
-
-              </div>
-
-              <button
-                className={
-                  styles.generateBtn
-                }
-                onClick={
-                  fetchData
-                }
-              >
-                Apply Changes
-              </button>
-
-            </div>
+</div>
 
           </div>
 
