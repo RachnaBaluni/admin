@@ -29,12 +29,14 @@ const TIME_SLOTS = [
 /* ================= PLAYERS ================= */
 
 const getPlayers = (m) => {
+
   return [
     m?.Team1?.partner1?._id,
     m?.Team1?.partner2?._id,
     m?.Team2?.partner1?._id,
     m?.Team2?.partner2?._id,
   ].filter(Boolean);
+
 };
 
 /* ================= DRAG CARD ================= */
@@ -59,10 +61,14 @@ function DraggableMatch({
       }
     : undefined;
 
+  /* ================= TEAM NAME ================= */
+
   const getTeamName = (
     team,
     side
   ) => {
+
+    /* REAL PLAYERS */
 
     if (team?.partner1?.name) {
 
@@ -72,7 +78,10 @@ function DraggableMatch({
             ? " & " + team.partner2?.name
             : ""
         }`;
+
     }
+
+    /* TBD WINNERS */
 
     const roundNumber =
       Number(
@@ -106,6 +115,7 @@ function DraggableMatch({
     }
 
     return `R${prevRound} M${rightMatch} Winner`;
+
   };
 
   return (
@@ -117,34 +127,50 @@ function DraggableMatch({
       className={styles.card}
     >
 
+      {/* TIME */}
+
       <div className={styles.fixedTime}>
         {time}
       </div>
+
+      {/* ROUND */}
 
       <div className={styles.round}>
         {match.Stage}
       </div>
 
+      {/* CATEGORY */}
+
       <div className={styles.category}>
         {match.category}
       </div>
 
+      {/* TEAM 1 */}
+
       <div className={styles.team}>
-        {getTeamName(
-          match.Team1,
-          1
-        )}
+        {
+          getTeamName(
+            match.Team1,
+            1
+          )
+        }
       </div>
+
+      {/* VS */}
 
       <div className={styles.vs}>
         VS
       </div>
 
+      {/* TEAM 2 */}
+
       <div className={styles.team}>
-        {getTeamName(
-          match.Team2,
-          2
-        )}
+        {
+          getTeamName(
+            match.Team2,
+            2
+          )
+        }
       </div>
 
     </div>
@@ -188,7 +214,7 @@ export default function OrderOfPlay() {
     setSelectedCategories,
   ] = useState([]);
 
-  /* DEFAULT */
+  /* DEFAULT ROUND 1 + 2 */
 
   const [
     selectedRounds,
@@ -207,6 +233,8 @@ export default function OrderOfPlay() {
     showFilters,
     setShowFilters,
   ] = useState(false);
+
+  /* MATCHES PER COURT */
 
   const [
     matchesPerCourt,
@@ -230,7 +258,9 @@ export default function OrderOfPlay() {
   /* ================= LOAD EVENTS ================= */
 
   useEffect(() => {
+
     fetchEvents();
+
   }, []);
 
   /* ================= AUTO LOAD ================= */
@@ -238,7 +268,9 @@ export default function OrderOfPlay() {
   useEffect(() => {
 
     if (events.length > 0) {
+
       fetchData();
+
     }
 
   }, [events]);
@@ -268,6 +300,7 @@ export default function OrderOfPlay() {
       toast.error(
         "Error loading events"
       );
+
     }
   };
 
@@ -330,6 +363,7 @@ export default function OrderOfPlay() {
           allMatches.push(
             ...matchesWithData
           );
+
         }
       );
 
@@ -361,16 +395,13 @@ export default function OrderOfPlay() {
             -
             (b.matchNo || 0)
           );
+
         }
       );
 
       buildGrid(allMatches);
 
       setShowFilters(false);
-
-      toast.success(
-        "Order Generated"
-      );
 
     } catch (err) {
 
@@ -379,6 +410,7 @@ export default function OrderOfPlay() {
       toast.error(
         "Error loading matches"
       );
+
     }
   };
 
@@ -456,18 +488,21 @@ export default function OrderOfPlay() {
             court:
               courtNo,
           });
+
         }
       }
 
       temp.push(row);
+
     }
 
     setGrid(temp);
+
   };
 
-  /* ================= SETTINGS ================= */
+  /* ================= RESET ================= */
 
-  const handleSettings =
+  const handleReset =
     () => {
 
       setShowFilters(
@@ -519,7 +554,10 @@ export default function OrderOfPlay() {
         }
 
         updated.push(round);
+
       }
+
+      /* ONLY CONSECUTIVE */
 
       const nums =
         updated
@@ -551,6 +589,7 @@ export default function OrderOfPlay() {
       setSelectedRounds(
         updated
       );
+
     };
 
   /* ================= DRAG END ================= */
@@ -571,6 +610,12 @@ export default function OrderOfPlay() {
       const overId =
         over.id;
 
+      if (
+        activeId === overId
+      ) {
+        return;
+      }
+
       let activePos =
         null;
 
@@ -587,7 +632,8 @@ export default function OrderOfPlay() {
             ) => {
 
               if (
-                cell?.match?._id ===
+                cell?.match
+                  ?._id ===
                 activeId
               ) {
 
@@ -595,6 +641,7 @@ export default function OrderOfPlay() {
                   i,
                   j,
                 };
+
               }
 
               if (
@@ -606,9 +653,12 @@ export default function OrderOfPlay() {
                   i,
                   j,
                 };
+
               }
+
             }
           );
+
         }
       );
 
@@ -643,6 +693,8 @@ export default function OrderOfPlay() {
         return;
       }
 
+      /* SWAP */
+
       const tempMatch =
         dragged.match;
 
@@ -652,11 +704,138 @@ export default function OrderOfPlay() {
       target.match =
         tempMatch;
 
+      /* VALIDATION */
+
+      const swappedMatches =
+        [
+          {
+            match:
+              dragged.match,
+            time:
+              dragged.time,
+            court:
+              dragged.court,
+            rowIndex:
+              activePos.i,
+          },
+          {
+            match:
+              target.match,
+            time:
+              target.time,
+            court:
+              target.court,
+            rowIndex:
+              overPos.i,
+          },
+        ];
+
+      for (const swapped of swappedMatches) {
+
+        const swappedPlayers =
+          getPlayers(
+            swapped.match
+          );
+
+        for (
+          let i = 0;
+          i <
+          newGrid.length;
+          i++
+        ) {
+
+          for (
+            let j = 0;
+            j <
+            newGrid[i]
+              .length;
+            j++
+          ) {
+
+            const cell =
+              newGrid[i][j];
+
+            if (
+              !cell?.match
+            ) {
+              continue;
+            }
+
+            if (
+              i ===
+                swapped.rowIndex &&
+              j ===
+                swapped.court - 1
+            ) {
+              continue;
+            }
+
+            const cellPlayers =
+              getPlayers(
+                cell.match
+              );
+
+            const samePlayer =
+              swappedPlayers.some(
+                (p) =>
+                  cellPlayers.includes(
+                    p
+                  )
+              );
+
+            if (
+              !samePlayer
+            ) {
+              continue;
+            }
+
+            /* SAME TIME */
+
+            if (
+              swapped.time ===
+                cell.time &&
+              swapped.court !==
+                cell.court
+            ) {
+
+              toast.error(
+                "❌ Same player cannot play on different courts at same time"
+              );
+
+              return;
+            }
+
+            /* CONSECUTIVE */
+
+            const diff =
+              Math.abs(
+                swapped.rowIndex -
+                  i
+              );
+
+            if (
+              diff === 1 &&
+              swapped.court !==
+                cell.court
+            ) {
+
+              toast.error(
+                "❌ Consecutive matches must be on same court"
+              );
+
+              return;
+            }
+
+          }
+        }
+      }
+
       setGrid(newGrid);
 
       toast.success(
-        "Match swapped"
+        "✅ Match swapped"
       );
+
     };
 
   /* ================= UI ================= */
@@ -691,7 +870,7 @@ export default function OrderOfPlay() {
               styles.resetBtn
             }
             onClick={
-              handleSettings
+              handleReset
             }
           >
             Settings
@@ -723,371 +902,398 @@ export default function OrderOfPlay() {
 
       </div>
 
-      {/* SETTINGS */}
+      {/* FILTERS */}
 
-      {showFilters && (
-
-        <div
-          className={
-            styles.filterBox
-          }
-        >
-
-          {/* CATEGORY */}
-
-          <div>
-
-            <h3>
-              Categories
-            </h3>
-
-            {events.map(
-              (
-                ev
-              ) => (
-
-                <label
-                  key={
-                    ev._id
-                  }
-                  className={
-                    styles.checkboxLabel
-                  }
-                >
-
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedCategories.includes(
-                        ev.name
-                      )
-                    }
-                    onChange={(
-                      e
-                    ) => {
-
-                      if (
-                        e.target.checked
-                      ) {
-
-                        setSelectedCategories([
-                          ...selectedCategories,
-                          ev.name,
-                        ]);
-
-                      } else {
-
-                        setSelectedCategories(
-                          selectedCategories.filter(
-                            (
-                              c
-                            ) =>
-                              c !==
-                              ev.name
-                          )
-                        );
-                      }
-                    }}
-                  />
-
-                  {ev.name}
-
-                </label>
-
-              )
-            )}
-
-          </div>
-
-          {/* ROUNDS */}
+      {
+        showFilters && (
 
           <div
             className={
-              styles.roundSelector
+              styles.filterBox
             }
           >
 
-            <h3>
-              Select Any 2 Consecutive Rounds
-            </h3>
+            {/* CATEGORY */}
 
-            <div
-              className={
-                styles.roundButtons
-              }
-            >
+            <div>
 
-              {roundsList.map(
-                (
-                  round
-                ) => (
+              <h3>
+                Categories
+              </h3>
 
-                  <button
-                    key={
-                      round
-                    }
-                    onClick={() =>
-                      handleRoundSelect(
-                        round
-                      )
-                    }
-                    className={
-                      selectedRounds.includes(
-                        round
-                      )
-                        ? styles.activeRoundBtn
-                        : styles.roundBtn
-                    }
-                  >
+              {
+                events.map(
+                  (
+                    ev
+                  ) => (
 
-                    {round}
+                    <label
+                      key={
+                        ev._id
+                      }
+                      className={
+                        styles.checkboxLabel
+                      }
+                    >
 
-                  </button>
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedCategories.includes(
+                            ev.name
+                          )
+                        }
+                        onChange={(
+                          e
+                        ) => {
 
+                          if (
+                            e
+                              .target
+                              .checked
+                          ) {
+
+                            setSelectedCategories(
+                              [
+                                ...selectedCategories,
+                                ev.name,
+                              ]
+                            );
+
+                          } else {
+
+                            setSelectedCategories(
+                              selectedCategories.filter(
+                                (
+                                  c
+                                ) =>
+                                  c !==
+                                  ev.name
+                              )
+                            );
+
+                          }
+
+                        }}
+                      />
+
+                      {
+                        ev.name
+                      }
+
+                    </label>
+
+                  )
                 )
-              )}
+              }
 
             </div>
 
-          </div>
-
-          {/* SETTINGS */}
-
-          <div
-            className={
-              styles.settingsBox
-            }
-          >
+            {/* ROUNDS */}
 
             <div
               className={
-                styles.settingItem
+                styles.roundSelector
               }
             >
 
-              <label>
-                Number Of Courts
-              </label>
+              <h3>
+                Select Any 2 Consecutive Rounds
+              </h3>
 
-              <input
-                type="number"
-                min="1"
-                value={
-                  courtCount
+              <div
+                className={
+                  styles.roundButtons
                 }
-                onChange={(
-                  e
-                ) =>
-                  setCourtCount(
-                    Number(
-                      e.target
-                        .value
+              >
+
+                {
+                  roundsList.map(
+                    (
+                      round
+                    ) => (
+
+                      <button
+                        key={
+                          round
+                        }
+                        onClick={() =>
+                          handleRoundSelect(
+                            round
+                          )
+                        }
+                        className={
+                          selectedRounds.includes(
+                            round
+                          )
+                            ? styles.activeRoundBtn
+                            : styles.roundBtn
+                        }
+                      >
+
+                        {round}
+
+                      </button>
+
                     )
                   )
                 }
-                className={
-                  styles.courtInput
-                }
-              />
+
+              </div>
 
             </div>
+
+            {/* SETTINGS */}
 
             <div
               className={
-                styles.settingItem
+                styles.settingsBox
               }
             >
 
-              <label>
-                Matches Per Court
-              </label>
+              <div
+                className={
+                  styles.settingItem
+                }
+              >
 
-              {Array.from({
-                length:
-                  courtCount,
-              }).map(
-                (
-                  _,
-                  index
-                ) => (
+                <label>
+                  Number Of Courts
+                </label>
 
-                  <div
-                    key={
+                <input
+                  type="number"
+                  min="1"
+                  value={
+                    courtCount
+                  }
+                  onChange={(
+                    e
+                  ) =>
+                    setCourtCount(
+                      Number(
+                        e.target
+                          .value
+                      )
+                    )
+                  }
+                  className={
+                    styles.courtInput
+                  }
+                />
+
+              </div>
+
+              <div
+                className={
+                  styles.settingItem
+                }
+              >
+
+                <label>
+                  Matches Per Court
+                </label>
+
+                {
+                  Array.from({
+                    length:
+                      courtCount,
+                  }).map(
+                    (
+                      _,
                       index
-                    }
-                    className={
-                      styles.matchCourtRow
-                    }
-                  >
+                    ) => (
 
-                    <span>
-                      Court {index + 1}
-                    </span>
+                      <div
+                        key={
+                          index
+                        }
+                        style={{
+                          marginBottom:
+                            "10px",
+                        }}
+                      >
 
-                    <input
-                      type="number"
-                      min="1"
-                      value={
-                        matchesPerCourt[
-                          index + 1
-                        ] || 1
-                      }
-                      onChange={(
-                        e
-                      ) =>
-
-                        setMatchesPerCourt(
+                        <label>
+                          Court{" "}
                           {
-                            ...matchesPerCourt,
-                            [
-                              index + 1
-                            ]:
-                              Number(
-                                e.target
-                                  .value
-                              ),
+                            index + 1
                           }
-                        )
+                        </label>
 
-                      }
-                      className={
-                        styles.smallInput
-                      }
-                    />
+                        <input
+                          type="number"
+                          min="1"
+                          value={
+                            matchesPerCourt[
+                              index +
+                                1
+                            ] ||
+                            1
+                          }
+                          onChange={(
+                            e
+                          ) =>
 
-                  </div>
+                            setMatchesPerCourt(
+                              {
+                                ...matchesPerCourt,
+                                [
+                                  index +
+                                    1
+                                ]:
+                                  Number(
+                                    e
+                                      .target
+                                      .value
+                                  ),
+                              }
+                            )
 
-                )
-              )}
+                          }
+                          className={
+                            styles.courtInput
+                          }
+                        />
+
+                      </div>
+
+                    )
+                  )
+                }
+
+              </div>
+
+              <button
+                className={
+                  styles.generateBtn
+                }
+                onClick={
+                  fetchData
+                }
+              >
+                Apply Changes
+              </button>
 
             </div>
 
-            <button
-              className={
-                styles.generateBtn
-              }
-              onClick={
-                fetchData
-              }
-            >
-              Apply Changes
-            </button>
-
           </div>
 
-        </div>
+        )
+      }
 
-      )}
+      {/* HEADER */}
 
-      {/* HIDE TABLE WHEN SETTINGS OPEN */}
+      <div
+        className={
+          styles.header
+        }
+        style={{
+          gridTemplateColumns:
+            `repeat(${courtCount}, 1fr)`,
+        }}
+      >
 
-      {!showFilters && (
-        <>
+        {
+          Array.from({
+            length:
+              courtCount,
+          }).map(
+            (
+              _,
+              index
+            ) => (
 
-          {/* HEADER */}
+              <div
+                key={
+                  index
+                }
+              >
+                COURT{" "}
+                {index + 1}
+              </div>
 
-          <div
-            className={
-              styles.header
-            }
-            style={{
-              gridTemplateColumns:
-                `repeat(${courtCount}, 1fr)`,
-            }}
-          >
+            )
+          )
+        }
 
-            {Array.from({
-              length:
-                courtCount,
-            }).map(
-              (
-                _,
-                index
-              ) => (
+      </div>
 
-                <div
-                  key={
-                    index
-                  }
-                >
-                  COURT {index + 1}
-                </div>
+      {/* MATCHES */}
 
-              )
-            )}
+      <DndContext
+        collisionDetection={
+          closestCenter
+        }
+        onDragEnd={
+          handleDragEnd
+        }
+      >
 
-          </div>
+        {
+          grid.map(
+            (
+              row,
+              i
+            ) => (
 
-          {/* MATCHES */}
+              <div
+                key={i}
+                className={
+                  styles.row
+                }
+                style={{
+                  gridTemplateColumns:
+                    `repeat(${courtCount}, 1fr)`,
+                }}
+              >
 
-          <DndContext
-            collisionDetection={
-              closestCenter
-            }
-            onDragEnd={
-              handleDragEnd
-            }
-          >
-
-            {grid.map(
-              (
-                row,
-                i
-              ) => (
-
-                <div
-                  key={i}
-                  className={
-                    styles.row
-                  }
-                  style={{
-                    gridTemplateColumns:
-                      `repeat(${courtCount}, 1fr)`,
-                  }}
-                >
-
-                  {row.map(
+                {
+                  row.map(
                     (
                       cell,
                       j
                     ) => (
 
                       <DroppableSlot
-                        key={j}
+                        key={
+                          j
+                        }
                         id={`slot-${i}-${j}`}
                       >
 
-                        {cell?.match && (
+                        {
+                          cell?.match && (
 
-                          <DraggableMatch
-                            match={
-                              cell.match
-                            }
-                            time={
-                              cell.time.includes(
-                                "Followed"
-                              )
-                                ? "Followed By"
-                                : cell.time
-                            }
-                          />
+                            <DraggableMatch
+                              match={
+                                cell.match
+                              }
+                              time={
+                                cell.time.includes(
+                                  "Followed"
+                                )
+                                  ? "Followed By"
+                                  : cell.time
+                              }
+                            />
 
-                        )}
+                          )
+                        }
 
                       </DroppableSlot>
 
                     )
-                  )}
+                  )
+                }
 
-                </div>
+              </div>
 
-              )
-            )}
+            )
+          )
+        }
 
-          </DndContext>
-
-        </>
-      )}
+      </DndContext>
 
     </div>
   );
