@@ -51,15 +51,38 @@ function DraggableMatch({
       }
     : undefined;
 
-  const name = (team) =>
-    team
-      ? `${team.partner1?.name || ""}
-         ${
-           team.partner2
-             ? " & " + team.partner2?.name
-             : ""
-         }`
-      : "BYE";
+  /* ================= TEAM NAME ================= */
+  const name = (team, side) => {
+
+    // IF PLAYERS EXIST -> SHOW REAL NAMES
+    if (team?.partner1?.name) {
+
+      return `${team.partner1?.name || ""}
+        ${
+          team.partner2
+            ? " & " + team.partner2?.name
+            : ""
+        }`;
+    }
+
+    // IF ROUND 2+ AND TEAM IS TBD
+    if (match.Stage !== "Round 1") {
+
+      const currentMatchNo =
+        match.matchNo || 1;
+
+      // LEFT SIDE
+      if (side === 1) {
+
+        return `R1 M${(currentMatchNo * 2) - 1} Winner`;
+      }
+
+      // RIGHT SIDE
+      return `R1 M${currentMatchNo * 2} Winner`;
+    }
+
+    return "TBD";
+  };
 
   return (
     <div
@@ -87,7 +110,7 @@ function DraggableMatch({
 
       {/* TEAM 1 */}
       <div className={styles.team}>
-        {name(match.Team1)}
+        {name(match.Team1, 1)}
       </div>
 
       {/* VS */}
@@ -97,7 +120,7 @@ function DraggableMatch({
 
       {/* TEAM 2 */}
       <div className={styles.team}>
-        {name(match.Team2)}
+        {name(match.Team2, 2)}
       </div>
 
     </div>
@@ -149,7 +172,6 @@ export default function OrderOfPlay() {
     "Round 3",
     "Round 4",
     "Round 5",
-   
   ];
 
   /* ================= LOAD EVENTS ================= */
@@ -237,10 +259,12 @@ export default function OrderOfPlay() {
           }
         );
 
+        /* ADD CATEGORY + MATCH NUMBER */
         const withCategory =
-          matches.map((m) => ({
+          matches.map((m, idx) => ({
             ...m,
             category: ev.name,
+            matchNo: idx + 1,
           }));
 
         allMatches = [
@@ -270,9 +294,6 @@ export default function OrderOfPlay() {
       "Round 3": 3,
       "Round 4": 4,
       "Round 5": 5,
-      "Quarter Final": 6,
-      "Semi Final": 7,
-      "Final": 8,
     };
 
     matches.sort(
@@ -656,77 +677,6 @@ export default function OrderOfPlay() {
             </button>
 
           </div>
-        )
-      }
-
-      {/* GRID */}
-      {
-        !showFilters && (
-          <>
-            {/* HEADER */}
-            <div
-              className={styles.header}
-              style={{
-                gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
-              }}
-            >
-
-              {Array.from({ length: courtCount }).map(
-                (_, index) => (
-                  <div key={index}>
-                    COURT {index + 1}
-                  </div>
-                )
-              )}
-
-            </div>
-
-            {/* MATCHES */}
-            <DndContext
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-
-              {grid.map((row, i) => (
-
-                <div
-                  key={i}
-                  className={styles.row}
-                  style={{
-                    gridTemplateColumns: `repeat(${courtCount}, 1fr)`,
-                  }}
-                >
-
-                  {row.map((cell, j) => (
-
-                    <DroppableSlot
-                      key={j}
-                      id={`slot-${i}-${j}`}
-                    >
-
-                      {cell?.match && (
-
-                        <DraggableMatch
-                          match={cell.match}
-                          time={
-                            cell.time.includes("Followed")
-                              ? "Followed By"
-                              : cell.time
-                          }
-                        />
-
-                      )}
-
-                    </DroppableSlot>
-
-                  ))}
-
-                </div>
-
-              ))}
-
-            </DndContext>
-          </>
         )
       }
 
