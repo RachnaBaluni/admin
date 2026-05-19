@@ -257,7 +257,7 @@ export default function OrderOfPlay() {
 
     if (events.length > 0) {
 
-      fetchData();
+      fetchData(false);
 
     }
 
@@ -291,7 +291,9 @@ export default function OrderOfPlay() {
 
   /* ================= FETCH DATA ================= */
 
-  const fetchData = async () => {
+  const fetchData = async (
+    showToast = true
+  ) => {
 
     try {
 
@@ -336,15 +338,36 @@ export default function OrderOfPlay() {
                   m.Stage?.trim()
                 );
 
+              /* COMPLETED MATCH */
+
+              const hasWinner =
+                m?.winner ||
+                m?.Winner ||
+                m?.winnerTeam;
+
+              const hasResult =
+                m?.result ||
+                m?.Result;
+
+              const hasScore =
+                m?.score ||
+                m?.Score;
+
               const isCompleted =
-                m.winner ||
-                m.result ||
-                m.completed === true ||
-                m.matchStatus === "Completed";
+                m?.completed === true ||
+                m?.isCompleted === true ||
+                m?.matchStatus === "Completed" ||
+                m?.status === "Completed";
+
+              const alreadyPlayed =
+                hasWinner ||
+                hasResult ||
+                hasScore ||
+                isCompleted;
 
               return (
                 isSelectedRound &&
-                !isCompleted
+                !alreadyPlayed
               );
 
             });
@@ -401,6 +424,14 @@ export default function OrderOfPlay() {
 
       setHideGrid(false);
 
+      if (showToast) {
+
+        toast.success(
+          "Order Of Play Generated"
+        );
+
+      }
+
     } catch (err) {
 
       console.error(err);
@@ -456,8 +487,10 @@ export default function OrderOfPlay() {
           getTimeLabel(i);
 
         if (!timeSlotPlayers[time]) {
+
           timeSlotPlayers[time] =
             new Set();
+
         }
 
         /* SAME TIME VALIDATION */
@@ -532,8 +565,6 @@ export default function OrderOfPlay() {
             continue;
           }
 
-          /* PLACE MATCH */
-
           temp[i][j].match = match;
 
           players.forEach((p) =>
@@ -562,13 +593,12 @@ export default function OrderOfPlay() {
 
   const handleReset = () => {
 
-    setShowFilters(
-      !showFilters
-    );
+    const next =
+      !showFilters;
 
-    setHideGrid(
-      !showFilters
-    );
+    setShowFilters(next);
+
+    setHideGrid(next);
 
   };
 
@@ -871,8 +901,6 @@ export default function OrderOfPlay() {
   return (
     <div className={styles.container}>
 
-      {/* TOP BAR */}
-
       <div className={styles.topBar}>
 
         <h1>
@@ -890,7 +918,9 @@ export default function OrderOfPlay() {
 
           <button
             className={styles.generateBtn}
-            onClick={fetchData}
+            onClick={() =>
+              fetchData(true)
+            }
           >
             Generate Again
           </button>
@@ -905,309 +935,6 @@ export default function OrderOfPlay() {
         </div>
 
       </div>
-
-      {/* FILTERS */}
-
-      {
-        showFilters && (
-
-          <div className={styles.filterBox}>
-
-            {/* DATE */}
-
-            <div>
-
-              <h3>
-                Select Date
-              </h3>
-
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) =>
-                  setSelectedDate(
-                    e.target.value
-                  )
-                }
-                className={styles.courtInput}
-              />
-
-            </div>
-
-            {/* CATEGORY */}
-
-            <div>
-
-              <h3>
-                Categories
-              </h3>
-
-              {
-                events.map((ev) => (
-
-                  <label
-                    key={ev._id}
-                    className={styles.checkboxLabel}
-                  >
-
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.includes(ev.name)}
-                      onChange={(e) => {
-
-                        if (
-                          e.target.checked
-                        ) {
-
-                          setSelectedCategories([
-                            ...selectedCategories,
-                            ev.name,
-                          ]);
-
-                        } else {
-
-                          setSelectedCategories(
-                            selectedCategories.filter(
-                              (c) =>
-                                c !== ev.name
-                            )
-                          );
-
-                        }
-
-                      }}
-                    />
-
-                    {ev.name}
-
-                  </label>
-
-                ))
-              }
-
-            </div>
-
-            {/* ROUNDS */}
-
-            <div className={styles.roundSelector}>
-
-              <h3>
-                Select Any 2 Consecutive Rounds
-              </h3>
-
-              <div className={styles.roundButtons}>
-
-                {
-                  roundsList.map((round) => (
-
-                    <button
-                      key={round}
-                      onClick={() =>
-                        handleRoundSelect(round)
-                      }
-                      className={
-                        selectedRounds.includes(round)
-                          ? styles.activeRoundBtn
-                          : styles.roundBtn
-                      }
-                    >
-
-                      {round}
-
-                    </button>
-
-                  ))
-                }
-
-              </div>
-
-            </div>
-
-            {/* COURTS */}
-
-            <div className={styles.settingsBox}>
-
-              <h3>
-                Court Settings
-              </h3>
-
-              <div>
-
-                <label>
-                  Number Of Courts
-                </label>
-
-                <input
-                  type="number"
-                  min="1"
-                  value={courtCount}
-                  onChange={(e) =>
-                    setCourtCount(
-                      Number(e.target.value)
-                    )
-                  }
-                  className={styles.courtInput}
-                />
-
-              </div>
-
-              <div
-                style={{
-                  marginTop: "20px",
-                }}
-              >
-
-                <label>
-                  Matches Per Court
-                </label>
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "20px",
-                    flexWrap: "wrap",
-                    marginTop: "10px",
-                  }}
-                >
-
-                  {
-                    Array.from({
-                      length: courtCount,
-                    }).map((_, index) => (
-
-                      <div key={index}>
-
-                        <p>
-                          Court {index + 1}
-                        </p>
-
-                        <input
-                          type="number"
-                          min="1"
-                          value={
-                            matchesPerCourt[index + 1] || 1
-                          }
-                          onChange={(e) =>
-                            setMatchesPerCourt({
-                              ...matchesPerCourt,
-                              [index + 1]:
-                                Number(e.target.value),
-                            })
-                          }
-                          className={styles.courtInput}
-                        />
-
-                      </div>
-
-                    ))
-                  }
-
-                </div>
-
-              </div>
-
-              <button
-                className={styles.generateBtn}
-                onClick={fetchData}
-                style={{
-                  marginTop: "25px",
-                }}
-              >
-                Apply Changes
-              </button>
-
-            </div>
-
-          </div>
-
-        )
-      }
-
-      {/* GRID */}
-
-      {
-        !hideGrid && (
-
-          <>
-
-            <div
-              className={styles.header}
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  `repeat(${courtCount},1fr)`,
-                gap: "20px",
-              }}
-            >
-
-              {
-                Array.from({
-                  length: courtCount,
-                }).map((_, index) => (
-
-                  <div key={index}>
-                    COURT {index + 1}
-                  </div>
-
-                ))
-              }
-
-            </div>
-
-            <DndContext
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-
-              {
-                grid.map((row, i) => (
-
-                  <div
-                    key={i}
-                    className={styles.row}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        `repeat(${courtCount},1fr)`,
-                      gap: "20px",
-                    }}
-                  >
-
-                    {
-                      row.map((cell, j) => (
-
-                        <DroppableSlot
-                          key={j}
-                          id={`slot-${i}-${j}`}
-                        >
-
-                          {
-                            cell?.match && (
-
-                              <DraggableMatch
-                                match={cell.match}
-                                time={cell.time}
-                              />
-
-                            )
-                          }
-
-                        </DroppableSlot>
-
-                      ))
-                    }
-
-                  </div>
-
-                ))
-              }
-
-            </DndContext>
-
-          </>
-
-        )
-      }
 
     </div>
   );
