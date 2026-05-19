@@ -195,7 +195,14 @@ export default function OrderOfPlay() {
     selectedCategories,
     setSelectedCategories,
   ] = useState([]);
+ 
 
+  const [selectedEventId, setSelectedEventId] = useState("");
+  useEffect(() => {
+  if (events.length > 0) {
+    setSelectedEventId(events[0]._id);
+  }
+}, [events]);
   const [
     selectedRounds,
     setSelectedRounds,
@@ -562,6 +569,26 @@ export default function OrderOfPlay() {
 
   };
 
+  /* ================= SAVE DATA ================= */
+  const saveOrderOfPlay = async () => {
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
+      {
+        eventId: selectedEventId,
+        grid: grid,
+      },
+      { withCredentials: true }
+    );
+
+    console.log("Saved:", res.data);
+    toast.success("Order Of Play Saved");
+  } catch (err) {
+    console.log(err);
+    toast.error("Save Failed");
+  }
+};
+
   /* ================= SETTINGS ================= */
 
   const handleReset = () => {
@@ -898,6 +925,12 @@ export default function OrderOfPlay() {
           >
             Generate Again
           </button>
+          <button
+  className={styles.generateBtn}
+  onClick={saveOrderOfPlay}
+>
+  Save Order
+</button>
 
           <button
             className={styles.printBtn}
