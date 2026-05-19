@@ -664,10 +664,11 @@ export default function OrderOfPlay() {
         over.id;
 
       if (
-        activeId === overId
-      ) {
-        return;
-      }
+  activePos?.i === overPos?.i &&
+  activePos?.j === overPos?.j
+) {
+  return;
+}
 
       let activePos = null;
 
@@ -746,7 +747,14 @@ export default function OrderOfPlay() {
         tempMatch;
 
       setGrid(newGrid);
+  
 
+      if (
+  activePos.i === overPos.i &&
+  activePos.j === overPos.j
+) {
+  return;
+}
       toast.success(
         "Match Swapped"
       );
