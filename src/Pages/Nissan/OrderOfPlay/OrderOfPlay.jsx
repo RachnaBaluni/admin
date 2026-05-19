@@ -342,6 +342,13 @@ export default function OrderOfPlay() {
                 m.completed === true ||
                 m.matchStatus === "Completed";
 
+                console.log("MATCH :", m);
+
+    console.log("winner :", m.winner);
+    console.log("result :", m.result);
+    console.log("completed :", m.completed);
+    console.log("matchStatus :", m.matchStatus);
+
               return (
                 isSelectedRound &&
                 !isCompleted
