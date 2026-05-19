@@ -292,6 +292,7 @@ export default function OrderOfPlay() {
   /* ================= FETCH DATA ================= */
 
   const fetchData = async () => {
+    console.log("Selected Date:", selectedDate);
 
     try {
 
