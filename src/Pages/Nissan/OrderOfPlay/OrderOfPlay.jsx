@@ -307,7 +307,7 @@ export default function OrderOfPlay() {
 
       const allResponses =
         await Promise.all(
-
+        
           filteredEvents.map((ev) =>
 
             axios.get(
@@ -320,6 +320,7 @@ export default function OrderOfPlay() {
           )
 
         );
+        console.log("First match:", allResponses[0].data.data[0]); // 👈 HERE
 
       let allMatches = [];
 
