@@ -19,11 +19,6 @@ import {
 const TIME_SLOTS = [
   "07:30",
   "08:15",
-  "09:00",
-  "09:45",
-  "10:30",
-  "11:15",
-  "12:00",
 ];
 
 /* ================= PLAYERS ================= */
@@ -252,7 +247,7 @@ export default function OrderOfPlay() {
   useEffect(() => {
 
     if (events.length > 0) {
-      fetchData();
+      fetchData(false);
     }
 
   }, [events]);
@@ -287,9 +282,134 @@ export default function OrderOfPlay() {
 
   };
 
+  /* ================= VALIDATION ================= */
+
+  const validateGrid = (
+    tempGrid
+  ) => {
+
+    for (
+      let i = 0;
+      i < tempGrid.length;
+      i++
+    ) {
+
+      for (
+        let j = 0;
+        j < tempGrid[i].length;
+        j++
+      ) {
+
+        const current =
+          tempGrid[i][j];
+
+        if (!current?.match) {
+          continue;
+        }
+
+        const currentPlayers =
+          getPlayers(
+            current.match
+          );
+
+        for (
+          let r = 0;
+          r < tempGrid.length;
+          r++
+        ) {
+
+          for (
+            let c = 0;
+            c < tempGrid[r].length;
+            c++
+          ) {
+
+            if (
+              i === r &&
+              j === c
+            ) {
+              continue;
+            }
+
+            const compare =
+              tempGrid[r][c];
+
+            if (!compare?.match) {
+              continue;
+            }
+
+            const comparePlayers =
+              getPlayers(
+                compare.match
+              );
+
+            const samePlayer =
+              currentPlayers.some(
+                (p) =>
+                  comparePlayers.includes(
+                    p
+                  )
+              );
+
+            if (!samePlayer) {
+              continue;
+            }
+
+            /* SAME TIME */
+
+            if (
+              current.time ===
+                compare.time &&
+              current.court !==
+                compare.court
+            ) {
+
+              toast.error(
+                "Same player cannot play on different courts at same time"
+              );
+
+              return false;
+
+            }
+
+            /* CONSECUTIVE */
+
+            const diff =
+              Math.abs(
+                i - r
+              );
+
+            if (
+              diff === 1 &&
+              current.court !==
+                compare.court
+            ) {
+
+              toast.error(
+                "Consecutive matches must be on same court"
+              );
+
+              return false;
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+    return true;
+
+  };
+
   /* ================= FETCH DATA ================= */
 
-  const fetchData = async () => {
+  const fetchData = async (
+    showToast = true
+  ) => {
 
     try {
 
@@ -395,14 +515,13 @@ export default function OrderOfPlay() {
         }
       );
 
-      buildGrid(allMatches);
+      buildGrid(
+        allMatches,
+        showToast
+      );
 
       setShowFilters(false);
       setHideGrid(false);
-
-      toast.success(
-        "Order Of Play Generated"
-      );
 
     } catch (err) {
 
@@ -418,7 +537,10 @@ export default function OrderOfPlay() {
 
   /* ================= BUILD GRID ================= */
 
-  const buildGrid = (matches) => {
+  const buildGrid = (
+    matches,
+    showToast = true
+  ) => {
 
     let temp = [];
 
@@ -435,8 +557,11 @@ export default function OrderOfPlay() {
         row.push({
           match: null,
           time:
-            TIME_SLOTS[i] ||
-            `Followed By ${i}`,
+            i === 0
+              ? "07:30"
+              : i === 1
+              ? "08:15"
+              : `Followed By`,
           court: j + 1,
         });
 
@@ -458,8 +583,11 @@ export default function OrderOfPlay() {
       for (let i = 0; i < maxRows; i++) {
 
         const time =
-          TIME_SLOTS[i] ||
-          `Followed By ${i}`;
+          i === 0
+            ? "07:30"
+            : i === 1
+            ? "08:15"
+            : `Followed By`;
 
         if (!timeSlotPlayers[time]) {
           timeSlotPlayers[time] = new Set();
@@ -509,7 +637,20 @@ export default function OrderOfPlay() {
 
     });
 
+    const isValid =
+      validateGrid(temp);
+
+    if (!isValid) {
+      return;
+    }
+
     setGrid(temp);
+
+    if (showToast) {
+      toast.success(
+        "Order Of Play Generated"
+      );
+    }
 
   };
 
@@ -520,8 +661,6 @@ export default function OrderOfPlay() {
     setShowFilters(
       !showFilters
     );
-
-    /* SETTINGS OPEN HONE PR GRID HIDE */
 
     setHideGrid(
       !showFilters
@@ -709,6 +848,13 @@ export default function OrderOfPlay() {
       target.match =
         tempMatch;
 
+      const isValid =
+        validateGrid(newGrid);
+
+      if (!isValid) {
+        return;
+      }
+
       setGrid(newGrid);
 
       toast.success(
@@ -741,7 +887,9 @@ export default function OrderOfPlay() {
 
           <button
             className={styles.generateBtn}
-            onClick={fetchData}
+            onClick={() =>
+              fetchData(true)
+            }
           >
             Generate Again
           </button>
@@ -786,6 +934,117 @@ export default function OrderOfPlay() {
                 }
                 className={styles.courtInput}
               />
+
+            </div>
+
+            {/* CATEGORY */}
+
+            <div>
+
+              <h3>
+                Categories
+              </h3>
+
+              {
+                events.map(
+                  (ev) => (
+
+                    <label
+                      key={ev._id}
+                      className={styles.checkboxLabel}
+                    >
+
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedCategories.includes(
+                            ev.name
+                          )
+                        }
+                        onChange={(e) => {
+
+                          if (
+                            e.target.checked
+                          ) {
+
+                            setSelectedCategories([
+                              ...selectedCategories,
+                              ev.name,
+                            ]);
+
+                          } else {
+
+                            setSelectedCategories(
+                              selectedCategories.filter(
+                                (c) =>
+                                  c !== ev.name
+                              )
+                            );
+
+                          }
+
+                        }}
+                      />
+
+                      {ev.name}
+
+                    </label>
+
+                  )
+                )
+              }
+
+            </div>
+
+            {/* ROUND */}
+
+            <div
+              className={
+                styles.roundSelector
+              }
+            >
+
+              <h3>
+                Select Any 2 Consecutive Rounds
+              </h3>
+
+              <div
+                className={
+                  styles.roundButtons
+                }
+              >
+
+                {
+                  roundsList.map(
+                    (
+                      round
+                    ) => (
+
+                      <button
+                        key={round}
+                        onClick={() =>
+                          handleRoundSelect(
+                            round
+                          )
+                        }
+                        className={
+                          selectedRounds.includes(
+                            round
+                          )
+                            ? styles.activeRoundBtn
+                            : styles.roundBtn
+                        }
+                      >
+
+                        {round}
+
+                      </button>
+
+                    )
+                  )
+                }
+
+              </div>
 
             </div>
 
@@ -869,7 +1128,9 @@ export default function OrderOfPlay() {
 
             <button
               className={styles.generateBtn}
-              onClick={fetchData}
+              onClick={() =>
+                fetchData(true)
+              }
               style={{
                 marginTop: "30px",
               }}
@@ -957,13 +1218,7 @@ export default function OrderOfPlay() {
 
                                   <DraggableMatch
                                     match={cell.match}
-                                    time={
-                                      cell.time.includes(
-                                        "Followed"
-                                      )
-                                        ? "Followed By"
-                                        : cell.time
-                                    }
+                                    time={cell.time}
                                   />
 
                                 )
