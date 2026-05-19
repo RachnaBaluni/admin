@@ -4,10 +4,14 @@ import styles from "./OrderOfPlay.module.css";
 import { toast } from "sonner";
 
 import {
-  DndContext,
+   DndContext,
   closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
   useDraggable,
   useDroppable,
+
 } from "@dnd-kit/core";
 
 /* ================= TIME ================= */
@@ -42,7 +46,15 @@ function DraggableMatch({ match, time }) {
     id: String(match?._id),
     disabled: !match?._id,
   });
+  
 
+  const sensors = useSensors(
+  useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8,
+    },
+  })
+);
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -839,6 +851,7 @@ export default function OrderOfPlay() {
       {/* ===== GRID ===== */}
 
       <DndContext
+      sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
