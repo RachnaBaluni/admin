@@ -326,6 +326,7 @@ export default function OrderOfPlay() {
 
       allResponses.forEach(
         (res, index) => {
+          console.log(res.data.data);
 
           const ev =
             filteredEvents[index];
