@@ -1,42 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import axios from "axios";
 import styles from "./OrderOfPlay.module.css";
 import { toast } from "sonner";
 
 import {
-   DndContext,
+  DndContext,
   closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
   useDraggable,
   useDroppable,
-
 } from "@dnd-kit/core";
 
 /* ================= TIME ================= */
 
 const getTimeLabel = (index) => {
+
   if (index === 0) return "07:30";
+
   if (index === 1) return "08:15";
 
   return "Followed By";
+
 };
 
 /* ================= PLAYERS ================= */
 
 const getPlayers = (m) => {
+
   return [
     m?.Team1?.partner1?._id,
     m?.Team1?.partner2?._id,
     m?.Team2?.partner1?._id,
     m?.Team2?.partner2?._id,
   ].filter(Boolean);
+
 };
 
 /* ================= DRAG CARD ================= */
 
-function DraggableMatch({ match, time }) {
+function DraggableMatch({
+  match,
+  time,
+}) {
+
   const {
     attributes,
     listeners,
@@ -46,48 +55,62 @@ function DraggableMatch({ match, time }) {
     id: String(match?._id),
     disabled: !match?._id,
   });
-  
 
-  const sensors = useSensors(
-  useSensor(PointerSensor, {
-    activationConstraint: {
-      distance: 8,
-    },
-  })
-);
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
       }
     : undefined;
 
-  const getTeamName = (team, side) => {
+  const getTeamName = (
+    team,
+    side
+  ) => {
+
     if (team?.partner1?.name) {
+
       return `${team.partner1?.name || ""}
-      ${team.partner2 ? " & " + team.partner2?.name : ""}`;
+      ${
+        team.partner2
+          ? " & " + team.partner2?.name
+          : ""
+      }`;
+
     }
 
-    const roundNumber = Number(
-      match.Stage?.replace("Round ", "")
-    );
+    const roundNumber =
+      Number(
+        match.Stage?.replace(
+          "Round ",
+          ""
+        )
+      );
 
-    if (!roundNumber || roundNumber === 1) {
+    if (
+      !roundNumber ||
+      roundNumber === 1
+    ) {
       return "TBD";
     }
 
-    const prevRound = roundNumber - 1;
+    const prevRound =
+      roundNumber - 1;
 
-    const currentMatchNo = match.matchNo || 1;
+    const currentMatchNo =
+      match.matchNo || 1;
 
-    const leftMatch = currentMatchNo * 2 - 1;
+    const leftMatch =
+      (currentMatchNo * 2) - 1;
 
-    const rightMatch = currentMatchNo * 2;
+    const rightMatch =
+      currentMatchNo * 2;
 
     if (side === 1) {
       return `R${prevRound} M${leftMatch} Winner`;
     }
 
     return `R${prevRound} M${rightMatch} Winner`;
+
   };
 
   return (
@@ -98,6 +121,7 @@ function DraggableMatch({ match, time }) {
       {...attributes}
       className={styles.card}
     >
+
       <div className={styles.fixedTime}>
         {time}
       </div>
@@ -111,7 +135,12 @@ function DraggableMatch({ match, time }) {
       </div>
 
       <div className={styles.team}>
-        {getTeamName(match.Team1, 1)}
+        {
+          getTeamName(
+            match.Team1,
+            1
+          )
+        }
       </div>
 
       <div className={styles.vs}>
@@ -119,8 +148,14 @@ function DraggableMatch({ match, time }) {
       </div>
 
       <div className={styles.team}>
-        {getTeamName(match.Team2, 2)}
+        {
+          getTeamName(
+            match.Team2,
+            2
+          )
+        }
       </div>
+
     </div>
   );
 }
@@ -131,6 +166,7 @@ function DroppableSlot({
   children,
   id,
 }) {
+
   const { setNodeRef } =
     useDroppable({
       id,
@@ -141,6 +177,7 @@ function DroppableSlot({
       ref={setNodeRef}
       className={styles.slot}
     >
+
       <div
         style={{
           minHeight: "130px",
@@ -148,6 +185,7 @@ function DroppableSlot({
       >
         {children}
       </div>
+
     </div>
   );
 }
@@ -207,20 +245,25 @@ export default function OrderOfPlay() {
   /* ================= LOAD EVENTS ================= */
 
   useEffect(() => {
+
     fetchEvents();
+
   }, []);
 
   /* ================= AUTO LOAD ================= */
 
   useEffect(() => {
+
     if (events.length > 0) {
       fetchData();
     }
+
   }, [events]);
 
   /* ================= FETCH EVENTS ================= */
 
   const fetchEvents = async () => {
+
     try {
 
       const res =
@@ -231,13 +274,16 @@ export default function OrderOfPlay() {
           }
         );
 
-      setEvents(res.data.data);
+      setEvents(
+        res.data.data
+      );
 
     } catch (err) {
 
       console.error(err);
 
     }
+
   };
 
   /* ================= FETCH DATA ================= */
@@ -249,20 +295,26 @@ export default function OrderOfPlay() {
       const filteredEvents =
         selectedCategories.length > 0
           ? events.filter((ev) =>
-              selectedCategories.includes(ev.name)
+              selectedCategories.includes(
+                ev.name
+              )
             )
           : events;
 
       const allResponses =
         await Promise.all(
+
           filteredEvents.map((ev) =>
+
             axios.get(
               `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
               {
                 withCredentials: true,
               }
             )
+
           )
+
         );
 
       let allMatches = [];
@@ -281,8 +333,6 @@ export default function OrderOfPlay() {
                   m.Stage?.trim()
                 );
 
-              /* ===== MATCH COMPLETED CHECK ===== */
-
               const isCompleted =
                 m?.winner ||
                 m?.Winner ||
@@ -300,6 +350,7 @@ export default function OrderOfPlay() {
                 isSelectedRound &&
                 !isCompleted
               );
+
             });
 
           const matchesWithData =
@@ -315,10 +366,9 @@ export default function OrderOfPlay() {
           allMatches.push(
             ...matchesWithData
           );
+
         }
       );
-
-      /* ===== SORT ===== */
 
       const roundOrder = {
         "Round 1": 1,
@@ -346,16 +396,17 @@ export default function OrderOfPlay() {
             -
             (b.matchNo || 0)
           );
+
         }
       );
 
       buildGrid(allMatches);
 
+      setShowFilters(false);
+
       toast.success(
         "Order Of Play Generated"
       );
-
-      setShowFilters(false);
 
     } catch (err) {
 
@@ -364,7 +415,9 @@ export default function OrderOfPlay() {
       toast.error(
         "Error loading matches"
       );
+
     }
+
   };
 
   /* ================= BUILD GRID ================= */
@@ -388,9 +441,11 @@ export default function OrderOfPlay() {
           time: getTimeLabel(i),
           court: j + 1,
         });
+
       }
 
       temp.push(row);
+
     }
 
     const timeSlotPlayers = {};
@@ -411,8 +466,6 @@ export default function OrderOfPlay() {
           timeSlotPlayers[time] =
             new Set();
         }
-
-        /* ===== SAME TIME VALIDATION ===== */
 
         const sameTimeConflict =
           players.some((p) =>
@@ -437,8 +490,6 @@ export default function OrderOfPlay() {
           if (temp[i][j].match) {
             continue;
           }
-
-          /* ===== CONSECUTIVE VALIDATION ===== */
 
           let consecutiveConflict =
             false;
@@ -474,15 +525,16 @@ export default function OrderOfPlay() {
                 consecutiveConflict = true;
 
                 break;
+
               }
+
             }
+
           }
 
           if (consecutiveConflict) {
             continue;
           }
-
-          /* ===== PLACE MATCH ===== */
 
           temp[i][j].match = match;
 
@@ -493,27 +545,37 @@ export default function OrderOfPlay() {
           placed = true;
 
           break;
+
         }
 
         if (placed) {
           break;
         }
+
       }
+
     });
 
     setGrid(temp);
+
   };
 
   /* ================= SETTINGS ================= */
 
   const handleSettings = () => {
-    setShowFilters(!showFilters);
+
+    setShowFilters(
+      !showFilters
+    );
+
   };
 
   /* ================= PRINT ================= */
 
   const handlePrint = () => {
+
     window.print();
+
   };
 
   /* ================= ROUND SELECT ================= */
@@ -544,9 +606,11 @@ export default function OrderOfPlay() {
           );
 
           return;
+
         }
 
         updated.push(round);
+
       }
 
       const nums =
@@ -559,7 +623,10 @@ export default function OrderOfPlay() {
               )
             )
           )
-          .sort((a, b) => a - b);
+          .sort(
+            (a, b) =>
+              a - b
+          );
 
       if (
         nums.length === 2 &&
@@ -571,9 +638,11 @@ export default function OrderOfPlay() {
         );
 
         return;
+
       }
 
       setSelectedRounds(updated);
+
     };
 
   /* ================= DRAG END ================= */
@@ -594,6 +663,13 @@ export default function OrderOfPlay() {
       const overId =
         over.id;
 
+      if (
+  activePos?.i === overPos?.i &&
+  activePos?.j === overPos?.j
+) {
+  return;
+}
+
       let activePos = null;
 
       let overPos = null;
@@ -602,44 +678,44 @@ export default function OrderOfPlay() {
         (row, i) => {
 
           row.forEach(
-            (cell, j) => {
+            (
+              cell,
+              j
+            ) => {
 
               if (
-                cell?.match?._id === activeId
+                cell?.match?._id ===
+                activeId
               ) {
 
                 activePos = {
                   i,
                   j,
                 };
+
               }
 
               if (
-                `slot-${i}-${j}` === overId
+                `slot-${i}-${j}` ===
+                overId
               ) {
 
                 overPos = {
                   i,
                   j,
                 };
+
               }
+
             }
           );
+
         }
       );
 
       if (
         !activePos ||
         !overPos
-      ) {
-        return;
-      }
-
-      /* ===== SAME POSITION ===== */
-
-      if (
-        activePos.i === overPos.i &&
-        activePos.j === overPos.j
       ) {
         return;
       }
@@ -671,18 +747,24 @@ export default function OrderOfPlay() {
         tempMatch;
 
       setGrid(newGrid);
+  
 
+      if (
+  activePos.i === overPos.i &&
+  activePos.j === overPos.j
+) {
+  return;
+}
       toast.success(
         "Match Swapped"
       );
+
     };
 
   /* ================= UI ================= */
 
   return (
     <div className={styles.container}>
-
-      {/* ===== TOP BAR ===== */}
 
       <div className={styles.topBar}>
 
@@ -717,14 +799,10 @@ export default function OrderOfPlay() {
 
       </div>
 
-      {/* ===== FILTERS ===== */}
-
       {
         showFilters && (
 
           <div className={styles.filterBox}>
-
-            {/* ===== CATEGORY ===== */}
 
             <div>
 
@@ -762,19 +840,20 @@ export default function OrderOfPlay() {
                                 c !== ev.name
                             )
                           );
+
                         }
+
                       }}
                     />
 
                     {ev.name}
 
                   </label>
+
                 ))
               }
 
             </div>
-
-            {/* ===== ROUNDS ===== */}
 
             <div className={styles.roundSelector}>
 
@@ -798,16 +877,17 @@ export default function OrderOfPlay() {
                           : styles.roundBtn
                       }
                     >
+
                       {round}
+
                     </button>
+
                   ))
                 }
 
               </div>
 
             </div>
-
-            {/* ===== APPLY ===== */}
 
             <button
               className={styles.generateBtn}
@@ -820,10 +900,9 @@ export default function OrderOfPlay() {
             </button>
 
           </div>
+
         )
       }
-
-      {/* ===== COURT HEADER ===== */}
 
       <div
         className={styles.header}
@@ -843,15 +922,13 @@ export default function OrderOfPlay() {
             <div key={index}>
               COURT {index + 1}
             </div>
+
           ))
         }
 
       </div>
 
-      {/* ===== GRID ===== */}
-
       <DndContext
-      sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
@@ -890,10 +967,12 @@ export default function OrderOfPlay() {
                     }
 
                   </DroppableSlot>
+
                 ))
               }
 
             </div>
+
           ))
         }
 
