@@ -5,6 +5,7 @@ import React, {
 
 import axios from "axios";
 import styles from "./OrderOfPlay.module.css";
+
 import { toast } from "sonner";
 
 import {
@@ -210,21 +211,6 @@ export default function OrderOfPlay() {
   ] = useState(4);
 
   const [
-    showFilters,
-    setShowFilters,
-  ] = useState(false);
-
-  const [
-    hideGrid,
-    setHideGrid,
-  ] = useState(false);
-
-  const [
-    selectedDate,
-    setSelectedDate,
-  ] = useState("");
-
-  const [
     matchesPerCourt,
     setMatchesPerCourt,
   ] = useState({
@@ -251,13 +237,13 @@ export default function OrderOfPlay() {
 
   }, []);
 
-  /* ================= AUTO LOAD ================= */
+  /* ================= AUTO FETCH ================= */
 
   useEffect(() => {
 
     if (events.length > 0) {
 
-      fetchData(false);
+      fetchData();
 
     }
 
@@ -289,11 +275,9 @@ export default function OrderOfPlay() {
 
   };
 
-  /* ================= FETCH DATA ================= */
+  /* ================= FETCH MATCHES ================= */
 
-  const fetchData = async (
-    showToast = true
-  ) => {
+  const fetchData = async () => {
 
     try {
 
@@ -326,7 +310,6 @@ export default function OrderOfPlay() {
 
       allResponses.forEach(
         (res, index) => {
-          console.log(res.data.data);
 
           const ev =
             filteredEvents[index];
@@ -339,7 +322,7 @@ export default function OrderOfPlay() {
                   m.Stage?.trim()
                 );
 
-              /* COMPLETED MATCH */
+              /* ================= WINNER CHECK ================= */
 
               const hasWinner =
                 m?.winner ||
@@ -389,6 +372,8 @@ export default function OrderOfPlay() {
         }
       );
 
+      /* ================= SORT ================= */
+
       const roundOrder = {
         "Round 1": 1,
         "Round 2": 2,
@@ -420,18 +405,6 @@ export default function OrderOfPlay() {
       );
 
       buildGrid(allMatches);
-
-      setShowFilters(false);
-
-      setHideGrid(false);
-
-      if (showToast) {
-
-        toast.success(
-          "Order Of Play Generated"
-        );
-
-      }
 
     } catch (err) {
 
@@ -566,6 +539,8 @@ export default function OrderOfPlay() {
             continue;
           }
 
+          /* PLACE MATCH */
+
           temp[i][j].match = match;
 
           players.forEach((p) =>
@@ -589,94 +564,6 @@ export default function OrderOfPlay() {
     setGrid(temp);
 
   };
-
-  /* ================= SETTINGS ================= */
-
-  const handleReset = () => {
-
-    const next =
-      !showFilters;
-
-    setShowFilters(next);
-
-    setHideGrid(next);
-
-  };
-
-  /* ================= PRINT ================= */
-
-  const handlePrint = () => {
-
-    window.print();
-
-  };
-
-  /* ================= ROUND SELECT ================= */
-
-  const handleRoundSelect =
-    (round) => {
-
-      let updated =
-        [...selectedRounds];
-
-      if (
-        updated.includes(round)
-      ) {
-
-        updated =
-          updated.filter(
-            (r) => r !== round
-          );
-
-      } else {
-
-        if (
-          updated.length >= 2
-        ) {
-
-          toast.error(
-            "Only 2 rounds allowed"
-          );
-
-          return;
-
-        }
-
-        updated.push(round);
-
-      }
-
-      const nums =
-        updated
-          .map((r) =>
-            Number(
-              r.replace(
-                "Round ",
-                ""
-              )
-            )
-          )
-          .sort(
-            (a, b) =>
-              a - b
-          );
-
-      if (
-        nums.length === 2 &&
-        nums[1] - nums[0] !== 1
-      ) {
-
-        toast.error(
-          "Select consecutive rounds"
-        );
-
-        return;
-
-      }
-
-      setSelectedRounds(updated);
-
-    };
 
   /* ================= DRAG END ================= */
 
@@ -785,114 +672,10 @@ export default function OrderOfPlay() {
       target.match =
         tempMatch;
 
-      /* VALIDATION */
-
-      const swappedMatches = [
-        {
-          match: dragged.match,
-          time: dragged.time,
-          court: dragged.court,
-          rowIndex: activePos.i,
-        },
-        {
-          match: target.match,
-          time: target.time,
-          court: target.court,
-          rowIndex: overPos.i,
-        },
-      ];
-
-      for (const swapped of swappedMatches) {
-
-        const swappedPlayers =
-          getPlayers(swapped.match);
-
-        for (
-          let i = 0;
-          i < newGrid.length;
-          i++
-        ) {
-
-          for (
-            let j = 0;
-            j < newGrid[i].length;
-            j++
-          ) {
-
-            const cell =
-              newGrid[i][j];
-
-            if (!cell?.match) {
-              continue;
-            }
-
-            if (
-              i === swapped.rowIndex &&
-              j === swapped.court - 1
-            ) {
-              continue;
-            }
-
-            const cellPlayers =
-              getPlayers(cell.match);
-
-            const samePlayer =
-              swappedPlayers.some((p) =>
-                cellPlayers.includes(p)
-              );
-
-            if (!samePlayer) {
-              continue;
-            }
-
-            /* SAME TIME */
-
-            if (
-              swapped.time ===
-                cell.time &&
-              swapped.court !==
-                cell.court
-            ) {
-
-              toast.error(
-                "❌ Same player cannot play on different courts at same time"
-              );
-
-              return;
-
-            }
-
-            /* CONSECUTIVE */
-
-            const diff =
-              Math.abs(
-                swapped.rowIndex - i
-              );
-
-            if (
-              diff === 1 &&
-              swapped.court !==
-                cell.court
-            ) {
-
-              toast.error(
-                "❌ Consecutive matches must be on same court"
-              );
-
-              return;
-
-            }
-
-          }
-
-        }
-
-      }
-
       setGrid(newGrid);
 
       toast.success(
-        "✅ Match swapped"
+        "Match swapped successfully"
       );
 
     };
@@ -908,34 +691,92 @@ export default function OrderOfPlay() {
           ORDER OF PLAY
         </h1>
 
-        <div className={styles.buttonGroup}>
-
-          <button
-            className={styles.resetBtn}
-            onClick={handleReset}
-          >
-            Settings
-          </button>
-
-          <button
-            className={styles.generateBtn}
-            onClick={() =>
-              fetchData(true)
-            }
-          >
-            Generate Again
-          </button>
-
-          <button
-            className={styles.printBtn}
-            onClick={handlePrint}
-          >
-            Print PDF
-          </button>
-
-        </div>
+        <button
+          className={styles.generateBtn}
+          onClick={fetchData}
+        >
+          Generate Again
+        </button>
 
       </div>
+
+      {/* COURT HEADER */}
+
+      <div
+        className={styles.header}
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            `repeat(${courtCount},1fr)`,
+          gap: "20px",
+        }}
+      >
+
+        {
+          Array.from({
+            length: courtCount,
+          }).map((_, index) => (
+
+            <div key={index}>
+              COURT {index + 1}
+            </div>
+
+          ))
+        }
+
+      </div>
+
+      {/* GRID */}
+
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+
+        {
+          grid.map((row, i) => (
+
+            <div
+              key={i}
+              className={styles.row}
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  `repeat(${courtCount},1fr)`,
+                gap: "20px",
+              }}
+            >
+
+              {
+                row.map((cell, j) => (
+
+                  <DroppableSlot
+                    key={j}
+                    id={`slot-${i}-${j}`}
+                  >
+
+                    {
+                      cell?.match && (
+
+                        <DraggableMatch
+                          match={cell.match}
+                          time={cell.time}
+                        />
+
+                      )
+                    }
+
+                  </DroppableSlot>
+
+                ))
+              }
+
+            </div>
+
+          ))
+        }
+
+      </DndContext>
 
     </div>
   );
