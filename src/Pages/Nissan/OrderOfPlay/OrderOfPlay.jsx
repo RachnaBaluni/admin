@@ -4,14 +4,13 @@ import styles from "./OrderOfPlay.module.css";
 import { toast } from "sonner";
 
 import {
-   DndContext,
+  DndContext,
   closestCenter,
   PointerSensor,
   useSensor,
   useSensors,
   useDraggable,
   useDroppable,
-
 } from "@dnd-kit/core";
 
 /* ================= TIME ================= */
@@ -46,15 +45,7 @@ function DraggableMatch({ match, time }) {
     id: String(match?._id),
     disabled: !match?._id,
   });
-  
 
-  const sensors = useSensors(
-  useSensor(PointerSensor, {
-    activationConstraint: {
-      distance: 8,
-    },
-  })
-);
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -94,10 +85,24 @@ function DraggableMatch({ match, time }) {
     <div
       ref={setNodeRef}
       style={style}
-      {...listeners}
-      {...attributes}
       className={styles.card}
     >
+
+      {/* ===== DRAG HANDLE ===== */}
+
+      <div
+        {...listeners}
+        {...attributes}
+        style={{
+          cursor: "grab",
+          fontSize: "18px",
+          marginBottom: "8px",
+          fontWeight: "bold",
+        }}
+      >
+        ⠿
+      </div>
+
       <div className={styles.fixedTime}>
         {time}
       </div>
@@ -121,6 +126,7 @@ function DraggableMatch({ match, time }) {
       <div className={styles.team}>
         {getTeamName(match.Team2, 2)}
       </div>
+
     </div>
   );
 }
@@ -131,6 +137,7 @@ function DroppableSlot({
   children,
   id,
 }) {
+
   const { setNodeRef } =
     useDroppable({
       id,
@@ -204,6 +211,16 @@ export default function OrderOfPlay() {
     "Round 6",
   ];
 
+  /* ================= SENSORS ================= */
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    })
+  );
+
   /* ================= LOAD EVENTS ================= */
 
   useEffect(() => {
@@ -221,6 +238,7 @@ export default function OrderOfPlay() {
   /* ================= FETCH EVENTS ================= */
 
   const fetchEvents = async () => {
+
     try {
 
       const res =
@@ -281,8 +299,6 @@ export default function OrderOfPlay() {
                   m.Stage?.trim()
                 );
 
-              /* ===== MATCH COMPLETED CHECK ===== */
-
               const isCompleted =
                 m?.winner ||
                 m?.Winner ||
@@ -317,8 +333,6 @@ export default function OrderOfPlay() {
           );
         }
       );
-
-      /* ===== SORT ===== */
 
       const roundOrder = {
         "Round 1": 1,
@@ -412,8 +426,6 @@ export default function OrderOfPlay() {
             new Set();
         }
 
-        /* ===== SAME TIME VALIDATION ===== */
-
         const sameTimeConflict =
           players.some((p) =>
             timeSlotPlayers[time].has(p)
@@ -437,8 +449,6 @@ export default function OrderOfPlay() {
           if (temp[i][j].match) {
             continue;
           }
-
-          /* ===== CONSECUTIVE VALIDATION ===== */
 
           let consecutiveConflict =
             false;
@@ -481,8 +491,6 @@ export default function OrderOfPlay() {
           if (consecutiveConflict) {
             continue;
           }
-
-          /* ===== PLACE MATCH ===== */
 
           temp[i][j].match = match;
 
@@ -605,7 +613,8 @@ export default function OrderOfPlay() {
             (cell, j) => {
 
               if (
-                cell?.match?._id === activeId
+                String(cell?.match?._id) ===
+                String(activeId)
               ) {
 
                 activePos = {
@@ -634,8 +643,6 @@ export default function OrderOfPlay() {
       ) {
         return;
       }
-
-      /* ===== SAME POSITION ===== */
 
       if (
         activePos.i === overPos.i &&
@@ -724,8 +731,6 @@ export default function OrderOfPlay() {
 
           <div className={styles.filterBox}>
 
-            {/* ===== CATEGORY ===== */}
-
             <div>
 
               <h3>
@@ -774,8 +779,6 @@ export default function OrderOfPlay() {
 
             </div>
 
-            {/* ===== ROUNDS ===== */}
-
             <div className={styles.roundSelector}>
 
               <h3>
@@ -806,8 +809,6 @@ export default function OrderOfPlay() {
               </div>
 
             </div>
-
-            {/* ===== APPLY ===== */}
 
             <button
               className={styles.generateBtn}
@@ -851,7 +852,7 @@ export default function OrderOfPlay() {
       {/* ===== GRID ===== */}
 
       <DndContext
-      sensors={sensors}
+        sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
