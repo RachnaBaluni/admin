@@ -408,8 +408,7 @@ console.log("MATCH WINNER:", m.Winner);
       setShowFilters(false);
 
       setHideGrid(false);
-      toast.success("Order Of Play Generated Again");
-
+      
     } catch (err) {
 
       console.error(err);
