@@ -350,8 +350,8 @@ export default function OrderOfPlay() {
                 
 
               return (
-                isSelectedRound &&
-                !isCompleted
+                isSelectedRound 
+                
               );
 
             });
