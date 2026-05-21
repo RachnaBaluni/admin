@@ -346,11 +346,7 @@ export default function OrderOfPlay() {
                 );
 
               const isCompleted =
-                m.winner ||
-                m.result ||
-                m.completed === true ||
-                m.matchStatus === "Completed";
-
+  m.Status === "Completed" || m.Winner;
                 
 
               return (
