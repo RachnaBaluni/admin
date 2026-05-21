@@ -344,10 +344,13 @@ export default function OrderOfPlay() {
                 selectedRounds.includes(
                   m.Stage?.trim()
                 );
-console.log("MATCH STATUS:", m.Status);
-console.log("MATCH WINNER:", m.Winner);
+
               const isCompleted =
-  m.Status === "Completed" || m.Winner;
+                m.winner ||
+                m.result ||
+                m.completed === true ||
+                m.matchStatus === "Completed";
+
                 
 
               return (
@@ -408,7 +411,7 @@ console.log("MATCH WINNER:", m.Winner);
       setShowFilters(false);
 
       setHideGrid(false);
-      
+
     } catch (err) {
 
       console.error(err);
