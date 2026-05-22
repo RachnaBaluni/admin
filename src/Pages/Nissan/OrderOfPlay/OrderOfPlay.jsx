@@ -337,7 +337,7 @@ export default function OrderOfPlay() {
           const ev =
             filteredEvents[index];
 
-          const filteredMatches =
+         const filteredMatches =
             res.data.data.filter((m) => {
 
               const isSelectedRound =
