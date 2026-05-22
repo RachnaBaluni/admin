@@ -360,14 +360,18 @@ export default function OrderOfPlay() {
       m.matchStatus === "Completed";
 
       console.log(
-      m.Status,
-      completedDate,
-      selected
-    );
+  "Status:",
+  m.Status,
+  "Winner:",
+  m.winner,
+  "updatedAt:",
+  m.updatedAt
+);
     console.log(m.createdAt);
 
     // completed match
     if (isCompleted) {
+      
 
       return (
         isSelectedRound &&
