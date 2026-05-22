@@ -571,6 +571,7 @@ export default function OrderOfPlay() {
       `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
       {
         eventId: selectedEventId,
+        playDate: selectedDate,
         grid: grid,
       },
       { withCredentials: true }
