@@ -300,6 +300,8 @@ export default function OrderOfPlay() {
 
   const fetchData = async () => {
     console.log("Selected Date:", selectedDate);
+    console.log("EVENT ID:", selectedEventId);
+
 
     try {
 
