@@ -345,13 +345,17 @@ export default function OrderOfPlay() {
                   m.Stage?.trim()
                 );
 
-             
+              const isCompleted =
+                m.winner ||
+                m.result ||
+                m.completed === true ||
+                m.matchStatus === "Completed";
 
                 
 
               return (
-                isSelectedRound 
-                
+                isSelectedRound &&
+                !isCompleted
               );
 
             });
