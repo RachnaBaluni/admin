@@ -359,6 +359,12 @@ export default function OrderOfPlay() {
       m.Status === "Completed" ||
       m.matchStatus === "Completed";
 
+      console.log(
+      m.Status,
+      completedDate,
+      selected
+    );
+
     // completed match
     if (isCompleted) {
 
