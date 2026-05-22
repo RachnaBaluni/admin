@@ -299,6 +299,7 @@ export default function OrderOfPlay() {
   /* ================= FETCH DATA ================= */
 
   const fetchData = async () => {
+    console.log("selectedDate value =", selectedDate);
     console.log("Selected Date:", selectedDate);
     console.log("EVENT ID:", selectedEventId);
 
@@ -568,6 +569,8 @@ export default function OrderOfPlay() {
 
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
+    console.log("SAVE DATE =", selectedDate);
+console.log("EVENT =", selectedEventId);
   try {
     
     const res = await axios.post(
