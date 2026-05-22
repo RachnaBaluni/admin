@@ -581,7 +581,7 @@ export default function OrderOfPlay() {
     console.log("Saved:", res.data);
     toast.success("Order Of Play Saved");
   } catch (err) {
-    console.log(err);
+    console.log("ERROR:", err.response?.data || err);
     toast.error("Save Failed");
   }
 };
