@@ -303,6 +303,7 @@ export default function OrderOfPlay() {
     console.log("Selected Date:", selectedDate);
     console.log("EVENT ID:", selectedEventId);
 
+     setGrid([]);
 
     try {
 
@@ -330,6 +331,7 @@ export default function OrderOfPlay() {
           )
 
         );
+        
         console.log("First match:", allResponses[0].data.data[0]); // 👈 HERE
 
       let allMatches = [];
@@ -340,23 +342,21 @@ export default function OrderOfPlay() {
           const ev =
             filteredEvents[index];
 
-      const filteredMatches =
-  res.data.data.filter((m) => {
+      const filteredMatches = res.data.data.filter((m) => {
 
-    const isSelectedRound =
-      selectedRounds.includes(
-        m.Stage?.trim()
-      );
+  const isSelectedRound =
+    selectedRounds.includes(m.Stage?.trim());
 
-    const isCompleted =
-      m.Status === "Completed";
+  const isCompleted =
+    m.Status === "Completed";
 
-    return (
-      isSelectedRound &&
-      !isCompleted
-    );
+  return (
+    isSelectedRound &&
+    !isCompleted
+  );
 
-  });
+});  console.log("FILTERED MATCHES:", filteredMatches);
+
 
           const matchesWithData =
             filteredMatches.map(
@@ -453,7 +453,7 @@ export default function OrderOfPlay() {
     const timeSlotPlayers = {};
 
     matches.forEach((match) => {
-
+       if (match.Status === "Completed") return;
       const players =
         getPlayers(match);
 
