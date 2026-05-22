@@ -302,6 +302,11 @@ export default function OrderOfPlay() {
     console.log("selectedDate value =", selectedDate);
     console.log("Selected Date:", selectedDate);
     console.log("EVENT ID:", selectedEventId);
+    if (!selectedDate) {
+    toast.error("Please select a date first");
+    return;
+  }
+
 
      setGrid([]);
 
