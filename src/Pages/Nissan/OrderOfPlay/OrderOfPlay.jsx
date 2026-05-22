@@ -337,28 +337,43 @@ export default function OrderOfPlay() {
           const ev =
             filteredEvents[index];
 
-         const filteredMatches =
-            res.data.data.filter((m) => {
+        const filteredMatches =
+  res.data.data.filter((m) => {
 
-              const isSelectedRound =
-                selectedRounds.includes(
-                  m.Stage?.trim()
-                );
+    const isSelectedRound =
+      selectedRounds.includes(
+        m.Stage?.trim()
+      );
 
-              const isCompleted =
-                m.winner ||
-                m.result ||
-                m.completed === true ||
-                m.matchStatus === "Completed";
+    // selected date
+    const selected =
+      selectedDate;
 
-                
+    // completed match ki date
+    const completedDate =
+      m.updatedAt
+        ? new Date(m.updatedAt)
+            .toISOString()
+            .split("T")[0]
+        : null;
 
-              return (
-                isSelectedRound &&
-                !isCompleted
-              );
+    // completed match
+    if (
+      m.Status === "Completed" ||
+      m.matchStatus === "Completed"
+    ) {
 
-            });
+      return (
+        isSelectedRound &&
+        completedDate === selected
+      );
+
+    }
+
+    // upcoming matches
+    return isSelectedRound;
+
+  });
 
           const matchesWithData =
             filteredMatches.map(
