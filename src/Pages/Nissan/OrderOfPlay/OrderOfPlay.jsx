@@ -364,7 +364,7 @@ export default function OrderOfPlay() {
       completedDate,
       selected
     );
-    console.log(m);
+    console.log(m.createdAt);
 
     // completed match
     if (isCompleted) {
