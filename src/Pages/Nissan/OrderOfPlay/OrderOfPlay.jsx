@@ -567,6 +567,7 @@ export default function OrderOfPlay() {
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
   try {
+     console.log(req.body);
     const res = await axios.post(
       `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
       {
