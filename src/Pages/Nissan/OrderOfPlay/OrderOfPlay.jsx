@@ -337,7 +337,7 @@ export default function OrderOfPlay() {
           const ev =
             filteredEvents[index];
 
-       const filteredMatches =
+      const filteredMatches =
   res.data.data.filter((m) => {
 
     const isSelectedRound =
@@ -345,43 +345,13 @@ export default function OrderOfPlay() {
         m.Stage?.trim()
       );
 
-    const selected =
-      selectedDate;
-
-    const completedDate =
-      m.updatedAt
-        ? new Date(m.updatedAt)
-            .toISOString()
-            .split("T")[0]
-        : null;
-
     const isCompleted =
-      m.Status === "Completed" ||
-      m.matchStatus === "Completed";
+      m.Status === "Completed";
 
-      console.log(
-  "Status:",
-  m.Status,
-  "Winner:",
-  m.winner,
-  "updatedAt:",
-  m.updatedAt
-);
-    console.log(m.createdAt);
-
-    // completed match
-    if (isCompleted) {
-      
-
-      return (
-        isSelectedRound &&
-        completedDate === selected
-      );
-
-    }
-
-    // upcoming
-    return isSelectedRound;
+    return (
+      isSelectedRound &&
+      !isCompleted
+    );
 
   });
 
