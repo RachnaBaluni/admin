@@ -28,14 +28,93 @@ const getTimeLabel = (index) => {
 
 /* ================= PLAYERS ================= */
 
-const getPlayers = (m) => {
+const getPlayers = (
+  m,
+  allMatches = []
+) => {
 
-  return [
+  if (!m) return [];
+
+  // CURRENT MATCH PLAYERS
+  const currentPlayers = [
     m?.Team1?.partner1?._id,
     m?.Team1?.partner2?._id,
     m?.Team2?.partner1?._id,
     m?.Team2?.partner2?._id,
   ].filter(Boolean);
+
+  const hasTeam1 =
+    m?.Team1?.partner1?._id;
+
+  const hasTeam2 =
+    m?.Team2?.partner1?._id;
+
+  // BOTH TEAMS PRESENT
+  if (hasTeam1 && hasTeam2) {
+    return currentPlayers;
+  }
+
+  // ONE TEAM PRESENT + ONE TBD
+  if (
+    (hasTeam1 && !hasTeam2) ||
+    (!hasTeam1 && hasTeam2)
+  ) {
+    return currentPlayers;
+  }
+
+  // ROUND 1 + NO PLAYERS
+  const roundNumber =
+    Number(
+      m.Stage?.replace(
+        "Round ",
+        ""
+      )
+    );
+
+  if (
+    !roundNumber ||
+    roundNumber === 1
+  ) {
+    return [];
+  }
+
+  // FUTURE ROUND
+  const prevRound =
+    roundNumber - 1;
+
+  const currentMatchNo =
+    m.matchNo || 1;
+
+  const leftMatchNo =
+    (currentMatchNo * 2) - 1;
+
+  const rightMatchNo =
+    currentMatchNo * 2;
+
+  const leftMatch =
+    allMatches.find(
+      (x) =>
+        x.Stage === `Round ${prevRound}` &&
+        x.matchNo === leftMatchNo
+    );
+
+  const rightMatch =
+    allMatches.find(
+      (x) =>
+        x.Stage === `Round ${prevRound}` &&
+        x.matchNo === rightMatchNo
+    );
+
+  return [
+    ...getPlayers(
+      leftMatch,
+      allMatches
+    ),
+    ...getPlayers(
+      rightMatch,
+      allMatches
+    ),
+  ];
 
 };
 
@@ -492,7 +571,7 @@ console.log("BUILD GRID MATCHES =", matches);
     matches.forEach((match) => {
      //  if (match.Status === "Completed") return;
       const players =
-        getPlayers(match);
+  getPlayers(match, matches);
 
       let placed = false;
 
@@ -552,7 +631,7 @@ console.log("BUILD GRID MATCHES =", matches);
               if (!prevMatch) continue;
 
               const prevPlayers =
-                getPlayers(prevMatch);
+  getPlayers(prevMatch, matches);
 
               const samePlayer =
                 players.some((p) =>
@@ -844,9 +923,14 @@ console.log("EVENT =", selectedEventId);
 
       for (const swapped of swappedMatches) {
 
-        const swappedPlayers =
-          getPlayers(swapped.match);
-
+       const swappedPlayers =
+  getPlayers(
+    swapped.match,
+    newGrid
+      .flat()
+      .map((c) => c.match)
+      .filter(Boolean)
+  );
         for (
           let i = 0;
           i < newGrid.length;
@@ -874,8 +958,13 @@ console.log("EVENT =", selectedEventId);
             }
 
             const cellPlayers =
-              getPlayers(cell.match);
-
+  getPlayers(
+    cell.match,
+    newGrid
+      .flat()
+      .map((c) => c.match)
+      .filter(Boolean)
+  );
             const samePlayer =
               swappedPlayers.some((p) =>
                 cellPlayers.includes(p)
@@ -1289,4 +1378,5 @@ console.log("EVENT =", selectedEventId);
 
     </div>
   );
+}
 }
