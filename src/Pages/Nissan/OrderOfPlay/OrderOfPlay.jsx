@@ -194,7 +194,7 @@ export default function OrderOfPlay() {
   const [
     selectedCategories,
     setSelectedCategories,
-  ] = useState([]);
+  ] = useState(["Cat.B(85+ combined)"]);
  
 
   const [selectedEventId, setSelectedEventId] = useState("");
