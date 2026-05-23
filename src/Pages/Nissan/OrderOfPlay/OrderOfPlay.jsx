@@ -298,73 +298,55 @@ export default function OrderOfPlay() {
 
   /* ================= FETCH DATA ================= */
 
-   const fetchData = async () => {
-
-    try {
-
-      const filteredEvents =
-        selectedCategories.length > 0
-          ? events.filter((ev) =>
-              selectedCategories.includes(ev.name)
-            )
-          : events;
-
-      const allResponses = await Promise.all(
-
-        filteredEvents.map((ev) =>
-
-          axios.get(
-            ${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id},
-            {
-              withCredentials: true,
-            }
+ const fetchData = async () => {
+  try {
+    const filteredEvents =
+      selectedCategories.length > 0
+        ? events.filter((ev) =>
+            selectedCategories.includes(ev.name)
           )
+        : events;
 
-        )
-
-      );
-
-      let allMatches = [];
-
-      allResponses.forEach((res, index) => {
-
-        const ev = filteredEvents[index];
-
-        const matches = res.data.data.filter(
-          (d) => {
-
-            /* DEFAULT ROUND 1 */
-            if (selectedRounds.length === 0) {
-              return d.Stage === "Round 1";
-            }
-
-            return selectedRounds.includes(d.Stage);
+    const allResponses = await Promise.all(
+      filteredEvents.map((ev) =>
+        axios.get(
+          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
+          {
+            withCredentials: true,
           }
-        );
+        )
+      )
+    );
 
-        const withCategory =
-          matches.map((m) => ({
-            ...m,
-            category: ev.name,
-          }));
+    let allMatches = [];
 
-        allMatches = [
-          ...allMatches,
-          ...withCategory,
-        ];
+    allResponses.forEach((res, index) => {
+      const ev = filteredEvents[index];
+
+      const matches = (res.data.data || []).filter((d) => {
+        // DEFAULT ROUND 1
+        if (selectedRounds.length === 0) {
+          return d.Stage === "Round 1";
+        }
+
+        return selectedRounds.includes(d.Stage);
       });
 
-      buildGrid(allMatches);
+      const withCategory = matches.map((m) => ({
+        ...m,
+        category: ev.name,
+      }));
 
-      setShowFilters(false);
+      allMatches = [...allMatches, ...withCategory];
+    });
 
-    } catch (err) {
-
-      console.error(err);
-
-      toast.error("Error loading");
-    }
-  };
+    buildGrid(allMatches);
+    setShowFilters(false);
+  } catch (err) {
+    console.error(err);
+    toast.error("Error loading");
+  }
+};
   /* ================= BUILD GRID ================= */
 
   const buildGrid = (matches) => {
