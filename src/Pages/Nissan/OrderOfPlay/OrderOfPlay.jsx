@@ -194,7 +194,7 @@ export default function OrderOfPlay() {
   const [
     selectedCategories,
     setSelectedCategories,
-  ] = useState(["Cat.B"]);
+  ] = useState([""]);
  
 
   const [selectedEventId, setSelectedEventId] = useState("");
@@ -308,7 +308,10 @@ export default function OrderOfPlay() {
   console.log("🚀 FETCH START");
   console.log("📌 selectedCategories:", selectedCategories);
   console.log("📌 selectedRounds:", selectedRounds);
-
+  console.log("COURT COUNT =", courtCount);
+console.log("MATCHES PER COURT =", matchesPerCourt);
+console.log("SELECTED CATEGORIES =", selectedCategories);
+console.log("SELECTED ROUNDS =", selectedRounds);
   setGrid([]);
 
   try {
@@ -396,7 +399,8 @@ const allowedRounds = selectedRounds.map(
 
       return (a.matchNo || 0) - (b.matchNo || 0);
     });
-
+   console.log("ALL MATCHES =", allMatches);
+console.log("TOTAL =", allMatches.length);
     buildGrid(allMatches);
 
     setShowFilters(false);
@@ -410,12 +414,13 @@ const allowedRounds = selectedRounds.map(
   /* ================= BUILD GRID ================= */
 
   const buildGrid = (matches) => {
-
+console.log("BUILD GRID MATCHES =", matches);
     let temp = [];
 
     const maxRows = Math.max(
+      
       ...Object.values(matchesPerCourt)
-    );
+    );console.log("MAX ROWS =", maxRows);
 
     for (let i = 0; i < maxRows; i++) {
 
@@ -547,6 +552,7 @@ const allowedRounds = selectedRounds.map(
       }
 
     });
+    console.log("FINAL GRID =", temp);
 
     setGrid(temp);
 
@@ -1108,6 +1114,7 @@ console.log("EVENT =", selectedEventId);
                         <input
                           type="number"
                           min="1"
+                          max="10"
                           value={
                             matchesPerCourt[index + 1] || 10
                           }
