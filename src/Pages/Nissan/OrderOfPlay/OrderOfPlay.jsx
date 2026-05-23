@@ -299,21 +299,25 @@ export default function OrderOfPlay() {
   /* ================= FETCH DATA ================= */
 
  const fetchData = async () => {
+  console.log("🚀 FETCH START");
+
+  setGrid([]);
+
   try {
-    const filteredEvents =
-      selectedCategories.length > 0
-        ? events.filter((ev) =>
-            selectedCategories.includes(ev.name)
-          )
-        : events;
+    // ✅ ONLY CAT A + CAT B
+    const filteredEvents = events.filter((ev) =>
+      ["Cat A", "Cat B"].includes(ev.name)
+    );
+
+    console.log("📌 EVENTS SELECTED:", filteredEvents.map(e => e.name));
+
+    const allowedRounds = ["Round 1", "Round 2"];
 
     const allResponses = await Promise.all(
       filteredEvents.map((ev) =>
         axios.get(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         )
       )
     );
@@ -322,29 +326,40 @@ export default function OrderOfPlay() {
 
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
+      const matches = res.data.data || [];
 
-      const matches = (res.data.data || []).filter((d) => {
-        // DEFAULT ROUND 1
-        if (selectedRounds.length === 0) {
-          return d.Stage === "Round 1";
-        }
+      console.log(`📌 ${ev.name} RAW MATCHES:`, matches.length);
 
-        return selectedRounds.includes(d.Stage);
-      });
+      // ✅ FILTER ROUND 1 + 2
+      const filteredMatches = matches.filter((m) =>
+        allowedRounds.includes(m.Stage?.trim())
+      );
 
-      const withCategory = matches.map((m) => ({
+      console.log(
+        `📌 ${ev.name} AFTER ROUND FILTER:`,
+        filteredMatches.length
+      );
+
+      // attach category
+      const mapped = filteredMatches.map((m, idx) => ({
         ...m,
         category: ev.name,
+        matchNo: idx + 1,
       }));
 
-      allMatches = [...allMatches, ...withCategory];
+      allMatches.push(...mapped);
     });
 
+    console.log("🔥 FINAL MATCH COUNT (ALL):", allMatches.length);
+
+    // 👉 GRID BUILD
     buildGrid(allMatches);
+
     setShowFilters(false);
+    setHideGrid(false);
   } catch (err) {
-    console.error(err);
-    toast.error("Error loading");
+    console.error("FETCH ERROR:", err);
+    toast.error("Error loading matches");
   }
 };
   /* ================= BUILD GRID ================= */
