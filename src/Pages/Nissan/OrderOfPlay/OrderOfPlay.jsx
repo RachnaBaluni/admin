@@ -1,6 +1,7 @@
 import React, {
   useEffect,
   useState,
+  useRef
 } from "react";
 
 import axios from "axios";
@@ -44,6 +45,7 @@ const getPlayers = (m) => {
 function DraggableMatch({
   match,
   time,
+  allMatchesRef
 }) {
 
   const {
@@ -239,7 +241,7 @@ function DroppableSlot({
 /* ================= MAIN ================= */
 
 export default function OrderOfPlay() {
-
+const allMatchesRef = useRef([]);
   const [grid, setGrid] =
     useState([]);
 
@@ -487,6 +489,7 @@ const allowedRounds = selectedRounds.map(
     });
    console.log("ALL MATCHES =", allMatches);
 console.log("TOTAL =", allMatches.length);
+allMatchesRef.current = allMatches;
     buildGrid(allMatches);
 
     setShowFilters(false);
@@ -1304,6 +1307,7 @@ console.log("EVENT =", selectedEventId);
                               <DraggableMatch
                                 match={cell.match}
                                 time={cell.time}
+                                allMatchesRef={allMatchesRef}
                               />
 
                             )
