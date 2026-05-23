@@ -518,26 +518,14 @@ allMatchesRef.current = allMatches;
 };
   /* ================= BUILD GRID ================= */
 
-const buildGrid = (matches) => {
+  const buildGrid = (matches) => {
   let temp = [];
 
   const maxRows = Math.max(...Object.values(matchesPerCourt));
 
-  const timeSlotPlayers = {};   // ✅ MOVE HERE (TOP)
-
   // STEP 1: GRID INIT
   for (let i = 0; i < maxRows; i++) {
-    const time = getTimeLabel(i);
-
-    console.log("----- SLOT CHECK -----");
-    console.log("TIME:", time);
-    console.log(
-      "BOOKED:",
-      timeSlotPlayers[time]
-        ? [...timeSlotPlayers[time]]
-        : []
-    );
-
+    
     let row = [];
 
     for (let j = 0; j < courtCount; j++) {
@@ -550,6 +538,7 @@ const buildGrid = (matches) => {
 
     temp.push(row);
   }
+
   const timeSlotPlayers = {};
 
   // STEP 2: PLACE EACH MATCH
