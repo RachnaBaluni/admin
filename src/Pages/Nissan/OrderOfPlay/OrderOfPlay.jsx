@@ -194,7 +194,7 @@ export default function OrderOfPlay() {
   const [
     selectedCategories,
     setSelectedCategories,
-  ] = useState([]);
+  ] = useState(["Cat.B"]);
  
 
   const [selectedEventId, setSelectedEventId] = useState("");
@@ -214,7 +214,7 @@ export default function OrderOfPlay() {
   const [
     courtCount,
     setCourtCount,
-  ] = useState(4);
+  ] = useState(10);
 
   const [
     showFilters,
@@ -326,8 +326,9 @@ export default function OrderOfPlay() {
 
     let allMatches = [];
 
-    const allowedRounds = ["round 1", "round 2"];
-
+const allowedRounds = selectedRounds.map(
+  (r) => r.trim().toLowerCase()
+);
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
 
