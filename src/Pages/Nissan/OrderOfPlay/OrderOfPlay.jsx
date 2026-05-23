@@ -394,7 +394,6 @@ export default function OrderOfPlay() {
 
     setShowFilters(false);
     setHideGrid(false);
-    setGrid(allMatches);
 
   } catch (err) {
     console.error("❌ FETCH ERROR:", err);
