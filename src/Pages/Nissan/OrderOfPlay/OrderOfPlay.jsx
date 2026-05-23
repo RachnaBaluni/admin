@@ -214,7 +214,7 @@ export default function OrderOfPlay() {
   const [
     courtCount,
     setCourtCount,
-  ] = useState(10);
+  ] = useState(4);
 
   const [
     showFilters,
@@ -232,14 +232,20 @@ export default function OrderOfPlay() {
   ] = useState("");
 
   const [
-    matchesPerCourt,
-    setMatchesPerCourt,
-  ] = useState({
-    1: 4,
-    2: 4,
-    3: 4,
-    4: 4,
-  });
+  matchesPerCourt,
+  setMatchesPerCourt,
+] = useState({
+  1: 10,
+  2: 10,
+  3: 10,
+  4: 10,
+  5: 10,
+  6: 10,
+  7: 10,
+  8: 10,
+  9: 10,
+  10: 10,
+});
 
   const roundsList = [
     "Round 1",
@@ -1103,7 +1109,7 @@ console.log("EVENT =", selectedEventId);
                           type="number"
                           min="1"
                           value={
-                            matchesPerCourt[index + 1] || 1
+                            matchesPerCourt[index + 1] || 10
                           }
                           onChange={(e) =>
                             setMatchesPerCourt({
