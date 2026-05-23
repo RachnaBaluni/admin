@@ -658,6 +658,29 @@ console.log("BUILD GRID MATCHES =", matches);
 
     });
     console.log("FINAL GRID =", temp);
+    console.log("FINAL GRID =", temp);
+
+const placed =
+temp.flat().filter(
+(cell) => cell.match
+).length;
+
+console.log(
+"TOTAL MATCHES:",
+matches.length
+);
+
+console.log(
+"PLACED MATCHES:",
+placed
+);
+
+console.log(
+"MISSING:",
+matches.length - placed
+);
+
+setGrid(temp);
 
     setGrid(temp);
 
