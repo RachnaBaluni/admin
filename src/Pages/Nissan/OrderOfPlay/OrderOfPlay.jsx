@@ -191,6 +191,28 @@ function DraggableMatch({
   return `R${prevRound} M${rightMatch} Winner`;
 
 };
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      style={style}
+    >
+      <div>{time}</div>
+
+      <div>
+        {getTeamName(match.Team1, 1)}
+      </div>
+
+      <div>VS</div>
+
+      <div>
+        {getTeamName(match.Team2, 2)}
+      </div>
+    </div>
+  );
+
+} // ← DraggableMatch yahan close hoga
 
 /* ================= DROP SLOT ================= */
 
@@ -1307,4 +1329,4 @@ console.log("EVENT =", selectedEventId);
     </div>
   );
 }
-}
+
