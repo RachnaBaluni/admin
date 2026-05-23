@@ -351,7 +351,7 @@
     page-break-inside: avoid;
   }
 
-  .card {
+  .matchCard {
     border: 1px solid #999;
     background: white !important;
     break-inside: avoid;
