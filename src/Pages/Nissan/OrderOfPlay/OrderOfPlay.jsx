@@ -525,6 +525,17 @@ allMatchesRef.current = allMatches;
 
   // STEP 1: GRID INIT
   for (let i = 0; i < maxRows; i++) {
+    const time = getTimeLabel(i);
+
+console.log("----- SLOT CHECK -----");
+console.log("TIME:", time);
+console.log("MATCH PLAYERS:", players);
+console.log(
+  "BOOKED:",
+  timeSlotPlayers[time]
+    ? [...timeSlotPlayers[time]]
+    : []
+);
     let row = [];
 
     for (let j = 0; j < courtCount; j++) {
@@ -543,11 +554,7 @@ allMatchesRef.current = allMatches;
   // STEP 2: PLACE EACH MATCH
   matches.forEach((match) => {
     const players = getPlayers(match);
-    console.log("TIME SLOT CHECK START");
-console.log("MATCH PLAYERS:", players);
-console.log("TIME:", i);
-console.log("COURT:", j);
-console.log("ALREADY BOOKED:", timeSlotPlayers[getTimeLabel(i)] ? [...timeSlotPlayers[getTimeLabel(i)]] : []);
+    
 
     let bestSlot = null;
     let bestScore = -Infinity;
