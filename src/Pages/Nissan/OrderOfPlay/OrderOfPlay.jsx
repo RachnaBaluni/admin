@@ -919,6 +919,10 @@ if (
               Math.abs(
                 swapped.rowIndex - i
               );
+              const samePlayerConflict =
+  swappedPlayers.some((p) =>
+    cellPlayers.includes(p)
+  );
 
             if (
               diff === 1 &&
