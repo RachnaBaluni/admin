@@ -370,7 +370,6 @@ export default function OrderOfPlay() {
 
     setShowFilters(false);
     setHideGrid(false);
-    setGrid(allMatches);
 
   } catch (err) {
     console.error(err);
