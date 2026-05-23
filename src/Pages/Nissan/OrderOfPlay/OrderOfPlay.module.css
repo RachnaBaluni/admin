@@ -206,7 +206,7 @@
 
 /* ================= CARD ================= */
 
-.matchcard {
+.matchCard {
   border: 1px dashed #bbb;
   padding: 10px;
   border-radius: 8px;
@@ -219,7 +219,7 @@
   transition: 0.2s;
 }
 
-.matchcard:hover {
+.matchCard:hover {
   background: #f3f4f6;
 }
 
