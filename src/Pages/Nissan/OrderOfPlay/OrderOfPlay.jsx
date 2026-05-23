@@ -573,14 +573,46 @@ const buildGrid = (matches) => {
       }
     }
 
-    if (bestSlot) {
-      const { i, j, time } = bestSlot;
-      temp[i][j].match = match;
+   if (bestSlot) {
+  const { i, j, time } = bestSlot;
 
-      players.forEach((p) =>
-        timeSlotPlayers[time].add(p)
-      );
+  temp[i][j].match = match;
+
+  if (!timeSlotPlayers[time]) {
+    timeSlotPlayers[time] = new Set();
+  }
+
+  players.forEach((p) =>
+    timeSlotPlayers[time].add(p)
+  );
+} else {
+  // 🔥 IMPORTANT: fallback me bhi conflict check
+  outer: for (let i = 0; i < maxRows; i++) {
+    const time = getTimeLabel(i);
+
+    if (!timeSlotPlayers[time]) {
+      timeSlotPlayers[time] = new Set();
     }
+
+    for (let j = 0; j < courtCount; j++) {
+      const slotSet = timeSlotPlayers[time];
+
+      const conflict = players.some((p) =>
+        slotSet.has(p)
+      );
+
+      if (!conflict && !temp[i][j].match) {
+        temp[i][j].match = match;
+
+        players.forEach((p) =>
+          slotSet.add(p)
+        );
+
+        break outer;
+      }
+    }
+  }
+}
   });
 
   setGrid(temp);
