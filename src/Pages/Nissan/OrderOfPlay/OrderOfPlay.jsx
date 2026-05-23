@@ -178,13 +178,38 @@ function DroppableSlot({
     </div>
   );
 }
+function DraggableMatch({ match, time }) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: match._id,
+  });
+
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      style={style}
+      className={styles.matchCard}
+    >
+      <div>
+        {match?.Stage} M{match?.matchNo}
+      </div>
+    </div>
+  );
+}
 
 /* ================= MAIN ================= */
 
 export default function OrderOfPlay() {
 
   const [grid, setGrid] =
-    useState([]);
+  useState([]);
 
   const [events, setEvents] =
     useState([]);
