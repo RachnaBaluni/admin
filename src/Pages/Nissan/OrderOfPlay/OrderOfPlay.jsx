@@ -444,7 +444,7 @@ console.log("BUILD GRID MATCHES =", matches);
     const timeSlotPlayers = {};
 
     matches.forEach((match) => {
-       if (match.Status === "Completed") return;
+     //  if (match.Status === "Completed") return;
       const players =
         getPlayers(match);
 
