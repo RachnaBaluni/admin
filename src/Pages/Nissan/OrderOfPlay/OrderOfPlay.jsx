@@ -518,14 +518,13 @@ allMatchesRef.current = allMatches;
 };
   /* ================= BUILD GRID ================= */
 
-  const buildGrid = (matches) => {
+const buildGrid = (matches) => {
   let temp = [];
-
   const maxRows = Math.max(...Object.values(matchesPerCourt));
 
-  // STEP 1: GRID INIT
+  const timeSlotPlayers = {}; // 🔥 MUST be before loop
+
   for (let i = 0; i < maxRows; i++) {
-    
     let row = [];
 
     for (let j = 0; j < courtCount; j++) {
@@ -539,17 +538,12 @@ allMatchesRef.current = allMatches;
     temp.push(row);
   }
 
-  const timeSlotPlayers = {};
-
-  // STEP 2: PLACE EACH MATCH
   matches.forEach((match) => {
     const players = getPlayers(match);
-    
 
     let bestSlot = null;
     let bestScore = -Infinity;
 
-    // STEP 3: TRY ALL SLOTS
     for (let i = 0; i < maxRows; i++) {
       const time = getTimeLabel(i);
 
@@ -558,78 +552,20 @@ allMatchesRef.current = allMatches;
       }
 
       for (let j = 0; j < courtCount; j++) {
-        const courtNo = j + 1;
-
-        if (i >= (matchesPerCourt[courtNo] || 0)) continue;
+        if (i >= (matchesPerCourt[j + 1] || 0)) continue;
         if (temp[i][j].match) continue;
 
-        // 🔴 HARD RULE: same time conflict
         const slotSet = timeSlotPlayers[time];
 
-const sameTimeConflict = players.some((p) =>
-  slotSet.has(p)
-);
+        const sameTimeConflict = players.some((p) =>
+          slotSet.has(p)
+        );
 
         if (sameTimeConflict) continue;
 
-        // 🔴 HARD RULE: consecutive conflict
-        let consecutiveConflict = false;
-
-        if (i > 0) {
-          for (let k = 0; k < courtCount; k++) {
-            const prev = temp[i - 1][k].match;
-            if (!prev) continue;
-
-            const prevPlayers = getPlayers(prev);
-
-            const overlap = players.some((p) =>
-              prevPlayers.includes(p)
-            );
-
-            if (overlap && k !== j) {
-              consecutiveConflict = true;
-              break;
-            }
-          }
-        }
-
-        if (consecutiveConflict) continue;
-
-        // 🟢 SCORING SYSTEM
         let score = 0;
+        score += 1;
 
-        // preferred: same court continuity
-        score += 2;
-
-        // preferred: empty time slot
-        score += 2;
-
-        // slight penalty if crowded row
-        const filledInRow = temp[i].filter((c) => c.match).length;
-        score -= filledInRow * 0.5;
-
-        // prefer earlier slots
-        score += (maxRows - i) * 0.1;
-
-        // BONUS: no recent player clash
-        const recentRow = i > 0 ? temp[i - 1] : null;
-        if (recentRow) {
-          let hasRecentClash = false;
-
-          recentRow.forEach((cell) => {
-            if (!cell.match) return;
-
-            const prevPlayers = getPlayers(cell.match);
-
-            if (players.some((p) => prevPlayers.includes(p))) {
-              hasRecentClash = true;
-            }
-          });
-
-          if (hasRecentClash) score -= 3;
-        }
-
-        // 🟢 PICK BEST SLOT
         if (score > bestScore) {
           bestScore = score;
           bestSlot = { i, j, time };
@@ -637,35 +573,18 @@ const sameTimeConflict = players.some((p) =>
       }
     }
 
-    // STEP 4: PLACE MATCH (FORCED fallback if needed)
     if (bestSlot) {
       const { i, j, time } = bestSlot;
-
       temp[i][j].match = match;
-
-      if (!timeSlotPlayers[time]) {
-        timeSlotPlayers[time] = new Set();
-      }
 
       players.forEach((p) =>
         timeSlotPlayers[time].add(p)
       );
-    } else {
-      // 🔥 fallback: force place anywhere empty
-      outer: for (let i = 0; i < maxRows; i++) {
-        for (let j = 0; j < courtCount; j++) {
-          if (!temp[i][j].match) {
-            temp[i][j].match = match;
-            break outer;
-          }
-        }
-      }
     }
   });
 
   setGrid(temp);
 };
-
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
     console.log("SAVE DATE =", selectedDate);
@@ -927,12 +846,11 @@ console.log("EVENT =", selectedEventId);
               continue;
             }
 
-            if (
-              i === swapped.rowIndex &&
-              j === swapped.court - 1
-            ) {
-              continue;
-            }
+            const isSameCell =
+  i === swapped.rowIndex &&
+  j === swapped.court - 1;
+
+if (isSameCell) continue;
 
             const cellPlayers =
               getPlayers(cell.match);
@@ -948,20 +866,20 @@ console.log("EVENT =", selectedEventId);
 
             /* SAME TIME */
 
-            if (
-              swapped.time ===
-                cell.time &&
-              swapped.court !==
-                cell.court
-            ) {
+            const overlap = swappedPlayers.some((p) =>
+  cellPlayers.includes(p)
+);
 
-              toast.error(
-                "❌ Same player cannot play on different courts at same time"
-              );
-
-              return;
-
-            }
+if (
+  overlap &&
+  swapped.time === cell.time &&
+  (i !== swapped.rowIndex || j !== swapped.court - 1)
+) {
+  toast.error(
+    "❌ Same player cannot play on different courts at same time"
+  );
+  return;
+}
 
             /* CONSECUTIVE */
 
