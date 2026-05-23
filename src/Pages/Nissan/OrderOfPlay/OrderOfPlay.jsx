@@ -281,7 +281,7 @@ const allMatchesRef = useRef([]);
     setSelectedRounds,
   ] = useState([
     "Round 1",
-    "Round 2",
+    
   ]);
 
   const [
