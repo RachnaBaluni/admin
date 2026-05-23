@@ -526,6 +526,7 @@ allMatchesRef.current = allMatches;
   // STEP 1: GRID INIT
   for (let i = 0; i < maxRows; i++) {
     const time = getTimeLabel(i);
+    const players = getPlayers(match);
 
 console.log("----- SLOT CHECK -----");
 console.log("TIME:", time);
