@@ -633,7 +633,7 @@ console.log("BUILD GRID MATCHES =", matches);
           }
 
           if (consecutiveConflict) {
-            continue;
+            break;
           }
 
           /* PLACE MATCH */
