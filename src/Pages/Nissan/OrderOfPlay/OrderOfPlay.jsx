@@ -300,21 +300,18 @@ export default function OrderOfPlay() {
 
  const fetchData = async () => {
   console.log("🚀 FETCH START");
-  console.log("📌 selectedRounds:", selectedRounds);
-  console.log("📌 selectedCategories:", selectedCategories);
-  console.log("📌 selectedDate:", selectedDate);
 
   setGrid([]);
 
   try {
-    const filteredEvents =
-      selectedCategories.length > 0
-        ? events.filter((ev) =>
-            selectedCategories.includes(ev.name)
-          )
-        : events;
+    // ✅ ONLY CAT A + CAT B
+    const filteredEvents = events.filter((ev) =>
+      ["Cat A", "Cat B"].includes(ev.name)
+    );
 
-    console.log("📌 EVENTS COUNT:", filteredEvents.length);
+    console.log("📌 EVENTS SELECTED:", filteredEvents.map(e => e.name));
+
+    const allowedRounds = ["Round 1", "Round 2"];
 
     const allResponses = await Promise.all(
       filteredEvents.map((ev) =>
@@ -325,38 +322,25 @@ export default function OrderOfPlay() {
       )
     );
 
-    console.log("📌 TOTAL API RESPONSES:", allResponses.length);
-
     let allMatches = [];
-
-    // 🔥 ROUND FILTER (DEFAULT: Round 1 + Round 2)
-    const allowedRounds = selectedRounds.length
-      ? selectedRounds
-      : ["Round 1", "Round 2"];
-
-    console.log("📌 ACTIVE ROUNDS:", allowedRounds);
 
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
+      const matches = res.data.data || [];
 
-      const matches = res?.data?.data || [];
+      console.log(`📌 ${ev.name} RAW MATCHES:`, matches.length);
 
-      console.log(
-        `📌 ${ev.name} RAW MATCHES:`,
-        matches.length
+      // ✅ FILTER ROUND 1 + 2
+      const filteredMatches = matches.filter((m) =>
+        allowedRounds.includes(m.Stage?.trim())
       );
-
-      // 🔥 ROUND FILTER APPLY
-      const filteredMatches = matches.filter((m) => {
-        const stage = m.Stage?.trim();
-        return allowedRounds.includes(stage);
-      });
 
       console.log(
         `📌 ${ev.name} AFTER ROUND FILTER:`,
         filteredMatches.length
       );
 
+      // attach category
       const mapped = filteredMatches.map((m, idx) => ({
         ...m,
         category: ev.name,
@@ -366,19 +350,15 @@ export default function OrderOfPlay() {
       allMatches.push(...mapped);
     });
 
-    console.log("📌 FINAL MATCH COUNT:", allMatches.length);
+    console.log("🔥 FINAL MATCH COUNT (ALL):", allMatches.length);
 
-    // 🔥 GRID INPUT CHECK
-    console.log("📌 SENDING TO GRID:", allMatches.length);
-
+    // 👉 GRID BUILD
     buildGrid(allMatches);
 
     setShowFilters(false);
     setHideGrid(false);
-
-    console.log("✅ FETCH COMPLETE");
   } catch (err) {
-    console.error("❌ FETCH ERROR:", err);
+    console.error("FETCH ERROR:", err);
     toast.error("Error loading matches");
   }
 };
