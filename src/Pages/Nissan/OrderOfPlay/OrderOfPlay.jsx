@@ -241,7 +241,7 @@ function DroppableSlot({
 /* ================= MAIN ================= */
 
 export default function OrderOfPlay() {
-const allMatchesRef = useRef([]);
+//const allMatchesRef = useRef([]);
   const [grid, setGrid] =
     useState([]);
 
