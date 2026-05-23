@@ -299,9 +299,9 @@ export default function OrderOfPlay() {
   /* ================= FETCH DATA ================= */
 
  const fetchData = async () => {
-  console.log("selectedDate value =", selectedDate);
-  console.log("Selected Date:", selectedDate);
-  console.log("EVENT ID:", selectedEventId);
+  console.log("🚀 FETCH START");
+  console.log("📌 selectedCategories:", selectedCategories);
+  console.log("📌 selectedRounds:", selectedRounds);
 
   setGrid([]);
 
@@ -313,29 +313,50 @@ export default function OrderOfPlay() {
           )
         : events;
 
+    console.log("📌 EVENTS COUNT:", filteredEvents.length);
+
     const allResponses = await Promise.all(
       filteredEvents.map((ev) =>
         axios.get(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         )
       )
     );
 
     let allMatches = [];
 
-    const allowedRounds = ["Round 1", "Round 2"]; // ✅ ONLY THESE
+    const allowedRounds = ["round 1", "round 2"];
 
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
 
       const matches = res.data.data || [];
 
-      // ✅ ONLY ROUND 1 & ROUND 2
+      console.log(`\n======================`);
+      console.log(`📌 CATEGORY: ${ev.name}`);
+      console.log(`RAW MATCHES: ${matches.length}`);
+
+      // normalize + debug stages
+      const round1 = matches.filter(
+        (m) => (m.Stage || "").trim().toLowerCase() === "round 1"
+      );
+
+      const round2 = matches.filter(
+        (m) => (m.Stage || "").trim().toLowerCase() === "round 2"
+      );
+
+      console.log("➡ Round 1:", round1.length);
+      console.log("➡ Round 2:", round2.length);
+      console.log("➡ TOTAL R1+R2:", round1.length + round2.length);
+
       const filteredMatches = matches.filter((m) =>
-        allowedRounds.includes(m.Stage?.trim())
+        allowedRounds.includes((m.Stage || "").trim().toLowerCase())
+      );
+
+      console.log(
+        `✅ AFTER FILTER (${ev.name}):`,
+        filteredMatches.length
       );
 
       const matchesWithData = filteredMatches.map((m, idx) => ({
@@ -346,6 +367,9 @@ export default function OrderOfPlay() {
 
       allMatches.push(...matchesWithData);
     });
+
+    console.log("\n🔥 FINAL MATCH COUNT:", allMatches.length);
+    console.log("📦 SENDING TO GRID:", allMatches.length);
 
     const roundOrder = {
       "Round 1": 1,
@@ -370,9 +394,10 @@ export default function OrderOfPlay() {
 
     setShowFilters(false);
     setHideGrid(false);
+    setGrid(allMatches);
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ FETCH ERROR:", err);
     toast.error("Error loading matches");
   }
 };
