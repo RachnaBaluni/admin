@@ -227,7 +227,7 @@ export default function OrderOfPlay() {
   const [
     selectedCategories,
     setSelectedCategories,
-  ] = useState(["Cat.B(85+ combined)"]);
+  ] = useState([]);
  
 
   const [selectedEventId, setSelectedEventId] = useState("");
@@ -322,11 +322,28 @@ export default function OrderOfPlay() {
           }
         );
             console.log("EVENTS =", res.data.data);
+            const allEvents = res.data.data;
 
 
       setEvents(
-        res.data.data
+        allEvents
       );
+      setSelectedCategories(
+      allEvents.map(
+        (ev) => ev.name
+      )
+    );
+
+    // FIRST EVENT SELECT
+    if (
+      allEvents.length > 0
+    ) {
+
+      setSelectedEventId(
+        allEvents[0]._id
+      );
+
+    }
 
     } catch (err) {
 
