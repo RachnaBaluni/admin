@@ -369,6 +369,7 @@ const allowedRounds = selectedRounds.map(
         `✅ AFTER FILTER (${ev.name}):`,
         filteredMatches.length
       );
+      const roundCounters = {};
 
       const matchesWithData = filteredMatches.map((m) => {
 
