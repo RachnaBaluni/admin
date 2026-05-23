@@ -194,7 +194,7 @@ export default function OrderOfPlay() {
   const [
     selectedCategories,
     setSelectedCategories,
-  ] = useState([""]);
+  ] = useState([]);
  
 
   const [selectedEventId, setSelectedEventId] = useState("");
