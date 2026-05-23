@@ -30,14 +30,14 @@ const getTimeLabel = (index) => {
 /* ================= PLAYERS ================= */
 
 const getPlayers = (m) => {
-
   return [
     m?.Team1?.partner1?._id,
     m?.Team1?.partner2?._id,
     m?.Team2?.partner1?._id,
     m?.Team2?.partner2?._id,
-  ].filter(Boolean);
-
+  ]
+    .filter(Boolean)
+    .map((id) => id.toString().trim());
 };
 
 /* ================= DRAG CARD ================= */
@@ -543,6 +543,11 @@ allMatchesRef.current = allMatches;
   // STEP 2: PLACE EACH MATCH
   matches.forEach((match) => {
     const players = getPlayers(match);
+    console.log("TIME SLOT CHECK START");
+console.log("MATCH PLAYERS:", players);
+console.log("TIME:", i);
+console.log("COURT:", j);
+console.log("ALREADY BOOKED:", timeSlotPlayers[getTimeLabel(i)] ? [...timeSlotPlayers[getTimeLabel(i)]] : []);
 
     let bestSlot = null;
     let bestScore = -Infinity;
@@ -562,9 +567,11 @@ allMatchesRef.current = allMatches;
         if (temp[i][j].match) continue;
 
         // 🔴 HARD RULE: same time conflict
-        const sameTimeConflict = players.some((p) =>
-          timeSlotPlayers[time].has(p)
-        );
+        const slotSet = timeSlotPlayers[time];
+
+const sameTimeConflict = players.some((p) =>
+  slotSet.has(p)
+);
 
         if (sameTimeConflict) continue;
 
