@@ -194,28 +194,44 @@ function DraggableMatch({
 
 };
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={style}
-    >
-      <div>{time}</div>
-
-      <div>
-        {getTeamName(match.Team1, 1)}
-      </div>
-
-      <div>VS</div>
-
-      <div>
-        {getTeamName(match.Team2, 2)}
-      </div>
+  <div
+    ref={setNodeRef}
+    {...listeners}
+    {...attributes}
+    style={style}
+    className={styles.matchCard}
+  >
+    {/* TIME */}
+    <div className={styles.time}>
+      {time}
     </div>
-  );
 
-} // ← DraggableMatch yahan close hoga
+    {/* CATEGORY */}
+    <div className={styles.category}>
+      {match.category}
+    </div>
 
+    {/* ROUND */}
+    <div className={styles.round}>
+      {match.Stage}
+    </div>
+
+    {/* TEAM 1 */}
+    <div className={styles.team}>
+      {getTeamName(match.Team1, 1)}
+    </div>
+
+    <div className={styles.vs}>
+      VS
+    </div>
+
+    {/* TEAM 2 */}
+    <div className={styles.team}>
+      {getTeamName(match.Team2, 2)}
+    </div>
+  </div>
+);
+}
 /* ================= DROP SLOT ================= */
 
 function DroppableSlot({
