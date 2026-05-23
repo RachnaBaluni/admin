@@ -370,12 +370,24 @@ const allowedRounds = selectedRounds.map(
         filteredMatches.length
       );
 
-      const matchesWithData = filteredMatches.map((m, idx) => ({
-        ...m,
-        category: ev.name,
-        matchNo: idx + 1,
-      }));
+      const matchesWithData = filteredMatches.map((m) => {
 
+    const stage = (m.Stage || "Round 1").trim();
+
+    if (!roundCounters[stage]) {
+      roundCounters[stage] = 1;
+    }
+
+    const currentMatchNo =
+      roundCounters[stage]++;
+
+    return {
+      ...m,
+      category: ev.name,
+      matchNo: currentMatchNo,
+    };
+
+  });
       allMatches.push(...matchesWithData);
     });
 
