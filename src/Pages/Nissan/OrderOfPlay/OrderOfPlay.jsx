@@ -299,9 +299,10 @@ export default function OrderOfPlay() {
   /* ================= FETCH DATA ================= */
 
  const fetchData = async () => {
-  console.log("selectedDate value =", selectedDate);
-  console.log("Selected Date:", selectedDate);
-  console.log("EVENT ID:", selectedEventId);
+  console.log("🚀 FETCH START");
+  console.log("📌 selectedRounds:", selectedRounds);
+  console.log("📌 selectedCategories:", selectedCategories);
+  console.log("📌 selectedDate:", selectedDate);
 
   setGrid([]);
 
@@ -313,66 +314,71 @@ export default function OrderOfPlay() {
           )
         : events;
 
+    console.log("📌 EVENTS COUNT:", filteredEvents.length);
+
     const allResponses = await Promise.all(
       filteredEvents.map((ev) =>
         axios.get(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         )
       )
     );
 
+    console.log("📌 TOTAL API RESPONSES:", allResponses.length);
+
     let allMatches = [];
 
-    const allowedRounds = ["Round 1", "Round 2"]; // ✅ ONLY THESE
+    // 🔥 ROUND FILTER (DEFAULT: Round 1 + Round 2)
+    const allowedRounds = selectedRounds.length
+      ? selectedRounds
+      : ["Round 1", "Round 2"];
+
+    console.log("📌 ACTIVE ROUNDS:", allowedRounds);
 
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
 
-      const matches = res.data.data || [];
+      const matches = res?.data?.data || [];
 
-      // ✅ ONLY ROUND 1 & ROUND 2
-      const filteredMatches = matches.filter((m) =>
-        allowedRounds.includes(m.Stage?.trim())
+      console.log(
+        `📌 ${ev.name} RAW MATCHES:`,
+        matches.length
       );
 
-      const matchesWithData = filteredMatches.map((m, idx) => ({
+      // 🔥 ROUND FILTER APPLY
+      const filteredMatches = matches.filter((m) => {
+        const stage = m.Stage?.trim();
+        return allowedRounds.includes(stage);
+      });
+
+      console.log(
+        `📌 ${ev.name} AFTER ROUND FILTER:`,
+        filteredMatches.length
+      );
+
+      const mapped = filteredMatches.map((m, idx) => ({
         ...m,
         category: ev.name,
         matchNo: idx + 1,
       }));
 
-      allMatches.push(...matchesWithData);
+      allMatches.push(...mapped);
     });
 
-    const roundOrder = {
-      "Round 1": 1,
-      "Round 2": 2,
-      "Round 3": 3,
-      "Round 4": 4,
-      "Round 5": 5,
-      "Round 6": 6,
-    };
+    console.log("📌 FINAL MATCH COUNT:", allMatches.length);
 
-    allMatches.sort((a, b) => {
-      const roundDiff =
-        (roundOrder[a.Stage] || 99) -
-        (roundOrder[b.Stage] || 99);
-
-      if (roundDiff !== 0) return roundDiff;
-
-      return (a.matchNo || 0) - (b.matchNo || 0);
-    });
+    // 🔥 GRID INPUT CHECK
+    console.log("📌 SENDING TO GRID:", allMatches.length);
 
     buildGrid(allMatches);
 
     setShowFilters(false);
     setHideGrid(false);
 
+    console.log("✅ FETCH COMPLETE");
   } catch (err) {
-    console.error(err);
+    console.error("❌ FETCH ERROR:", err);
     toast.error("Error loading matches");
   }
 };
