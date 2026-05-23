@@ -206,7 +206,7 @@
 
 /* ================= CARD ================= */
 
-.card {
+.matchcard {
   border: 1px dashed #bbb;
   padding: 10px;
   border-radius: 8px;
@@ -219,13 +219,13 @@
   transition: 0.2s;
 }
 
-.card:hover {
+.matchcard:hover {
   background: #f3f4f6;
 }
 
 /* ================= TIME ================= */
 
-.fixedTime {
+.Time {
   font-weight: bold;
   color: #2563eb;
   font-size: 14px;
