@@ -298,131 +298,85 @@ export default function OrderOfPlay() {
 
   /* ================= FETCH DATA ================= */
 
-  const fetchData = async () => {
-    console.log("selectedDate value =", selectedDate);
-    console.log("Selected Date:", selectedDate);
-    console.log("EVENT ID:", selectedEventId);
-    
+ const fetchData = async () => {
+  console.log("selectedDate value =", selectedDate);
+  console.log("Selected Date:", selectedDate);
+  console.log("EVENT ID:", selectedEventId);
 
-     setGrid([]);
+  setGrid([]);
 
-    try {
-
-      const filteredEvents =
-        selectedCategories.length > 0
-          ? events.filter((ev) =>
-              selectedCategories.includes(
-                ev.name
-              )
-            )
-          : events;
-
-      const allResponses =
-        await Promise.all(
-        
-          filteredEvents.map((ev) =>
-
-            axios.get(
-              `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-              {
-                withCredentials: true,
-              }
-            )
-
+  try {
+    const filteredEvents =
+      selectedCategories.length > 0
+        ? events.filter((ev) =>
+            selectedCategories.includes(ev.name)
           )
+        : events;
 
-        );
-        
-        console.log("First match:", allResponses[0].data.data[0]); // 👈 HERE
-
-      let allMatches = [];
-
-      allResponses.forEach(
-        (res, index) => {
-
-          const ev =
-            filteredEvents[index];
-
-      const filteredMatches = res.data.data.filter((m) => {
-
-  const isSelectedRound =
-    selectedRounds.includes(m.Stage?.trim());
-
-  const isCompleted =
-    m.Status === "Completed";
-
-  return (
-    isSelectedRound &&
-    !isCompleted
-  );
-
-});  console.log("FILTERED MATCHES:", filteredMatches);
-
-
-          const matchesWithData =
-            filteredMatches.map(
-              (m, idx) => ({
-                ...m,
-                category: ev.name,
-                matchNo: idx + 1,
-              })
-            );
-
-          allMatches.push(
-            ...matchesWithData
-          );
-
-        }
-      );
-
-      const roundOrder = {
-        "Round 1": 1,
-        "Round 2": 2,
-        "Round 3": 3,
-        "Round 4": 4,
-        "Round 5": 5,
-        "Round 6": 6,
-      };
-
-      allMatches.sort(
-        (a, b) => {
-
-          const roundDiff =
-            (roundOrder[a.Stage] || 99)
-            -
-            (roundOrder[b.Stage] || 99);
-
-          if (roundDiff !== 0) {
-            return roundDiff;
+    const allResponses = await Promise.all(
+      filteredEvents.map((ev) =>
+        axios.get(
+          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
+          {
+            withCredentials: true,
           }
+        )
+      )
+    );
 
-          return (
-            (a.matchNo || 0)
-            -
-            (b.matchNo || 0)
-          );
+    let allMatches = [];
 
-        }
+    const allowedRounds = ["Round 1", "Round 2"]; // ✅ ONLY THESE
+
+    allResponses.forEach((res, index) => {
+      const ev = filteredEvents[index];
+
+      const matches = res.data.data || [];
+
+      // ✅ ONLY ROUND 1 & ROUND 2
+      const filteredMatches = matches.filter((m) =>
+        allowedRounds.includes(m.Stage?.trim())
       );
 
-      buildGrid(allMatches);
+      const matchesWithData = filteredMatches.map((m, idx) => ({
+        ...m,
+        category: ev.name,
+        matchNo: idx + 1,
+      }));
 
-      setShowFilters(false);
+      allMatches.push(...matchesWithData);
+    });
 
-      setHideGrid(false);
+    const roundOrder = {
+      "Round 1": 1,
+      "Round 2": 2,
+      "Round 3": 3,
+      "Round 4": 4,
+      "Round 5": 5,
+      "Round 6": 6,
+    };
 
-    } catch (err) {
+    allMatches.sort((a, b) => {
+      const roundDiff =
+        (roundOrder[a.Stage] || 99) -
+        (roundOrder[b.Stage] || 99);
 
-      console.error(err);
+      if (roundDiff !== 0) return roundDiff;
 
-      toast.error(
-        "Error loading matches"
-      );
+      return (a.matchNo || 0) - (b.matchNo || 0);
+    });
 
-    }
+    buildGrid(allMatches);
 
-  };
+    setShowFilters(false);
+    setHideGrid(false);
+    setGrid(allMatches);
 
+  } catch (err) {
+    console.error(err);
+    toast.error("Error loading matches");
+  }
+};
   /* ================= BUILD GRID ================= */
 
   const buildGrid = (matches) => {
