@@ -16,25 +16,27 @@ import {
 
 /* ================= TIME ================= */
 
-const TIME_SLOTS = [
-  "07:30",
-  "08:15",
-  "09:00",
-  "09:45",
-  "10:30",
-  "11:15",
-  "12:00",
-];
+const getTimeLabel = (index) => {
+
+  if (index === 0) return "07:30";
+
+  if (index === 1) return "08:15";
+
+  return "Followed By";
+
+};
 
 /* ================= PLAYERS ================= */
 
 const getPlayers = (m) => {
+
   return [
     m?.Team1?.partner1?._id,
     m?.Team1?.partner2?._id,
     m?.Team2?.partner1?._id,
     m?.Team2?.partner2?._id,
   ].filter(Boolean);
+
 };
 
 /* ================= DRAG CARD ================= */
@@ -67,11 +69,12 @@ function DraggableMatch({
     if (team?.partner1?.name) {
 
       return `${team.partner1?.name || ""}
-        ${
-          team.partner2
-            ? " & " + team.partner2?.name
-            : ""
-        }`;
+      ${
+        team.partner2
+          ? " & " + team.partner2?.name
+          : ""
+      }`;
+
     }
 
     const roundNumber =
@@ -106,6 +109,7 @@ function DraggableMatch({
     }
 
     return `R${prevRound} M${rightMatch} Winner`;
+
   };
 
   return (
@@ -130,10 +134,12 @@ function DraggableMatch({
       </div>
 
       <div className={styles.team}>
-        {getTeamName(
-          match.Team1,
-          1
-        )}
+        {
+          getTeamName(
+            match.Team1,
+            1
+          )
+        }
       </div>
 
       <div className={styles.vs}>
@@ -141,10 +147,12 @@ function DraggableMatch({
       </div>
 
       <div className={styles.team}>
-        {getTeamName(
-          match.Team2,
-          2
-        )}
+        {
+          getTeamName(
+            match.Team2,
+            2
+          )
+        }
       </div>
 
     </div>
@@ -187,9 +195,14 @@ export default function OrderOfPlay() {
     selectedCategories,
     setSelectedCategories,
   ] = useState([]);
+ 
 
-  /* DEFAULT */
-
+  const [selectedEventId, setSelectedEventId] = useState("");
+  useEffect(() => {
+  if (events.length > 0) {
+    setSelectedEventId(events[0]._id);
+  }
+}, [events]);
   const [
     selectedRounds,
     setSelectedRounds,
@@ -207,6 +220,16 @@ export default function OrderOfPlay() {
     showFilters,
     setShowFilters,
   ] = useState(false);
+
+  const [
+    hideGrid,
+    setHideGrid,
+  ] = useState(false);
+
+  const [
+    selectedDate,
+    setSelectedDate,
+  ] = useState("");
 
   const [
     matchesPerCourt,
@@ -230,7 +253,9 @@ export default function OrderOfPlay() {
   /* ================= LOAD EVENTS ================= */
 
   useEffect(() => {
+
     fetchEvents();
+
   }, []);
 
   /* ================= AUTO LOAD ================= */
@@ -238,7 +263,9 @@ export default function OrderOfPlay() {
   useEffect(() => {
 
     if (events.length > 0) {
+
       fetchData();
+
     }
 
   }, [events]);
@@ -265,225 +292,304 @@ export default function OrderOfPlay() {
 
       console.error(err);
 
-      toast.error(
-        "Error loading events"
-      );
     }
+
   };
 
   /* ================= FETCH DATA ================= */
 
-  const fetchData = async () => {
+ const fetchData = async () => {
+  console.log("🚀 FETCH START");
+  console.log("📌 selectedCategories:", selectedCategories);
+  console.log("📌 selectedRounds:", selectedRounds);
 
-    try {
+  setGrid([]);
 
-      const filteredEvents =
-        selectedCategories.length > 0
-          ? events.filter((ev) =>
-              selectedCategories.includes(
-                ev.name
-              )
-            )
-          : events;
-
-      const allResponses =
-        await Promise.all(
-
-          filteredEvents.map((ev) =>
-
-            axios.get(
-              `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-              {
-                withCredentials: true,
-              }
-            )
-
+  try {
+    const filteredEvents =
+      selectedCategories.length > 0
+        ? events.filter((ev) =>
+            selectedCategories.includes(ev.name)
           )
+        : events;
 
-        );
+    console.log("📌 EVENTS COUNT:", filteredEvents.length);
 
-      let allMatches = [];
+    const allResponses = await Promise.all(
+      filteredEvents.map((ev) =>
+        axios.get(
+          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
+          { withCredentials: true }
+        )
+      )
+    );
 
-      allResponses.forEach(
-        (res, index) => {
+    let allMatches = [];
 
-          const ev =
-            filteredEvents[index];
+    const allowedRounds = ["round 1", "round 2"];
 
-          const filteredMatches =
-            res.data.data.filter(
-              (m) =>
-                selectedRounds.includes(
-                  m.Stage?.trim()
-                )
-            );
+    allResponses.forEach((res, index) => {
+      const ev = filteredEvents[index];
 
-          const matchesWithData =
-            filteredMatches.map(
-              (m, idx) => ({
-                ...m,
-                category: ev.name,
-                matchNo: idx + 1,
-              })
-            );
+      const matches = res.data.data || [];
 
-          allMatches.push(
-            ...matchesWithData
-          );
-        }
+      console.log(`\n======================`);
+      console.log(`📌 CATEGORY: ${ev.name}`);
+      console.log(`RAW MATCHES: ${matches.length}`);
+
+      // normalize + debug stages
+      const round1 = matches.filter(
+        (m) => (m.Stage || "").trim().toLowerCase() === "round 1"
       );
 
-      /* SORT */
-
-      const roundOrder = {
-        "Round 1": 1,
-        "Round 2": 2,
-        "Round 3": 3,
-        "Round 4": 4,
-        "Round 5": 5,
-        "Round 6": 6,
-      };
-
-      allMatches.sort(
-        (a, b) => {
-
-          const roundDiff =
-            (roundOrder[a.Stage] || 99)
-            -
-            (roundOrder[b.Stage] || 99);
-
-          if (roundDiff !== 0) {
-            return roundDiff;
-          }
-
-          return (
-            (a.matchNo || 0)
-            -
-            (b.matchNo || 0)
-          );
-        }
+      const round2 = matches.filter(
+        (m) => (m.Stage || "").trim().toLowerCase() === "round 2"
       );
 
-      buildGrid(allMatches);
+      console.log("➡ Round 1:", round1.length);
+      console.log("➡ Round 2:", round2.length);
+      console.log("➡ TOTAL R1+R2:", round1.length + round2.length);
 
-      setShowFilters(false);
-
-      toast.success(
-        "Order Generated"
+      const filteredMatches = matches.filter((m) =>
+        allowedRounds.includes((m.Stage || "").trim().toLowerCase())
       );
 
-    } catch (err) {
-
-      console.error(err);
-
-      toast.error(
-        "Error loading matches"
+      console.log(
+        `✅ AFTER FILTER (${ev.name}):`,
+        filteredMatches.length
       );
-    }
-  };
 
+      const matchesWithData = filteredMatches.map((m, idx) => ({
+        ...m,
+        category: ev.name,
+        matchNo: idx + 1,
+      }));
+
+      allMatches.push(...matchesWithData);
+    });
+
+    console.log("\n🔥 FINAL MATCH COUNT:", allMatches.length);
+    console.log("📦 SENDING TO GRID:", allMatches.length);
+
+    const roundOrder = {
+      "Round 1": 1,
+      "Round 2": 2,
+      "Round 3": 3,
+      "Round 4": 4,
+      "Round 5": 5,
+      "Round 6": 6,
+    };
+
+    allMatches.sort((a, b) => {
+      const roundDiff =
+        (roundOrder[a.Stage] || 99) -
+        (roundOrder[b.Stage] || 99);
+
+      if (roundDiff !== 0) return roundDiff;
+
+      return (a.matchNo || 0) - (b.matchNo || 0);
+    });
+
+    buildGrid(allMatches);
+
+    setShowFilters(false);
+    setHideGrid(false);
+
+  } catch (err) {
+    console.error("❌ FETCH ERROR:", err);
+    toast.error("Error loading matches");
+  }
+};
   /* ================= BUILD GRID ================= */
 
-  const buildGrid = (
-    matches
-  ) => {
+  const buildGrid = (matches) => {
 
     let temp = [];
 
-    let matchIndex = 0;
+    const maxRows = Math.max(
+      ...Object.values(matchesPerCourt)
+    );
 
-    const maxRows =
-      Math.max(
-        ...Object.values(
-          matchesPerCourt
-        )
-      );
-
-    for (
-      let i = 0;
-      i < maxRows;
-      i++
-    ) {
+    for (let i = 0; i < maxRows; i++) {
 
       let row = [];
 
-      for (
-        let j = 0;
-        j < courtCount;
-        j++
-      ) {
+      for (let j = 0; j < courtCount; j++) {
 
-        const courtNo =
-          j + 1;
+        row.push({
+          match: null,
+          time: getTimeLabel(i),
+          court: j + 1,
+        });
 
-        const allowedMatches =
-          matchesPerCourt[
-            courtNo
-          ] || 0;
-
-        if (
-          i < allowedMatches
-        ) {
-
-          const match =
-            matches[
-              matchIndex
-            ];
-
-          row.push({
-            match:
-              match || null,
-            time:
-              TIME_SLOTS[i]
-              ||
-              `Followed By ${i}`,
-            court:
-              courtNo,
-          });
-
-          if (match) {
-            matchIndex++;
-          }
-
-        } else {
-
-          row.push({
-            match: null,
-            time:
-              TIME_SLOTS[i]
-              ||
-              `Followed By ${i}`,
-            court:
-              courtNo,
-          });
-        }
       }
 
       temp.push(row);
+
     }
 
+    const timeSlotPlayers = {};
+
+    matches.forEach((match) => {
+       if (match.Status === "Completed") return;
+      const players =
+        getPlayers(match);
+
+      let placed = false;
+
+      for (let i = 0; i < maxRows; i++) {
+
+        const time =
+          getTimeLabel(i);
+
+        if (!timeSlotPlayers[time]) {
+          timeSlotPlayers[time] =
+            new Set();
+        }
+
+        /* SAME TIME VALIDATION */
+
+        const sameTimeConflict =
+          players.some((p) =>
+            timeSlotPlayers[time].has(p)
+          );
+
+        if (sameTimeConflict) {
+          continue;
+        }
+
+        for (let j = 0; j < courtCount; j++) {
+
+          const courtNo = j + 1;
+
+          const allowedMatches =
+            matchesPerCourt[courtNo] || 0;
+
+          if (i >= allowedMatches) {
+            continue;
+          }
+
+          if (temp[i][j].match) {
+            continue;
+          }
+
+          /* CONSECUTIVE VALIDATION */
+
+          let consecutiveConflict =
+            false;
+
+          if (i > 0) {
+
+            for (
+              let prevCourt = 0;
+              prevCourt < courtCount;
+              prevCourt++
+            ) {
+
+              const prevMatch =
+                temp[i - 1][prevCourt]
+                  .match;
+
+              if (!prevMatch) continue;
+
+              const prevPlayers =
+                getPlayers(prevMatch);
+
+              const samePlayer =
+                players.some((p) =>
+                  prevPlayers.includes(p)
+                );
+
+              if (
+                samePlayer &&
+                prevCourt !== j
+              ) {
+
+                consecutiveConflict = true;
+
+                break;
+
+              }
+
+            }
+
+          }
+
+          if (consecutiveConflict) {
+            continue;
+          }
+
+          /* PLACE MATCH */
+
+          temp[i][j].match = match;
+
+          players.forEach((p) =>
+            timeSlotPlayers[time].add(p)
+          );
+
+          placed = true;
+
+          break;
+
+        }
+
+        if (placed) {
+          break;
+        }
+
+      }
+
+    });
+
     setGrid(temp);
+
   };
+
+  /* ================= SAVE DATA ================= */
+  const saveOrderOfPlay = async () => {
+    console.log("SAVE DATE =", selectedDate);
+console.log("EVENT =", selectedEventId);
+  try {
+    
+    const res = await axios.post(
+      `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
+      {
+        eventId: selectedEventId,
+        playDate: selectedDate,
+        grid: grid,
+      },
+      { withCredentials: true }
+    );
+
+    console.log("Saved:", res.data);
+    toast.success("Order Of Play Saved");
+  } catch (err) {
+    console.log("ERROR:", err.response?.data || err);
+    toast.error("Save Failed");
+  }
+};
 
   /* ================= SETTINGS ================= */
 
-  const handleSettings =
-    () => {
+  const handleReset = () => {
 
-      setShowFilters(
-        !showFilters
-      );
+    setShowFilters(
+      !showFilters
+    );
 
-    };
+    setHideGrid(
+      !showFilters
+    );
+
+  };
 
   /* ================= PRINT ================= */
 
-  const handlePrint =
-    () => {
+  const handlePrint = () => {
 
-      window.print();
+    window.print();
 
-    };
+  };
 
   /* ================= ROUND SELECT ================= */
 
@@ -494,15 +600,12 @@ export default function OrderOfPlay() {
         [...selectedRounds];
 
       if (
-        updated.includes(
-          round
-        )
+        updated.includes(round)
       ) {
 
         updated =
           updated.filter(
-            (r) =>
-              r !== round
+            (r) => r !== round
           );
 
       } else {
@@ -516,9 +619,11 @@ export default function OrderOfPlay() {
           );
 
           return;
+
         }
 
         updated.push(round);
+
       }
 
       const nums =
@@ -546,11 +651,11 @@ export default function OrderOfPlay() {
         );
 
         return;
+
       }
 
-      setSelectedRounds(
-        updated
-      );
+      setSelectedRounds(updated);
+
     };
 
   /* ================= DRAG END ================= */
@@ -570,6 +675,12 @@ export default function OrderOfPlay() {
 
       const overId =
         over.id;
+
+      if (
+        activeId === overId
+      ) {
+        return;
+      }
 
       let activePos =
         null;
@@ -595,6 +706,7 @@ export default function OrderOfPlay() {
                   i,
                   j,
                 };
+
               }
 
               if (
@@ -606,9 +718,12 @@ export default function OrderOfPlay() {
                   i,
                   j,
                 };
+
               }
+
             }
           );
+
         }
       );
 
@@ -621,9 +736,7 @@ export default function OrderOfPlay() {
 
       const newGrid =
         JSON.parse(
-          JSON.stringify(
-            grid
-          )
+          JSON.stringify(grid)
         );
 
       const dragged =
@@ -652,69 +765,156 @@ export default function OrderOfPlay() {
       target.match =
         tempMatch;
 
+      /* VALIDATION */
+
+      const swappedMatches = [
+        {
+          match: dragged.match,
+          time: dragged.time,
+          court: dragged.court,
+          rowIndex: activePos.i,
+        },
+        {
+          match: target.match,
+          time: target.time,
+          court: target.court,
+          rowIndex: overPos.i,
+        },
+      ];
+
+      for (const swapped of swappedMatches) {
+
+        const swappedPlayers =
+          getPlayers(swapped.match);
+
+        for (
+          let i = 0;
+          i < newGrid.length;
+          i++
+        ) {
+
+          for (
+            let j = 0;
+            j < newGrid[i].length;
+            j++
+          ) {
+
+            const cell =
+              newGrid[i][j];
+
+            if (!cell?.match) {
+              continue;
+            }
+
+            if (
+              i === swapped.rowIndex &&
+              j === swapped.court - 1
+            ) {
+              continue;
+            }
+
+            const cellPlayers =
+              getPlayers(cell.match);
+
+            const samePlayer =
+              swappedPlayers.some((p) =>
+                cellPlayers.includes(p)
+              );
+
+            if (!samePlayer) {
+              continue;
+            }
+
+            /* SAME TIME */
+
+            if (
+              swapped.time ===
+                cell.time &&
+              swapped.court !==
+                cell.court
+            ) {
+
+              toast.error(
+                "❌ Same player cannot play on different courts at same time"
+              );
+
+              return;
+
+            }
+
+            /* CONSECUTIVE */
+
+            const diff =
+              Math.abs(
+                swapped.rowIndex - i
+              );
+
+            if (
+              diff === 1 &&
+              swapped.court !==
+                cell.court
+            ) {
+
+              toast.error(
+                "❌ Consecutive matches must be on same court"
+              );
+
+              return;
+
+            }
+
+          }
+
+        }
+
+      }
+
       setGrid(newGrid);
 
       toast.success(
-        "Match swapped"
+        "✅ Match swapped"
       );
+
     };
 
   /* ================= UI ================= */
 
   return (
-    <div
-      className={
-        styles.container
-      }
-    >
+    <div className={styles.container}>
 
       {/* TOP BAR */}
 
-      <div
-        className={
-          styles.topBar
-        }
-      >
+      <div className={styles.topBar}>
 
         <h1>
           ORDER OF PLAY
         </h1>
 
-        <div
-          className={
-            styles.buttonGroup
-          }
-        >
+        <div className={styles.buttonGroup}>
 
           <button
-            className={
-              styles.resetBtn
-            }
-            onClick={
-              handleSettings
-            }
+            className={styles.resetBtn}
+            onClick={handleReset}
           >
             Settings
           </button>
 
           <button
-            className={
-              styles.generateBtn
-            }
-            onClick={
-              fetchData
-            }
+            className={styles.generateBtn}
+            onClick={fetchData}
           >
             Generate Again
           </button>
+          <button
+  className={styles.generateBtn}
+  onClick={saveOrderOfPlay}
+>
+  Save Order
+</button>
 
           <button
-            className={
-              styles.printBtn
-            }
-            onClick={
-              handlePrint
-            }
+            className={styles.printBtn}
+            onClick={handlePrint}
           >
             Print PDF
           </button>
@@ -723,371 +923,308 @@ export default function OrderOfPlay() {
 
       </div>
 
-      {/* SETTINGS */}
+      {/* FILTERS */}
 
-      {showFilters && (
+      {
+        showFilters && (
 
-        <div
-          className={
-            styles.filterBox
-          }
-        >
+          <div className={styles.filterBox}>
 
-          {/* CATEGORY */}
+            {/* DATE */}
 
-          <div>
+            <div>
 
-            <h3>
-              Categories
-            </h3>
-
-            {events.map(
-              (
-                ev
-              ) => (
-
-                <label
-                  key={
-                    ev._id
-                  }
-                  className={
-                    styles.checkboxLabel
-                  }
-                >
-
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedCategories.includes(
-                        ev.name
-                      )
-                    }
-                    onChange={(
-                      e
-                    ) => {
-
-                      if (
-                        e.target.checked
-                      ) {
-
-                        setSelectedCategories([
-                          ...selectedCategories,
-                          ev.name,
-                        ]);
-
-                      } else {
-
-                        setSelectedCategories(
-                          selectedCategories.filter(
-                            (
-                              c
-                            ) =>
-                              c !==
-                              ev.name
-                          )
-                        );
-                      }
-                    }}
-                  />
-
-                  {ev.name}
-
-                </label>
-
-              )
-            )}
-
-          </div>
-
-          {/* ROUNDS */}
-
-          <div
-            className={
-              styles.roundSelector
-            }
-          >
-
-            <h3>
-              Select Any 2 Consecutive Rounds
-            </h3>
-
-            <div
-              className={
-                styles.roundButtons
-              }
-            >
-
-              {roundsList.map(
-                (
-                  round
-                ) => (
-
-                  <button
-                    key={
-                      round
-                    }
-                    onClick={() =>
-                      handleRoundSelect(
-                        round
-                      )
-                    }
-                    className={
-                      selectedRounds.includes(
-                        round
-                      )
-                        ? styles.activeRoundBtn
-                        : styles.roundBtn
-                    }
-                  >
-
-                    {round}
-
-                  </button>
-
-                )
-              )}
-
-            </div>
-
-          </div>
-
-          {/* SETTINGS */}
-
-          <div
-            className={
-              styles.settingsBox
-            }
-          >
-
-            <div
-              className={
-                styles.settingItem
-              }
-            >
-
-              <label>
-                Number Of Courts
-              </label>
+              <h3>
+                Select Date
+              </h3>
 
               <input
-                type="number"
-                min="1"
-                value={
-                  courtCount
-                }
-                onChange={(
-                  e
-                ) =>
-                  setCourtCount(
-                    Number(
-                      e.target
-                        .value
-                    )
+                type="date"
+                value={selectedDate}
+                onChange={(e) =>
+                  setSelectedDate(
+                    e.target.value
                   )
                 }
-                className={
-                  styles.courtInput
-                }
+                className={styles.courtInput}
               />
 
             </div>
 
-            <div
-              className={
-                styles.settingItem
-              }
-            >
+            {/* CATEGORY */}
 
-              <label>
-                Matches Per Court
-              </label>
+            <div>
 
-              {Array.from({
-                length:
-                  courtCount,
-              }).map(
-                (
-                  _,
-                  index
-                ) => (
+              <h3>
+                Categories
+              </h3>
 
-                  <div
-                    key={
-                      index
-                    }
-                    className={
-                      styles.matchCourtRow
-                    }
+              {
+                events.map((ev) => (
+
+                  <label
+                    key={ev._id}
+                    className={styles.checkboxLabel}
                   >
 
-                    <span>
-                      Court {index + 1}
-                    </span>
-
                     <input
-                      type="number"
-                      min="1"
-                      value={
-                        matchesPerCourt[
-                          index + 1
-                        ] || 1
-                      }
-                      onChange={(
-                        e
-                      ) =>
+                      type="checkbox"
+                      checked={selectedCategories.includes(ev.name)}
+                      onChange={(e) => {
 
-                        setMatchesPerCourt(
-                          {
-                            ...matchesPerCourt,
-                            [
-                              index + 1
-                            ]:
-                              Number(
-                                e.target
-                                  .value
-                              ),
-                          }
-                        )
+                        if (
+                          e.target.checked
+                        ) {
 
-                      }
-                      className={
-                        styles.smallInput
-                      }
+                          setSelectedCategories([
+                            ...selectedCategories,
+                            ev.name,
+                          ]);
+
+                        } else {
+
+                          setSelectedCategories(
+                            selectedCategories.filter(
+                              (c) =>
+                                c !== ev.name
+                            )
+                          );
+
+                        }
+
+                      }}
                     />
 
-                  </div>
+                    {ev.name}
 
-                )
-              )}
+                  </label>
+
+                ))
+              }
 
             </div>
 
-            <button
-              className={
-                styles.generateBtn
-              }
-              onClick={
-                fetchData
-              }
-            >
-              Apply Changes
-            </button>
+            {/* ROUNDS */}
 
-          </div>
+            <div className={styles.roundSelector}>
 
-        </div>
+              <h3>
+                Select Any 2 Consecutive Rounds
+              </h3>
 
-      )}
+              <div className={styles.roundButtons}>
 
-      {/* HIDE TABLE WHEN SETTINGS OPEN */}
+                {
+                  roundsList.map((round) => (
 
-      {!showFilters && (
-        <>
+                    <button
+                      key={round}
+                      onClick={() =>
+                        handleRoundSelect(round)
+                      }
+                      className={
+                        selectedRounds.includes(round)
+                          ? styles.activeRoundBtn
+                          : styles.roundBtn
+                      }
+                    >
 
-          {/* HEADER */}
+                      {round}
 
-          <div
-            className={
-              styles.header
-            }
-            style={{
-              gridTemplateColumns:
-                `repeat(${courtCount}, 1fr)`,
-            }}
-          >
+                    </button>
 
-            {Array.from({
-              length:
-                courtCount,
-            }).map(
-              (
-                _,
-                index
-              ) => (
+                  ))
+                }
+
+              </div>
+
+            </div>
+
+            {/* COURTS */}
+
+            <div className={styles.settingsBox}>
+
+              <h3>
+                Court Settings
+              </h3>
+
+              <div>
+
+                <label>
+                  Number Of Courts
+                </label>
+
+                <input
+                  type="number"
+                  min="1"
+                  value={courtCount}
+                  onChange={(e) =>
+                    setCourtCount(
+                      Number(e.target.value)
+                    )
+                  }
+                  className={styles.courtInput}
+                />
+
+              </div>
+
+              <div
+                style={{
+                  marginTop: "20px",
+                }}
+              >
+
+                <label>
+                  Matches Per Court
+                </label>
 
                 <div
-                  key={
-                    index
-                  }
-                >
-                  COURT {index + 1}
-                </div>
-
-              )
-            )}
-
-          </div>
-
-          {/* MATCHES */}
-
-          <DndContext
-            collisionDetection={
-              closestCenter
-            }
-            onDragEnd={
-              handleDragEnd
-            }
-          >
-
-            {grid.map(
-              (
-                row,
-                i
-              ) => (
-
-                <div
-                  key={i}
-                  className={
-                    styles.row
-                  }
                   style={{
-                    gridTemplateColumns:
-                      `repeat(${courtCount}, 1fr)`,
+                    display: "flex",
+                    gap: "20px",
+                    flexWrap: "wrap",
+                    marginTop: "10px",
                   }}
                 >
 
-                  {row.map(
-                    (
-                      cell,
-                      j
-                    ) => (
+                  {
+                    Array.from({
+                      length: courtCount,
+                    }).map((_, index) => (
 
-                      <DroppableSlot
-                        key={j}
-                        id={`slot-${i}-${j}`}
-                      >
+                      <div key={index}>
 
-                        {cell?.match && (
+                        <p>
+                          Court {index + 1}
+                        </p>
 
-                          <DraggableMatch
-                            match={
-                              cell.match
-                            }
-                            time={
-                              cell.time.includes(
-                                "Followed"
-                              )
-                                ? "Followed By"
-                                : cell.time
-                            }
-                          />
+                        <input
+                          type="number"
+                          min="1"
+                          value={
+                            matchesPerCourt[index + 1] || 1
+                          }
+                          onChange={(e) =>
+                            setMatchesPerCourt({
+                              ...matchesPerCourt,
+                              [index + 1]:
+                                Number(e.target.value),
+                            })
+                          }
+                          className={styles.courtInput}
+                        />
 
-                        )}
+                      </div>
 
-                      </DroppableSlot>
-
-                    )
-                  )}
+                    ))
+                  }
 
                 </div>
 
-              )
-            )}
+              </div>
 
-          </DndContext>
+              <button
+                className={styles.generateBtn}
+                onClick={fetchData}
+                style={{
+                  marginTop: "25px",
+                }}
+              >
+                Apply Changes
+              </button>
 
-        </>
-      )}
+            </div>
+
+          </div>
+
+        )
+      }
+
+      {/* GRID */}
+
+      {
+        !hideGrid && (
+
+          <>
+
+            <div
+              className={styles.header}
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  `repeat(${courtCount},1fr)`,
+                gap: "20px",
+              }}
+            >
+
+              {
+                Array.from({
+                  length: courtCount,
+                }).map((_, index) => (
+
+                  <div key={index}>
+                    COURT {index + 1}
+                  </div>
+
+                ))
+              }
+
+            </div>
+
+            <DndContext
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+
+              {
+                grid.map((row, i) => (
+
+                  <div
+                    key={i}
+                    className={styles.row}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        `repeat(${courtCount},1fr)`,
+                      gap: "20px",
+                    }}
+                  >
+
+                    {
+                      row.map((cell, j) => (
+
+                        <DroppableSlot
+                          key={j}
+                          id={`slot-${i}-${j}`}
+                        >
+
+                          {
+                            cell?.match && (
+
+                              <DraggableMatch
+                                match={cell.match}
+                                time={cell.time}
+                              />
+
+                            )
+                          }
+
+                        </DroppableSlot>
+
+                      ))
+                    }
+
+                  </div>
+
+                ))
+              }
+
+            </DndContext>
+
+          </>
+
+        )
+      }
 
     </div>
   );
