@@ -279,7 +279,6 @@ export default function OrderOfPlay() {
   /* ================= FETCH EVENTS ================= */
 
   const fetchEvents = async () => {
-
     try {
 
       const res =
@@ -289,6 +288,8 @@ export default function OrderOfPlay() {
             withCredentials: true,
           }
         );
+            console.log("EVENTS =", res.data.data);
+
 
       setEvents(
         res.data.data
