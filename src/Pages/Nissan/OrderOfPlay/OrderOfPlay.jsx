@@ -28,133 +28,168 @@ const getTimeLabel = (index) => {
 
 /* ================= PLAYERS ================= */
 
-const getPlayers = (m, allMatches = []) => {
-  if (!m) return [];
+const getPlayers = (m) => {
 
-  const currentPlayers = [
+  return [
     m?.Team1?.partner1?._id,
     m?.Team1?.partner2?._id,
     m?.Team2?.partner1?._id,
     m?.Team2?.partner2?._id,
   ].filter(Boolean);
 
-  if (currentPlayers.length > 0) return currentPlayers;
-
-  const roundNumber = Number(m.Stage?.match(/\d+/)?.[0]);
-
-  if (!roundNumber || roundNumber === 1) return [];
-
-  const prevRound = roundNumber - 1;
-  const currentMatchNo = m.matchNo || 1;
-
-  const leftMatchNo = currentMatchNo * 2 - 1;
-  const rightMatchNo = currentMatchNo * 2;
-
-  const leftMatch = allMatches.find(
-    x => x.Stage === `Round ${prevRound}` && x.matchNo === leftMatchNo
-  );
-
-  const rightMatch = allMatches.find(
-    x => x.Stage === `Round ${prevRound}` && x.matchNo === rightMatchNo
-  );
-
-  const leftPlayers = leftMatch ? getPlayers(leftMatch, allMatches) : [];
-  const rightPlayers = rightMatch ? getPlayers(rightMatch, allMatches) : [];
-
-  return [...leftPlayers, ...rightPlayers];
 };
 
 /* ================= DRAG CARD ================= */
 
-const getTeamName = (team, side) => {
-  if (!match) return "";
+function DraggableMatch({
+  match,
+  time,
+}) {
 
-  // ===============================
-  // 1. NORMAL TEAM DISPLAY
-  // ===============================
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+  } = useDraggable({
+    id: match._id,
+  });
+
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
+
+  const getTeamName = (
+  team,
+  side
+) => {
+
+  // NORMAL TEAM
   if (team?.partner1?.name) {
-    return `${team.partner1?.name}${
-      team.partner2 ? " & " + team.partner2?.name : ""
+
+    return `${team.partner1?.name || ""}
+    ${
+      team.partner2
+        ? " & " + team.partner2?.name
+        : ""
     }`;
+
   }
 
-  // ===============================
-  // 2. ROUND INFO
-  // ===============================
-  const roundNumber = Number(match.Stage?.match(/\d+/)?.[0]);
-  const currentMatchNo = match.matchNo || 1;
+  // CURRENT ROUND
+  const roundNumber =
+    Number(
+      match.Stage?.replace(
+        "Round ",
+        ""
+      )
+    );
 
-  if (!roundNumber || roundNumber === 1) {
-    const opponent =
-      side === 1 ? match.Team2 : match.Team1;
-
-    if (opponent?.partner1?.name) {
-      return `${opponent.partner1?.name}${
-        opponent.partner2 ? " & " + opponent.partner2?.name : ""
-      }`;
-    }
-
+  if (
+    !roundNumber ||
+    roundNumber === 1
+  ) {
     return "TBD";
   }
 
-  // ===============================
-  // 3. AUTO WINNER LOGIC (TBD CASE)
-  // ===============================
+  const prevRound =
+    roundNumber - 1;
+
+  const currentMatchNo =
+    match.matchNo || 1;
+
+  const leftMatch =
+    (currentMatchNo * 2) - 1;
+
+  const rightMatch =
+    currentMatchNo * 2;
+
+  // FIND PREVIOUS ROUND MATCHES
+  const leftPrevMatch =
+    allMatchesRef.current.find(
+      (m) =>
+        m.Stage === `Round ${prevRound}` &&
+        m.matchNo === leftMatch
+    );
+
+  const rightPrevMatch =
+    allMatchesRef.current.find(
+      (m) =>
+        m.Stage === `Round ${prevRound}` &&
+        m.matchNo === rightMatch
+    );
+
+  // AUTO WINNER LOGIC
   const getAutoWinner = (m) => {
+
     if (!m) return null;
 
-    const team1 = m.Team1?.partner1?.name;
-    const team2 = m.Team2?.partner1?.name;
+    const team1Exists =
+      m.Team1?.partner1?.name;
 
-    if (team1 && !team2) {
-      return `${m.Team1.partner1?.name}${
-        m.Team1.partner2 ? " & " + m.Team1.partner2?.name : ""
+    const team2Exists =
+      m.Team2?.partner1?.name;
+
+    // Team1 vs TBD
+    if (
+      team1Exists &&
+      !team2Exists
+    ) {
+
+      return `${m.Team1.partner1?.name}
+      ${
+        m.Team1.partner2
+          ? " & " + m.Team1.partner2?.name
+          : ""
       }`;
+
     }
 
-    if (!team1 && team2) {
-      return `${m.Team2.partner1?.name}${
-        m.Team2.partner2 ? " & " + m.Team2.partner2?.name : ""
+    // TBD vs Team2
+    if (
+      !team1Exists &&
+      team2Exists
+    ) {
+
+      return `${m.Team2.partner1?.name}
+      ${
+        m.Team2.partner2
+          ? " & " + m.Team2.partner2?.name
+          : ""
       }`;
+
     }
 
     return null;
+
   };
 
-  const prevRound = roundNumber - 1;
-
-  const leftMatchNo = currentMatchNo * 2 - 1;
-  const rightMatchNo = currentMatchNo * 2;
-
-  const leftPrevMatch = allMatchesRef.current?.find(
-    (m) =>
-      m.Stage === `Round ${prevRound}` &&
-      m.matchNo === leftMatchNo
-  );
-
-  const rightPrevMatch = allMatchesRef.current?.find(
-    (m) =>
-      m.Stage === `Round ${prevRound}` &&
-      m.matchNo === rightMatchNo
-  );
-
-  // ===============================
   // LEFT SIDE
-  // ===============================
   if (side === 1) {
-    const autoWinner = getAutoWinner(leftPrevMatch);
-    if (autoWinner) return autoWinner;
 
-    return `R${prevRound} M${leftMatchNo} Winner`;
+    const autoWinner =
+      getAutoWinner(leftPrevMatch);
+
+    if (autoWinner) {
+      return autoWinner;
+    }
+
+    return `R${prevRound} M${leftMatch} Winner`;
+
   }
 
-  // ===============================
   // RIGHT SIDE
-  // ===============================
-  const autoWinner = getAutoWinner(rightPrevMatch);
-  if (autoWinner) return autoWinner;
+  const autoWinner =
+    getAutoWinner(rightPrevMatch);
 
-  return `R${prevRound} M${rightMatchNo} Winner`;
+  if (autoWinner) {
+    return autoWinner;
+  }
+
+  return `R${prevRound} M${rightMatch} Winner`;
+
 };
 
 /* ================= DROP SLOT ================= */
@@ -178,38 +213,13 @@ function DroppableSlot({
     </div>
   );
 }
-function DraggableMatch({ match, time }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: match._id,
-  });
-
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined;
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={style}
-      className={styles.matchCard}
-    >
-      <div>
-        {match?.Stage} M{match?.matchNo}
-      </div>
-    </div>
-  );
-}
 
 /* ================= MAIN ================= */
 
 export default function OrderOfPlay() {
 
   const [grid, setGrid] =
-  useState([]);
+    useState([]);
 
   const [events, setEvents] =
     useState([]);
@@ -482,7 +492,7 @@ console.log("BUILD GRID MATCHES =", matches);
     matches.forEach((match) => {
      //  if (match.Status === "Completed") return;
       const players =
-  getPlayers(match, matches);
+        getPlayers(match);
 
       let placed = false;
 
@@ -542,7 +552,7 @@ console.log("BUILD GRID MATCHES =", matches);
               if (!prevMatch) continue;
 
               const prevPlayers =
-  getPlayers(prevMatch, matches);
+                getPlayers(prevMatch);
 
               const samePlayer =
                 players.some((p) =>
@@ -834,14 +844,9 @@ console.log("EVENT =", selectedEventId);
 
       for (const swapped of swappedMatches) {
 
-       const swappedPlayers =
-  getPlayers(
-    swapped.match,
-    newGrid
-      .flat()
-      .map((c) => c.match)
-      .filter(Boolean)
-  );
+        const swappedPlayers =
+          getPlayers(swapped.match);
+
         for (
           let i = 0;
           i < newGrid.length;
@@ -869,13 +874,8 @@ console.log("EVENT =", selectedEventId);
             }
 
             const cellPlayers =
-  getPlayers(
-    cell.match,
-    newGrid
-      .flat()
-      .map((c) => c.match)
-      .filter(Boolean)
-  );
+              getPlayers(cell.match);
+
             const samePlayer =
               swappedPlayers.some((p) =>
                 cellPlayers.includes(p)
@@ -1290,4 +1290,4 @@ console.log("EVENT =", selectedEventId);
     </div>
   );
 }
-
+}
