@@ -397,14 +397,9 @@ const allMatchesRef = useRef([]);
 
   /* ================= FETCH DATA ================= */
 
- const fetchData = async () => {
+const fetchData = async () => {
   console.log("🚀 FETCH START");
-  console.log("📌 selectedCategories:", selectedCategories);
-  console.log("📌 selectedRounds:", selectedRounds);
-  console.log("COURT COUNT =", courtCount);
-console.log("MATCHES PER COURT =", matchesPerCourt);
-console.log("SELECTED CATEGORIES =", selectedCategories);
-console.log("SELECTED ROUNDS =", selectedRounds);
+
   setGrid([]);
 
   try {
@@ -428,65 +423,53 @@ console.log("SELECTED ROUNDS =", selectedRounds);
 
     let allMatches = [];
 
-const allowedRounds = selectedRounds.map(
-  (r) => r.trim().toLowerCase()
-);
+    const allowedRounds = selectedRounds.map((r) =>
+      r.trim().toLowerCase()
+    );
+
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
-
       const matches = res.data.data || [];
 
       console.log(`\n======================`);
       console.log(`📌 CATEGORY: ${ev.name}`);
       console.log(`RAW MATCHES: ${matches.length}`);
 
-      // normalize + debug stages
-      const round1 = matches.filter(
-        (m) => (m.Stage || "").trim().toLowerCase() === "round 1"
-      );
-
-      const round2 = matches.filter(
-        (m) => (m.Stage || "").trim().toLowerCase() === "round 2"
-      );
-
-      console.log("➡ Round 1:", round1.length);
-      console.log("➡ Round 2:", round2.length);
-      console.log("➡ TOTAL R1+R2:", round1.length + round2.length);
-
       const filteredMatches = matches.filter((m) =>
-        allowedRounds.includes((m.Stage || "").trim().toLowerCase())
+        allowedRounds.includes(
+          (m.Stage || "").trim().toLowerCase()
+        )
       );
 
       console.log(
         `✅ AFTER FILTER (${ev.name}):`,
         filteredMatches.length
       );
+
       const roundCounters = {};
 
       const matchesWithData = filteredMatches.map((m) => {
+        const stage = (m.Stage || "Round 1").trim();
 
-    const stage = (m.Stage || "Round 1").trim();
+        if (!roundCounters[stage]) {
+          roundCounters[stage] = 1;
+        }
 
-    if (!roundCounters[stage]) {
-      roundCounters[stage] = 1;
-    }
+        const currentMatchNo = roundCounters[stage]++;
 
-    const currentMatchNo =
-      roundCounters[stage]++;
+        return {
+          ...m,
+          category: ev.name,
+          matchNo: currentMatchNo,
+        };
+      });
 
-    return {
-      ...m,
-      category: ev.name,
-      matchNo: currentMatchNo,
-    };
-
-  });
       allMatches.push(...matchesWithData);
     });
 
-    console.log("\n🔥 FINAL MATCH COUNT:", allMatches.length);
-    console.log("📦 SENDING TO GRID:", allMatches.length);
+    console.log("🔥 FINAL MATCH COUNT:", allMatches.length);
 
+    // SORT
     const roundOrder = {
       "Round 1": 1,
       "Round 2": 2,
@@ -505,14 +488,31 @@ const allowedRounds = selectedRounds.map(
 
       return (a.matchNo || 0) - (b.matchNo || 0);
     });
-   console.log("ALL MATCHES =", allMatches);
-console.log("TOTAL =", allMatches.length);
-allMatchesRef.current = allMatches;
-    const result = buildGrid(allMatches);
 
-console.log("RESULT =", result); // debug
+    allMatchesRef.current = allMatches;
 
-setGrid(result.grid);
+    /* ================= DAY LOGIC ================= */
+
+    // ✅ DAY 1
+    const day1 = buildGrid(allMatches);
+    console.log("DAY 1 DONE");
+
+    // ✅ DAY 2
+    let day2 = null;
+
+    if (day1.remainingMatches.length > 0) {
+      day2 = buildGrid(day1.remainingMatches);
+      console.log("DAY 2 DONE");
+    }
+
+    // DEBUG
+    console.log("DAY1:", day1.grid);
+    console.log("DAY2:", day2?.grid);
+
+    // ✅ SHOW ONLY DAY 1 FOR NOW
+    setGrid(day1.grid);
+
+    /* ============================================ */
 
     setShowFilters(false);
     setHideGrid(false);
@@ -1317,9 +1317,21 @@ if (
             </DndContext>
 
           </>
+          
 
         )
       }
+      {/* 🔥 REMAINING MATCHES */}
+
+<div style={{ marginTop: "40px" }}>
+  <h2>Remaining Matches: {notPlacedMatches.length}</h2>
+
+  {notPlacedMatches.map((m) => (
+    <div key={m._id} style={{ marginBottom: "8px" }}>
+      {m.category} - {m.Stage}
+    </div>
+  ))}
+</div>
 
     </div>
   );
