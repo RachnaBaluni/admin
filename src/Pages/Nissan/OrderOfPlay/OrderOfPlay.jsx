@@ -258,7 +258,24 @@ function DroppableSlot({
 
 export default function OrderOfPlay() {
 
+  
+
+
   const allMatchesRef = useRef([]);
+
+  // 👇 YAHAN ADD KAR
+  const getNextDate = (date) => {
+    if (!date) return "";
+
+    const d = new Date(date);
+    d.setDate(d.getDate() + 1);
+
+    return d.toISOString().split("T")[0];
+  };
+
+  
+
+
     const [hideGrid, setHideGrid] = useState(false);
 const [grid, setGrid] = useState([]);
   const [events, setEvents] = useState([]);
@@ -318,80 +335,115 @@ setSelectedEventId(allEvents[0]?._id);
 
   /* ================= FETCH DATA ================= */
 
-  const fetchData = async () => {
-    try {
-      const filteredEvents =
-        selectedCategories.length > 0
-          ? events.filter((ev) =>
-              selectedCategories.includes(ev.name)
-            )
-          : events;
+const fetchData = async () => {
+  // 🔴 VALIDATION
+  if (!selectedDate) {
+    toast.error("Please select date first");
+    return;
+  }
 
-      const allResponses = await Promise.all(
-        filteredEvents.map((ev) =>
-          axios.get(
-            `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-            { withCredentials: true }
+  try {
+    const filteredEvents =
+      selectedCategories.length > 0
+        ? events.filter((ev) =>
+            selectedCategories.includes(ev.name)
           )
+        : events;
+
+    const allResponses = await Promise.all(
+      filteredEvents.map((ev) =>
+        axios.get(
+          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
+          { withCredentials: true }
+        )
+      )
+    );
+
+    let allMatches = [];
+
+    const allowedRounds = selectedRounds.map((r) =>
+      r.trim().toLowerCase()
+    );
+
+    /* ================= BUILD MATCHES ================= */
+
+    allResponses.forEach((res, index) => {
+      const ev = filteredEvents[index];
+      const matches = res.data.data || [];
+
+      const filteredMatches = matches.filter((m) =>
+        allowedRounds.includes(
+          (m.Stage || "").trim().toLowerCase()
         )
       );
 
-      let allMatches = [];
+      const roundCounters = {};
 
-      const allowedRounds = selectedRounds.map((r) =>
-        r.trim().toLowerCase()
-      );
+      const matchesWithData = filteredMatches.map((m) => {
+        const stage = (m.Stage || "Round 1").trim();
 
-      allResponses.forEach((res, index) => {
-        const ev = filteredEvents[index];
-        const matches = res.data.data || [];
+        if (!roundCounters[stage]) {
+          roundCounters[stage] = 1;
+        }
 
-        const filteredMatches = matches.filter((m) =>
-          allowedRounds.includes(
-            (m.Stage || "").trim().toLowerCase()
-          )
-        );
-
-        const roundCounters = {};
-
-        const matchesWithData = filteredMatches.map((m) => {
-          const stage = (m.Stage || "Round 1").trim();
-
-          if (!roundCounters[stage]) {
-            roundCounters[stage] = 1;
-          }
-
-          return {
-            ...m,
-            category: ev.name,
-            matchNo: roundCounters[stage]++,
-          };
-        });
-
-        allMatches.push(...matchesWithData);
+        return {
+          ...m,
+          category: ev.name,
+          matchNo: roundCounters[stage]++,
+        };
       });
 
-      allMatchesRef.current = allMatches;
+      allMatches.push(...matchesWithData);
+    });
 
-      // ✅ DAY 1
-      const day1 = buildGrid(allMatches);
+    /* ================= SORT MATCHES ================= */
 
-      // ✅ DAY 2
-      let day2 = null;
-      if (day1.remainingMatches.length > 0) {
-        day2 = buildGrid(day1.remainingMatches);
-      }
+    const roundOrder = {
+      "Round 1": 1,
+      "Round 2": 2,
+      "Round 3": 3,
+      "Round 4": 4,
+      "Round 5": 5,
+      "Round 6": 6,
+    };
 
-      // ✅ STATE SET
-      setDay1Grid(day1.grid);
-      setDay2Grid(day2?.grid || []);
-      setNotPlacedMatches(day1.remainingMatches);
-      setGrid(day1.grid);
-    } catch (err) {
-      console.error(err);
-      toast.error("Error loading matches");
-    }
-  };
+    allMatches.sort((a, b) => {
+      const rDiff =
+        (roundOrder[a.Stage] || 99) -
+        (roundOrder[b.Stage] || 99);
+
+      if (rDiff !== 0) return rDiff;
+
+      return (a.matchNo || 0) - (b.matchNo || 0);
+    });
+
+    // 🔥 REF UPDATE
+    allMatchesRef.current = allMatches;
+
+    /* ================= DAY LOGIC ================= */
+
+    // ✅ DAY 1
+    const day1 = buildGrid(allMatches);
+
+    // ✅ DAY 2 (remaining only)
+    const day2 = buildGrid(day1.remainingMatches);
+
+    /* ================= STATE UPDATE ================= */
+
+    setDay1Grid(day1.grid);
+    setDay2Grid(day2.grid);
+
+    // 🔥 only final leftover
+    setNotPlacedMatches(day2.remainingMatches);
+
+    // 🔥 drag grid (only day1)
+    setGrid(day1.grid);
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Error loading matches");
+  }
+};
 
   /* ================= BUILD GRID ================= */
 
@@ -499,42 +551,61 @@ setSelectedEventId(allEvents[0]?._id);
   };
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
-    console.log("SAVE DATE =", selectedDate);
-console.log("EVENT =", selectedEventId);
+
+  // 🔴 VALIDATION
+  if (!selectedEventId) {
+    toast.error("Please select event");
+    return;
+  }
+
+  if (!selectedDate) {
+    toast.error("Please select date");
+    return;
+  }
+
+  if (!grid || grid.length === 0) {
+    toast.error("No matches to save");
+    return;
+  }
+
   try {
-    
+
+    // 🔥 CLEAN GRID (only required data send karo)
+    const formattedGrid = grid.map((row) =>
+      row.map((cell) => ({
+        matchId: cell?.match?._id || null,
+        time: cell.time,
+        court: cell.court,
+      }))
+    );
+
+    const payload = {
+      eventId: selectedEventId,
+      playDate: selectedDate,
+      grid: formattedGrid,
+    };
+
+    console.log("SENDING DATA:", payload);
+
     const res = await axios.post(
       `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
-      {
-        eventId: selectedEventId,
-        playDate: selectedDate,
-        grid: grid,
-      },
+      payload,
       { withCredentials: true }
     );
 
     console.log("Saved:", res.data);
-    toast.success("Order Of Play Saved");
+
+    toast.success("✅ Order Of Play Saved Successfully");
+
   } catch (err) {
-    console.log("ERROR:", err.response?.data || err);
-    toast.error("Save Failed");
+
+    console.error("SAVE ERROR:", err.response?.data || err);
+
+    toast.error(
+      err.response?.data?.message || "Save Failed ❌"
+    );
   }
 };
-
-  /* ================= SETTINGS ================= */
-
-  const handleReset = () => {
-
-    setShowFilters(
-      !showFilters
-    );
-
-    setHideGrid(
-      !showFilters
-    );
-
-  };
-
   /* ================= PRINT ================= */
 
   const handlePrint = () => {
@@ -1177,7 +1248,51 @@ if (
               }
 
             </DndContext>
+               
+            {day2Grid.length > 0 && (
+  <>
+    <h2 style={{ marginTop: "40px" }}>
+      Day 2 ({getNextDate(selectedDate)})
+    </h2>
 
+    <div
+      className={styles.header}
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${courtCount},1fr)`,
+        gap: "20px",
+      }}
+    >
+      {Array.from({ length: courtCount }).map((_, index) => (
+        <div key={index}>COURT {index + 1}</div>
+      ))}
+    </div>
+
+    {day2Grid.map((row, i) => (
+      <div
+        key={i}
+        className={styles.row}
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${courtCount},1fr)`,
+          gap: "20px",
+        }}
+      >
+        {row.map((cell, j) => (
+          <div key={j} className={styles.slot}>
+            {cell?.match && (
+              <DraggableMatch
+                match={cell.match}
+                time={cell.time}
+                allMatchesRef={allMatchesRef}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    ))}
+  </>
+)}
           </>
           
 
