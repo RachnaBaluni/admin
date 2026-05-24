@@ -273,7 +273,7 @@ const [grid, setGrid] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState("");
 
   const [selectedDate, setSelectedDate] = useState("");
-
+const [showFilters, setShowFilters] = useState(false);
   const [matchesPerCourt, setMatchesPerCourt] = useState({
     1: 10, 2: 10, 3: 10, 4: 10
   });
