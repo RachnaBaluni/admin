@@ -522,127 +522,30 @@ const buildGrid = (matches) => {
   let temp = [];
   const maxRows = Math.max(...Object.values(matchesPerCourt));
 
-  const timeSlotPlayers = {}; // 🔥 MUST be before loop
-
-  for (let i = 0; i < maxRows; i++) {
-    let row = [];
-
-    for (let j = 0; j < courtCount; j++) {
-      row.push({
-        match: null,
-        time: getTimeLabel(i),
-        court: j + 1,
-      });
-    }
-
-    temp.push(row);
-  }
-
-  matches.forEach((match) => {
-    const players = getPlayers(match);
-
-    let bestSlot = null;
-    let bestScore = -Infinity;
-
-    for (let i = 0; i < maxRows; i++) {
-      const time = getTimeLabel(i);
-
-      if (!timeSlotPlayers[time]) {
-        timeSlotPlayers[time] = new Set();
-      }
-
-      for (let j = 0; j < courtCount; j++) {
-        if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-        if (temp[i][j].match) continue;
-
-        const slotSet = timeSlotPlayers[time];
-
-        const sameTimeConflict = players.some((p) =>
-          slotSet.has(p)
-        );
-
-        if (sameTimeConflict) continue;
-
-        let score = 0;
-        score += 1;
-
-        if (score > bestScore) {
-          bestScore = score;
-          bestSlot = { i, j, time };
-        }
-      }
-    }
-
-   if (bestSlot) {
-  const { i, j, time } = bestSlot;
-
-  temp[i][j].match = match;
-
-  if (!timeSlotPlayers[time]) {
-    timeSlotPlayers[time] = new Set();
-  }
-
-  players.forEach((p) =>
-    timeSlotPlayers[time].add(p)
-  );
-} else {
-  // 🔥 IMPORTANT: fallback me bhi conflict check
-  outer: for (let i = 0; i < maxRows; i++) {
-    const time = getTimeLabel(i);
-
-    if (!timeSlotPlayers[time]) {
-      timeSlotPlayers[time] = new Set();
-    }
-
-    for (let j = 0; j < courtCount; j++) {
-      const slotSet = timeSlotPlayers[time];
-
-      const conflict = players.some((p) =>
-        slotSet.has(p)
-      );
-
-      if (!conflict && !temp[i][j].match) {
-        temp[i][j].match = match;
-
-        players.forEach((p) =>
-          slotSet.add(p)
-        );
-
-        break outer;
-      }
-    }
-  }
-}
-  });
-
-  setGrid(temp);
-};const buildGrid = (matches) => {
-  let temp = [];
-  const maxRows = Math.max(...Object.values(matchesPerCourt));
-
-  const timeSlotPlayers = {};
-  const playerLastMatch = {}; // 🔥 NEW (IMPORTANT)
-
-  // 🧱 GRID BANANA
-  for (let i = 0; i < maxRows; i++) {
-    let row = [];
-
-    for (let j = 0; j < courtCount; j++) {
-      row.push({
-        match: null,
-        time: getTimeLabel(i),
-        court: j + 1,
-      });
-    }
-
-    temp.push(row);
-  }
+  const timeSlotPlayers = {};   // same time conflict
+  const playerLastRow = {};     // consecutive check
 
   let notPlacedMatches = [];
 
-  // 🔁 MATCH LOOP
-  for (let match of matches) {
+  // 🔥 EMPTY GRID CREATE
+  for (let i = 0; i < maxRows; i++) {
+    let row = [];
+
+    for (let j = 0; j < courtCount; j++) {
+      row.push({
+        match: null,
+        time: getTimeLabel(i),
+        court: j + 1,
+      });
+    }
+
+    temp.push(row);
+  }
+
+  // 🔥 PLACE MATCHES
+  matches.forEach((match) => {
     const players = getPlayers(match);
+
     let placed = false;
 
     for (let i = 0; i < maxRows; i++) {
@@ -653,51 +556,55 @@ const buildGrid = (matches) => {
       }
 
       for (let j = 0; j < courtCount; j++) {
+
+        // court capacity
         if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+
+        // already filled
         if (temp[i][j].match) continue;
 
         const slotSet = timeSlotPlayers[time];
 
-        // ✅ SAME TIME VALIDATION
+        // ❌ SAME TIME CONFLICT
         const sameTimeConflict = players.some((p) =>
           slotSet.has(p)
         );
 
-        if (sameTimeConflict) {
-          continue;
-        }
+        if (sameTimeConflict) continue;
 
-        // ✅ CONSECUTIVE VALIDATION
+        // ❌ CONSECUTIVE COURT CHECK
         let consecutiveConflict = false;
 
-        for (let p of players) {
-          if (playerLastMatch[p]) {
-            const last = playerLastMatch[p];
+        players.forEach((p) => {
+          if (playerLastRow[p] !== undefined) {
+            const lastRow = playerLastRow[p];
 
-            if (
-              Math.abs(last.row - i) === 1 &&
-              last.court !== j + 1
-            ) {
-              consecutiveConflict = true;
-              break;
+            if (Math.abs(lastRow - i) === 1) {
+
+              const lastCourtIndex = temp[lastRow]?.findIndex(
+                (c) =>
+                  c.match &&
+                  getPlayers(c.match).includes(p)
+              );
+
+              if (lastCourtIndex !== j) {
+                consecutiveConflict = true;
+              }
             }
           }
-        }
+        });
 
-        if (consecutiveConflict) {
-          continue;
-        }
+        if (consecutiveConflict) continue;
 
         // ✅ PLACE MATCH
         temp[i][j].match = match;
 
-        players.forEach((p) => {
-          slotSet.add(p);
+        // update same time players
+        players.forEach((p) => slotSet.add(p));
 
-          playerLastMatch[p] = {
-            row: i,
-            court: j + 1,
-          };
+        // update last row
+        players.forEach((p) => {
+          playerLastRow[p] = i;
         });
 
         placed = true;
@@ -707,24 +614,18 @@ const buildGrid = (matches) => {
       if (placed) break;
     }
 
-    // ❌ AGAR PLACE NA HO PAYA
+    // ❌ NOT PLACED → SAVE FOR NEXT DAY
     if (!placed) {
       notPlacedMatches.push(match);
     }
-  }
+  });
 
-  // 🔥 DEBUG
-  console.log("TOTAL MATCHES =", matches.length);
-  console.log("PLACED =", matches.length - notPlacedMatches.length);
-  console.log("NOT PLACED =", notPlacedMatches.length);
+  console.log("❌ NOT PLACED:", notPlacedMatches.length);
 
-  if (notPlacedMatches.length > 0) {
-    toast.error(
-      `${notPlacedMatches.length} matches could not be scheduled`
-    );
-  }
-
-  setGrid(temp);
+  return {
+    grid: temp,
+    remainingMatches: notPlacedMatches,
+  };
 };
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
