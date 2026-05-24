@@ -453,7 +453,18 @@ const allowedRounds = selectedRounds.map(
 
       const filteredMatches = matches.filter((m) =>
         allowedRounds.includes((m.Stage || "").trim().toLowerCase())
-      );
+      )
+      .filter((m) => {
+    // agar date select hai
+    if (selectedDate) {
+      // sirf wo matches dikhao jo:
+      // 1. abhi tak schedule nahi hue
+      // 2. ya isi date ke hain
+      return !m.playDate || m.playDate === selectedDate;
+    }
+
+    return true;
+  });
 
       console.log(
         `✅ AFTER FILTER (${ev.name}):`,
