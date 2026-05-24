@@ -257,271 +257,186 @@ function DroppableSlot({
 /* ================= MAIN ================= */
 
 export default function OrderOfPlay() {
-const allMatchesRef = useRef([]);
-  const [grid, setGrid] =
-    useState([]);
 
-  const [events, setEvents] =
-    useState([]);
+  const allMatchesRef = useRef([]);
 
-  const [
-    selectedCategories,
-    setSelectedCategories,
-  ] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
-  const [notPlacedMatches, setNotPlacedMatches] = useState([]);
- 
+  const [day1Grid, setDay1Grid] = useState([]);
+  const [day2Grid, setDay2Grid] = useState([]);
 
   const [selectedEventId, setSelectedEventId] = useState("");
-  useEffect(() => {
-  if (events.length > 0) {
-    setSelectedEventId(events[0]._id);
-  }
-}, [events]);
-  const [
-    selectedRounds,
-    setSelectedRounds,
-  ] = useState([
+
+  const [selectedRounds, setSelectedRounds] = useState([
     "Round 1",
-    
   ]);
 
-  const [
-    courtCount,
-    setCourtCount,
-  ] = useState(4);
+  const [courtCount, setCourtCount] = useState(4);
 
-  const [
-    showFilters,
-    setShowFilters,
-  ] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [hideGrid, setHideGrid] = useState(false);
 
-  const [
-    hideGrid,
-    setHideGrid,
-  ] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
 
-  const [
-    selectedDate,
-    setSelectedDate,
-  ] = useState("");
-
-  const [
-  matchesPerCourt,
-  setMatchesPerCourt,
-] = useState({
-  1: 10,
-  2: 10,
-  3: 10,
-  4: 10,
-  5: 10,
-  6: 10,
-  7: 10,
-  8: 10,
-  9: 10,
-  10: 10,
-});
-
-  const roundsList = [
-    "Round 1",
-    "Round 2",
-    "Round 3",
-    "Round 4",
-    "Round 5",
-    "Round 6",
-  ];
+  const [matchesPerCourt, setMatchesPerCourt] = useState({
+    1: 10,
+    2: 10,
+    3: 10,
+    4: 10,
+    5: 10,
+    6: 10,
+    7: 10,
+    8: 10,
+    9: 10,
+    10: 10,
+  });
 
   /* ================= LOAD EVENTS ================= */
 
   useEffect(() => {
-
     fetchEvents();
-
   }, []);
 
-  /* ================= AUTO LOAD ================= */
-
   useEffect(() => {
-
     if (events.length > 0) {
-
+      setSelectedEventId(events[0]._id);
       fetchData();
-
     }
-
   }, [events]);
 
   /* ================= FETCH EVENTS ================= */
 
   const fetchEvents = async () => {
     try {
-
-      const res =
-        await axios.get(
-          `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
-          {
-            withCredentials: true,
-          }
-        );
-            console.log("EVENTS =", res.data.data);
-            const allEvents = res.data.data;
-
-
-      setEvents(
-        allEvents
-      );
-      setSelectedCategories(
-      allEvents.map(
-        (ev) => ev.name
-      )
-    );
-
-    // FIRST EVENT SELECT
-    if (
-      allEvents.length > 0
-    ) {
-
-      setSelectedEventId(
-        allEvents[0]._id
+      const res = await axios.get(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
+        { withCredentials: true }
       );
 
-    }
+      const allEvents = res.data.data;
+
+      setEvents(allEvents);
+      setSelectedCategories(allEvents.map((ev) => ev.name));
 
     } catch (err) {
-
       console.error(err);
-
     }
-
   };
 
   /* ================= FETCH DATA ================= */
 
-const fetchData = async () => {
-  console.log("🚀 FETCH START");
+  const fetchData = async () => {
 
-  setGrid([]);
+    console.log("🚀 FETCH START");
 
-  try {
-    const filteredEvents =
-      selectedCategories.length > 0
-        ? events.filter((ev) =>
-            selectedCategories.includes(ev.name)
+    try {
+      const filteredEvents =
+        selectedCategories.length > 0
+          ? events.filter((ev) =>
+              selectedCategories.includes(ev.name)
+            )
+          : events;
+
+      const allResponses = await Promise.all(
+        filteredEvents.map((ev) =>
+          axios.get(
+            `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
+            { withCredentials: true }
           )
-        : events;
-
-    console.log("📌 EVENTS COUNT:", filteredEvents.length);
-
-    const allResponses = await Promise.all(
-      filteredEvents.map((ev) =>
-        axios.get(
-          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-          { withCredentials: true }
-        )
-      )
-    );
-
-    let allMatches = [];
-
-    const allowedRounds = selectedRounds.map((r) =>
-      r.trim().toLowerCase()
-    );
-
-    allResponses.forEach((res, index) => {
-      const ev = filteredEvents[index];
-      const matches = res.data.data || [];
-
-      console.log(`\n======================`);
-      console.log(`📌 CATEGORY: ${ev.name}`);
-      console.log(`RAW MATCHES: ${matches.length}`);
-
-      const filteredMatches = matches.filter((m) =>
-        allowedRounds.includes(
-          (m.Stage || "").trim().toLowerCase()
         )
       );
 
-      console.log(
-        `✅ AFTER FILTER (${ev.name}):`,
-        filteredMatches.length
+      let allMatches = [];
+
+      const allowedRounds = selectedRounds.map((r) =>
+        r.trim().toLowerCase()
       );
 
-      const roundCounters = {};
+      allResponses.forEach((res, index) => {
+        const ev = filteredEvents[index];
+        const matches = res.data.data || [];
 
-      const matchesWithData = filteredMatches.map((m) => {
-        const stage = (m.Stage || "Round 1").trim();
+        const filteredMatches = matches.filter((m) =>
+          allowedRounds.includes(
+            (m.Stage || "").trim().toLowerCase()
+          )
+        );
 
-        if (!roundCounters[stage]) {
-          roundCounters[stage] = 1;
-        }
+        const roundCounters = {};
 
-        const currentMatchNo = roundCounters[stage]++;
+        const matchesWithData = filteredMatches.map((m) => {
+          const stage = (m.Stage || "Round 1").trim();
 
-        return {
-          ...m,
-          category: ev.name,
-          matchNo: currentMatchNo,
-        };
+          if (!roundCounters[stage]) {
+            roundCounters[stage] = 1;
+          }
+
+          const currentMatchNo = roundCounters[stage]++;
+
+          return {
+            ...m,
+            category: ev.name,
+            matchNo: currentMatchNo,
+          };
+        });
+
+        allMatches.push(...matchesWithData);
       });
 
-      allMatches.push(...matchesWithData);
-    });
+      console.log("🔥 TOTAL MATCHES:", allMatches.length);
 
-    console.log("🔥 FINAL MATCH COUNT:", allMatches.length);
+      // SORT
+      const roundOrder = {
+        "Round 1": 1,
+        "Round 2": 2,
+        "Round 3": 3,
+        "Round 4": 4,
+        "Round 5": 5,
+        "Round 6": 6,
+      };
 
-    // SORT
-    const roundOrder = {
-      "Round 1": 1,
-      "Round 2": 2,
-      "Round 3": 3,
-      "Round 4": 4,
-      "Round 5": 5,
-      "Round 6": 6,
-    };
+      allMatches.sort((a, b) => {
+        const roundDiff =
+          (roundOrder[a.Stage] || 99) -
+          (roundOrder[b.Stage] || 99);
 
-    allMatches.sort((a, b) => {
-      const roundDiff =
-        (roundOrder[a.Stage] || 99) -
-        (roundOrder[b.Stage] || 99);
+        if (roundDiff !== 0) return roundDiff;
 
-      if (roundDiff !== 0) return roundDiff;
+        return (a.matchNo || 0) - (b.matchNo || 0);
+      });
 
-      return (a.matchNo || 0) - (b.matchNo || 0);
-    });
+      allMatchesRef.current = allMatches;
 
-    allMatchesRef.current = allMatches;
+      /* ================= DAY LOGIC ================= */
 
-    /* ================= DAY LOGIC ================= */
+      // ✅ DAY 1
+      const day1 = buildGrid(allMatches);
+      console.log("DAY 1 DONE");
 
-    // ✅ DAY 1
-    const day1 = buildGrid(allMatches);
-    console.log("DAY 1 DONE");
+      // ✅ DAY 2
+      let day2 = null;
 
-    // ✅ DAY 2
-    let day2 = null;
+      if (day1.remainingMatches.length > 0) {
+        day2 = buildGrid(day1.remainingMatches);
+        console.log("DAY 2 DONE");
+      }
 
-    if (day1.remainingMatches.length > 0) {
-      day2 = buildGrid(day1.remainingMatches);
-      console.log("DAY 2 DONE");
+      console.log("DAY1:", day1.grid);
+      console.log("DAY2:", day2?.grid);
+
+      // ✅ FINAL STATE SET
+      setDay1Grid(day1.grid);
+      setDay2Grid(day2?.grid || []);
+
+      setShowFilters(false);
+      setHideGrid(false);
+
+    } catch (err) {
+      console.error("❌ FETCH ERROR:", err);
+      toast.error("Error loading matches");
     }
-
-    // DEBUG
-    console.log("DAY1:", day1.grid);
-    console.log("DAY2:", day2?.grid);
-
-    // ✅ SHOW ONLY DAY 1 FOR NOW
-    setGrid(day1.grid);
-
-    /* ============================================ */
-
-    setShowFilters(false);
-    setHideGrid(false);
-
-  } catch (err) {
-    console.error("❌ FETCH ERROR:", err);
-    toast.error("Error loading matches");
-  }
-};
+  };
   /* ================= BUILD GRID ================= */
 
 const buildGrid = (matches) => {
