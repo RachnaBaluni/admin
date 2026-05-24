@@ -259,40 +259,34 @@ function DroppableSlot({
 export default function OrderOfPlay() {
 
   const allMatchesRef = useRef([]);
-
+const [grid, setGrid] = useState([]);
   const [events, setEvents] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
 
   const [day1Grid, setDay1Grid] = useState([]);
   const [day2Grid, setDay2Grid] = useState([]);
 
-  const [selectedEventId, setSelectedEventId] = useState("");
+  const [notPlacedMatches, setNotPlacedMatches] = useState([]);
 
-  const [selectedRounds, setSelectedRounds] = useState([
-    "Round 1",
-  ]);
-
+  const [selectedRounds, setSelectedRounds] = useState(["Round 1"]);
   const [courtCount, setCourtCount] = useState(4);
-
-  const [showFilters, setShowFilters] = useState(false);
-  const [hideGrid, setHideGrid] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState("");
 
   const [selectedDate, setSelectedDate] = useState("");
 
   const [matchesPerCourt, setMatchesPerCourt] = useState({
-    1: 10,
-    2: 10,
-    3: 10,
-    4: 10,
-    5: 10,
-    6: 10,
-    7: 10,
-    8: 10,
-    9: 10,
-    10: 10,
+    1: 10, 2: 10, 3: 10, 4: 10
   });
+  const roundsList = [
+  "Round 1",
+  "Round 2",
+  "Round 3",
+  "Round 4",
+  "Round 5",
+  "Round 6",
+];
 
-  /* ================= LOAD EVENTS ================= */
+  /* ================= FETCH EVENTS ================= */
 
   useEffect(() => {
     fetchEvents();
@@ -300,12 +294,9 @@ export default function OrderOfPlay() {
 
   useEffect(() => {
     if (events.length > 0) {
-      setSelectedEventId(events[0]._id);
       fetchData();
     }
   }, [events]);
-
-  /* ================= FETCH EVENTS ================= */
 
   const fetchEvents = async () => {
     try {
@@ -318,7 +309,7 @@ export default function OrderOfPlay() {
 
       setEvents(allEvents);
       setSelectedCategories(allEvents.map((ev) => ev.name));
-
+setSelectedEventId(allEvents[0]?._id);
     } catch (err) {
       console.error(err);
     }
@@ -327,9 +318,6 @@ export default function OrderOfPlay() {
   /* ================= FETCH DATA ================= */
 
   const fetchData = async () => {
-
-    console.log("🚀 FETCH START");
-
     try {
       const filteredEvents =
         selectedCategories.length > 0
@@ -372,170 +360,142 @@ export default function OrderOfPlay() {
             roundCounters[stage] = 1;
           }
 
-          const currentMatchNo = roundCounters[stage]++;
-
           return {
             ...m,
             category: ev.name,
-            matchNo: currentMatchNo,
+            matchNo: roundCounters[stage]++,
           };
         });
 
         allMatches.push(...matchesWithData);
       });
 
-      console.log("🔥 TOTAL MATCHES:", allMatches.length);
-
-      // SORT
-      const roundOrder = {
-        "Round 1": 1,
-        "Round 2": 2,
-        "Round 3": 3,
-        "Round 4": 4,
-        "Round 5": 5,
-        "Round 6": 6,
-      };
-
-      allMatches.sort((a, b) => {
-        const roundDiff =
-          (roundOrder[a.Stage] || 99) -
-          (roundOrder[b.Stage] || 99);
-
-        if (roundDiff !== 0) return roundDiff;
-
-        return (a.matchNo || 0) - (b.matchNo || 0);
-      });
-
       allMatchesRef.current = allMatches;
-
-      /* ================= DAY LOGIC ================= */
 
       // ✅ DAY 1
       const day1 = buildGrid(allMatches);
-      console.log("DAY 1 DONE");
 
       // ✅ DAY 2
       let day2 = null;
-
       if (day1.remainingMatches.length > 0) {
         day2 = buildGrid(day1.remainingMatches);
-        console.log("DAY 2 DONE");
       }
 
-      console.log("DAY1:", day1.grid);
-      console.log("DAY2:", day2?.grid);
-
-      // ✅ FINAL STATE SET
+      // ✅ STATE SET
       setDay1Grid(day1.grid);
       setDay2Grid(day2?.grid || []);
-
-      setShowFilters(false);
-      setHideGrid(false);
-
+      setNotPlacedMatches(day1.remainingMatches);
+      setGrid(day1.grid);
     } catch (err) {
-      console.error("❌ FETCH ERROR:", err);
+      console.error(err);
       toast.error("Error loading matches");
     }
   };
+
   /* ================= BUILD GRID ================= */
 
-const buildGrid = (matches) => {
-  let temp = [];
-  const maxRows = Math.max(...Object.values(matchesPerCourt));
+  const buildGrid = (matches) => {
 
-  const timeSlotPlayers = {};
-  const playerLastRow = {};
+    let temp = [];
+    const maxRows = Math.max(...Object.values(matchesPerCourt));
 
-  let notPlacedMatches = [];
+    const timeSlotPlayers = {};
+    const playerLastRow = {};
 
-  // GRID CREATE
-  for (let i = 0; i < maxRows; i++) {
-    let row = [];
+    let notPlacedMatches = [];
 
-    for (let j = 0; j < courtCount; j++) {
-      row.push({
-        match: null,
-        time: getTimeLabel(i),
-        court: j + 1,
-      });
-    }
-
-    temp.push(row);
-  }
-
-  // PLACE MATCHES
-  matches.forEach((match) => {
-    const players = getPlayers(match);
-    let placed = false;
-
+    // GRID CREATE
     for (let i = 0; i < maxRows; i++) {
-      const time = getTimeLabel(i);
-
-      if (!timeSlotPlayers[time]) {
-        timeSlotPlayers[time] = new Set();
-      }
+      let row = [];
 
       for (let j = 0; j < courtCount; j++) {
-
-        if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-        if (temp[i][j].match) continue;
-
-        const slotSet = timeSlotPlayers[time];
-
-        const sameTimeConflict = players.some((p) =>
-          slotSet.has(p)
-        );
-        if (sameTimeConflict) continue;
-
-        let consecutiveConflict = false;
-
-        players.forEach((p) => {
-          if (playerLastRow[p] !== undefined) {
-            const lastRow = playerLastRow[p];
-
-            if (Math.abs(lastRow - i) === 1) {
-              const lastCourtIndex = temp[lastRow]?.findIndex(
-                (c) =>
-                  c.match &&
-                  getPlayers(c.match).includes(p)
-              );
-
-              if (lastCourtIndex !== j) {
-                consecutiveConflict = true;
-              }
-            }
-          }
+        row.push({
+          match: null,
+          time: getTimeLabel(i),
+          court: j + 1,
         });
-
-        if (consecutiveConflict) continue;
-
-        // PLACE
-        temp[i][j].match = match;
-
-        players.forEach((p) => slotSet.add(p));
-        players.forEach((p) => {
-          playerLastRow[p] = i;
-        });
-
-        placed = true;
-        break;
       }
 
-      if (placed) break;
+      temp.push(row);
     }
 
-    if (!placed) {
-      notPlacedMatches.push(match);
-    }
-  });
+    // PLACE MATCHES
+    matches.forEach((match) => {
 
-  console.log("❌ NOT PLACED:", notPlacedMatches.length);
+      const players = getPlayers(match);
+      let placed = false;
 
-  return {
-    grid: temp,
-    remainingMatches: notPlacedMatches,
+      for (let i = 0; i < maxRows; i++) {
+
+        const time = getTimeLabel(i);
+
+        if (!timeSlotPlayers[time]) {
+          timeSlotPlayers[time] = new Set();
+        }
+
+        for (let j = 0; j < courtCount; j++) {
+
+          if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+          if (temp[i][j].match) continue;
+
+          const slotSet = timeSlotPlayers[time];
+
+          const sameTimeConflict = players.some((p) =>
+            slotSet.has(p)
+          );
+          if (sameTimeConflict) continue;
+
+          let consecutiveConflict = false;
+
+          players.forEach((p) => {
+            if (playerLastRow[p] !== undefined) {
+
+              const lastRow = playerLastRow[p];
+
+              if (Math.abs(lastRow - i) === 1) {
+
+                const lastCourtIndex =
+                  temp[lastRow]?.findIndex(
+                    (c) =>
+                      c.match &&
+                      getPlayers(c.match).includes(p)
+                  );
+
+                if (lastCourtIndex !== j) {
+                  consecutiveConflict = true;
+                }
+              }
+            }
+          });
+
+          if (consecutiveConflict) continue;
+
+          // PLACE
+          temp[i][j].match = match;
+
+          players.forEach((p) => slotSet.add(p));
+          players.forEach((p) => {
+            playerLastRow[p] = i;
+          });
+
+          placed = true;
+          break;
+        }
+
+        if (placed) break;
+      }
+
+      if (!placed) {
+        notPlacedMatches.push(match);
+      }
+
+    });
+
+    return {
+      grid: temp,
+      remainingMatches: notPlacedMatches,
+    };
   };
-};
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
     console.log("SAVE DATE =", selectedDate);
@@ -1225,9 +1185,9 @@ if (
       {/* 🔥 REMAINING MATCHES */}
 
 <div style={{ marginTop: "40px" }}>
-  <h2>Remaining Matches: {day1.remainingMatches.length}</h2>
+  <h2>Remaining Matches: {notPlacedMatches.length}</h2>
 
-  {day1.remainingMatches.map((m) => (
+  {notPlacedMatches.map((m) => (
     <div key={m._id} style={{ marginBottom: "8px" }}>
       {m.category} - {m.Stage}
     </div>
