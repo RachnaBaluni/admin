@@ -1225,9 +1225,9 @@ if (
       {/* 🔥 REMAINING MATCHES */}
 
 <div style={{ marginTop: "40px" }}>
-  <h2>Remaining Matches: {notPlacedMatches.length}</h2>
+  <h2>Remaining Matches: {day1.remainingMatches.length}</h2>
 
-  {notPlacedMatches.map((m) => (
+  {day1.remainingMatches.map((m) => (
     <div key={m._id} style={{ marginBottom: "8px" }}>
       {m.category} - {m.Stage}
     </div>
