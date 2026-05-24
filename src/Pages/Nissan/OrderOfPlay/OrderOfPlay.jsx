@@ -1186,7 +1186,7 @@ if (
             >
 
               {
-                grid.map((row, i) => (
+                day1Grid.map((row, i) => (
 
                   <div
                     key={i}
