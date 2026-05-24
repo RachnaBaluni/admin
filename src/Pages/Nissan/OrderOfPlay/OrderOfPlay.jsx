@@ -575,17 +575,13 @@ console.log("EVENT =", selectedEventId);
   /* ================= SETTINGS ================= */
 
   const handleReset = () => {
-
-    setShowFilters(
-      !showFilters
-    );
-
-    setHideGrid(
-      !showFilters
-    );
-
-  };
-
+  setShowFilters(prev => {
+    const newValue = !prev;
+    setHideGrid(newValue);
+    return newValue;
+  });
+};
+console.log("hideGrid:", hideGrid);
   /* ================= PRINT ================= */
 
   const handlePrint = () => {
@@ -928,6 +924,7 @@ if (
         </div>
 
       </div>
+      
 
       {/* FILTERS */}
 
@@ -1149,148 +1146,121 @@ if (
 
       {/* GRID */}
 
-      {
-        !hideGrid && (
+{
+  !hideGrid && (
 
-          <>
-
-            <div
-              className={styles.header}
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  `repeat(${courtCount},1fr)`,
-                gap: "20px",
-              }}
-            >
-
-              {
-                Array.from({
-                  length: courtCount,
-                }).map((_, index) => (
-
-                  <div key={index}>
-                    COURT {index + 1}
-                  </div>
-
-                ))
-              }
-
-            </div>
-
-            <DndContext
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-
-              {
-                day1Grid.map((row, i) => (
-
-                  <div
-                    key={i}
-                    className={styles.row}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        `repeat(${courtCount},1fr)`,
-                      gap: "20px",
-                    }}
-                  >
-
-                    {
-                      row.map((cell, j) => (
-
-                        <DroppableSlot
-                          key={j}
-                          id={`slot-${i}-${j}`}
-                        >
-
-                          {
-                            cell?.match && (
-
-                              <DraggableMatch
-                                match={cell.match}
-                                time={cell.time}
-                                allMatchesRef={allMatchesRef}
-                              />
-
-                            )
-                          }
-
-                        </DroppableSlot>
-
-                      ))
-                    }
-
-                  </div>
-
-                ))
-              }
-
-            </DndContext>
-               
-            {day2Grid.length > 0 && (
-  <>
-    <h2 style={{ marginTop: "40px" }}>
-      Day 2 ({getNextDate(selectedDate)})
-    </h2>
-
-    <div
-      className={styles.header}
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${courtCount},1fr)`,
-        gap: "20px",
-      }}
-    >
-      {Array.from({ length: courtCount }).map((_, index) => (
-        <div key={index}>COURT {index + 1}</div>
-      ))}
-    </div>
-
-    {day2Grid.map((row, i) => (
+    <>
+      {/* HEADER */}
       <div
-        key={i}
-        className={styles.row}
+        className={styles.header}
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${courtCount},1fr)`,
           gap: "20px",
         }}
       >
-        {row.map((cell, j) => (
-          <div key={j} className={styles.slot}>
-            {cell?.match && (
-              <DraggableMatch
-                match={cell.match}
-                time={cell.time}
-                allMatchesRef={allMatchesRef}
-              />
-            )}
-          </div>
+        {Array.from({ length: courtCount }).map((_, index) => (
+          <div key={index}>COURT {index + 1}</div>
         ))}
       </div>
-    ))}
-  </>
-)}
-          </>
-          
 
-        )
-      }
-      {/* 🔥 REMAINING MATCHES */}
+      {/* DAY 1 */}
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        {day1Grid.map((row, i) => (
+          <div
+            key={i}
+            className={styles.row}
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${courtCount},1fr)`,
+              gap: "20px",
+            }}
+          >
+            {row.map((cell, j) => (
+              <DroppableSlot key={j} id={`slot-${i}-${j}`}>
+                {cell?.match && (
+                  <DraggableMatch
+                    match={cell.match}
+                    time={cell.time}
+                    allMatchesRef={allMatchesRef}
+                  />
+                )}
+              </DroppableSlot>
+            ))}
+          </div>
+        ))}
+      </DndContext>
 
-<div style={{ marginTop: "40px" }}>
-  <h2>Remaining Matches: {notPlacedMatches.length}</h2>
+      {/* DAY 2 */}
+      {day2Grid.length > 0 && (
+        <>
+          <h2 style={{ marginTop: "40px" }}>
+            Day 2 ({getNextDate(selectedDate)})
+          </h2>
 
-  {notPlacedMatches.map((m) => (
-    <div key={m._id} style={{ marginBottom: "8px" }}>
-      {m.category} - {m.Stage}
-    </div>
-  ))}
-</div>
+          <div
+            className={styles.header}
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${courtCount},1fr)`,
+              gap: "20px",
+            }}
+          >
+            {Array.from({ length: courtCount }).map((_, index) => (
+              <div key={index}>COURT {index + 1}</div>
+            ))}
+          </div>
 
+          {day2Grid.map((row, i) => (
+            <div
+              key={i}
+              className={styles.row}
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${courtCount},1fr)`,
+                gap: "20px",
+              }}
+            >
+              {row.map((cell, j) => (
+                <div key={j} className={styles.slot}>
+                  {cell?.match && (
+                    <DraggableMatch
+                      match={cell.match}
+                      time={cell.time}
+                      allMatchesRef={allMatchesRef}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </>
+      )}
+
+      {/* REMAINING */}
+      <div style={{ marginTop: "40px" }}>
+        <h2>Remaining Matches: {notPlacedMatches.length}</h2>
+
+        {notPlacedMatches.length === 0 ? (
+          <p>All matches scheduled ✅</p>
+        ) : (
+          notPlacedMatches.map((m) => (
+            <div
+              key={m._id}
+              style={{ marginBottom: "8px", color: "red" }}
+            >
+              {m.category} - {m.Stage}
+            </div>
+          ))
+        )}
+      </div>
+
+    </>
+  )
+}
     </div>
   );
 }
-
