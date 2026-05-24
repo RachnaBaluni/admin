@@ -616,6 +616,115 @@ const buildGrid = (matches) => {
   });
 
   setGrid(temp);
+};const buildGrid = (matches) => {
+  let temp = [];
+  const maxRows = Math.max(...Object.values(matchesPerCourt));
+
+  const timeSlotPlayers = {};
+  const playerLastMatch = {}; // 🔥 NEW (IMPORTANT)
+
+  // 🧱 GRID BANANA
+  for (let i = 0; i < maxRows; i++) {
+    let row = [];
+
+    for (let j = 0; j < courtCount; j++) {
+      row.push({
+        match: null,
+        time: getTimeLabel(i),
+        court: j + 1,
+      });
+    }
+
+    temp.push(row);
+  }
+
+  let notPlacedMatches = [];
+
+  // 🔁 MATCH LOOP
+  for (let match of matches) {
+    const players = getPlayers(match);
+    let placed = false;
+
+    for (let i = 0; i < maxRows; i++) {
+      const time = getTimeLabel(i);
+
+      if (!timeSlotPlayers[time]) {
+        timeSlotPlayers[time] = new Set();
+      }
+
+      for (let j = 0; j < courtCount; j++) {
+        if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+        if (temp[i][j].match) continue;
+
+        const slotSet = timeSlotPlayers[time];
+
+        // ✅ SAME TIME VALIDATION
+        const sameTimeConflict = players.some((p) =>
+          slotSet.has(p)
+        );
+
+        if (sameTimeConflict) {
+          continue;
+        }
+
+        // ✅ CONSECUTIVE VALIDATION
+        let consecutiveConflict = false;
+
+        for (let p of players) {
+          if (playerLastMatch[p]) {
+            const last = playerLastMatch[p];
+
+            if (
+              Math.abs(last.row - i) === 1 &&
+              last.court !== j + 1
+            ) {
+              consecutiveConflict = true;
+              break;
+            }
+          }
+        }
+
+        if (consecutiveConflict) {
+          continue;
+        }
+
+        // ✅ PLACE MATCH
+        temp[i][j].match = match;
+
+        players.forEach((p) => {
+          slotSet.add(p);
+
+          playerLastMatch[p] = {
+            row: i,
+            court: j + 1,
+          };
+        });
+
+        placed = true;
+        break;
+      }
+
+      if (placed) break;
+    }
+
+    // ❌ AGAR PLACE NA HO PAYA
+    if (!placed) {
+      notPlacedMatches.push(match);
+    }
+  }
+
+  // 🔥 DEBUG
+  console.log("TOTAL MATCHES =", matches.length);
+  console.log("PLACED =", matches.length - notPlacedMatches.length);
+  console.log("NOT PLACED =", notPlacedMatches.length);
+
+  if (notPlacedMatches.length > 0) {
+    toast.error(
+      `${notPlacedMatches.length} matches could not be scheduled`
+    );
+  }
+
+  setGrid(temp);
 };
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
