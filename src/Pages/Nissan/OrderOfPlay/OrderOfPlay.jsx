@@ -268,6 +268,8 @@ const allMatchesRef = useRef([]);
     selectedCategories,
     setSelectedCategories,
   ] = useState([]);
+
+  const [notPlacedMatches, setNotPlacedMatches] = useState([]);
  
 
   const [selectedEventId, setSelectedEventId] = useState("");
@@ -561,10 +563,10 @@ const buildGrid = (matches) => {
 
       for (let j = 0; j < courtCount; j++) {
 
-        // court capacity
+        // ❌ court capacity
         if (i >= (matchesPerCourt[j + 1] || 0)) continue;
 
-        // already filled
+        // ❌ already filled
         if (temp[i][j].match) continue;
 
         const slotSet = timeSlotPlayers[time];
@@ -573,7 +575,6 @@ const buildGrid = (matches) => {
         const sameTimeConflict = players.some((p) =>
           slotSet.has(p)
         );
-
         if (sameTimeConflict) continue;
 
         // ❌ CONSECUTIVE COURT CHECK
@@ -584,7 +585,6 @@ const buildGrid = (matches) => {
             const lastRow = playerLastRow[p];
 
             if (Math.abs(lastRow - i) === 1) {
-
               const lastCourtIndex = temp[lastRow]?.findIndex(
                 (c) =>
                   c.match &&
@@ -618,13 +618,17 @@ const buildGrid = (matches) => {
       if (placed) break;
     }
 
-    // ❌ NOT PLACED → SAVE FOR NEXT DAY
+    // ❌ NOT PLACED
     if (!placed) {
       notPlacedMatches.push(match);
     }
   });
 
   console.log("❌ NOT PLACED:", notPlacedMatches.length);
+  console.log("NOT PLACED DATA:", notPlacedMatches);
+
+  setGrid(temp);
+  setNotPlacedMatches(notPlacedMatches);
 
   return {
     grid: temp,
