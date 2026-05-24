@@ -522,8 +522,9 @@ const buildGrid = (matches) => {
   let temp = [];
   const maxRows = Math.max(...Object.values(matchesPerCourt));
 
-  const timeSlotPlayers = {}; // 🔥 MUST be before loop
+  const timeSlotPlayers = {};
 
+  // 🟢 create empty grid
   for (let i = 0; i < maxRows; i++) {
     let row = [];
 
@@ -538,6 +539,7 @@ const buildGrid = (matches) => {
     temp.push(row);
   }
 
+  // 🔥 main allocation
   matches.forEach((match) => {
     const players = getPlayers(match);
 
@@ -557,15 +559,53 @@ const buildGrid = (matches) => {
 
         const slotSet = timeSlotPlayers[time];
 
+        // ❌ HARD RULE: same time conflict
         const sameTimeConflict = players.some((p) =>
           slotSet.has(p)
         );
 
         if (sameTimeConflict) continue;
 
-        let score = 0;
-        score += 1;
+        let score = 1;
 
+        // 🟢 SAME COURT (strong preference)
+        if (i > 0) {
+          const prevSameCourt = temp[i - 1][j]?.match;
+
+          if (prevSameCourt) {
+            const prevPlayers = getPlayers(prevSameCourt);
+
+            const samePlayer = players.some((p) =>
+              prevPlayers.includes(p)
+            );
+
+            if (samePlayer) {
+              score += 10;
+            }
+          }
+        }
+
+        // 🔴 DIFFERENT COURT (penalty)
+        if (i > 0) {
+          for (let cj = 0; cj < courtCount; cj++) {
+            if (cj === j) continue;
+
+            const prevMatch = temp[i - 1][cj]?.match;
+            if (!prevMatch) continue;
+
+            const prevPlayers = getPlayers(prevMatch);
+
+            const samePlayer = players.some((p) =>
+              prevPlayers.includes(p)
+            );
+
+            if (samePlayer) {
+              score -= 20;
+            }
+          }
+        }
+
+        // ✅ pick best slot
         if (score > bestScore) {
           bestScore = score;
           bestSlot = { i, j, time };
@@ -573,46 +613,50 @@ const buildGrid = (matches) => {
       }
     }
 
-   if (bestSlot) {
-  const { i, j, time } = bestSlot;
+    // ✅ assign best slot
+    if (bestSlot) {
+      const { i, j, time } = bestSlot;
 
-  temp[i][j].match = match;
+      temp[i][j].match = match;
 
-  if (!timeSlotPlayers[time]) {
-    timeSlotPlayers[time] = new Set();
-  }
+      if (!timeSlotPlayers[time]) {
+        timeSlotPlayers[time] = new Set();
+      }
 
-  players.forEach((p) =>
-    timeSlotPlayers[time].add(p)
-  );
-} else {
-  // 🔥 IMPORTANT: fallback me bhi conflict check
-  outer: for (let i = 0; i < maxRows; i++) {
-    const time = getTimeLabel(i);
-
-    if (!timeSlotPlayers[time]) {
-      timeSlotPlayers[time] = new Set();
-    }
-
-    for (let j = 0; j < courtCount; j++) {
-      const slotSet = timeSlotPlayers[time];
-
-      const conflict = players.some((p) =>
-        slotSet.has(p)
+      players.forEach((p) =>
+        timeSlotPlayers[time].add(p)
       );
+    } else {
+      // 🔥 FALLBACK (NO MATCH SKIP)
+      outer: for (let i = 0; i < maxRows; i++) {
+        const time = getTimeLabel(i);
 
-      if (!conflict && !temp[i][j].match) {
-        temp[i][j].match = match;
+        if (!timeSlotPlayers[time]) {
+          timeSlotPlayers[time] = new Set();
+        }
 
-        players.forEach((p) =>
-          slotSet.add(p)
-        );
+        for (let j = 0; j < courtCount; j++) {
+          if (temp[i][j].match) continue;
 
-        break outer;
+          const slotSet = timeSlotPlayers[time];
+
+          const sameTimeConflict = players.some((p) =>
+            slotSet.has(p)
+          );
+
+          if (sameTimeConflict) continue;
+
+          // ✅ force place (ignore consecutive)
+          temp[i][j].match = match;
+
+          players.forEach((p) =>
+            slotSet.add(p)
+          );
+
+          break outer;
+        }
       }
     }
-  }
-}
   });
 
   setGrid(temp);
