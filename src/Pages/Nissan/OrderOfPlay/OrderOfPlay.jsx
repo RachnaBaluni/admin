@@ -277,10 +277,7 @@ export default function OrderOfPlay() {
 
 
     const [hideGrid, setHideGrid] = useState(false);
-const handleReset = () => {
-    setShowFilters(!showFilters);
-    setHideGrid(!showFilters);
-  };
+
 
 const [grid, setGrid] = useState([]);
   const [events, setEvents] = useState([]);
