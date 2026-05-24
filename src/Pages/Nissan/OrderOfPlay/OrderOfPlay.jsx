@@ -506,7 +506,11 @@ const allowedRounds = selectedRounds.map(
    console.log("ALL MATCHES =", allMatches);
 console.log("TOTAL =", allMatches.length);
 allMatchesRef.current = allMatches;
-    buildGrid(allMatches);
+    const result = buildGrid(allMatches);
+
+console.log("RESULT =", result); // debug
+
+setGrid(result.grid);
 
     setShowFilters(false);
     setHideGrid(false);
