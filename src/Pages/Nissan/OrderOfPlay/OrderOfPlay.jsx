@@ -277,6 +277,7 @@ export default function OrderOfPlay() {
 
 
     const [hideGrid, setHideGrid] = useState(false);
+    const[handleReset, setHandleReset]=useState(false);
 const [grid, setGrid] = useState([]);
   const [events, setEvents] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -336,9 +337,9 @@ setSelectedEventId(allEvents[0]?._id);
   /* ================= FETCH DATA ================= */
 
 const fetchData = async () => {
-  // 🔴 VALIDATION
-  if (!selectedDate) {
-    toast.error("Please select date first");
+
+   if (!selectedDate) {
+    toast.error("Select date first");
     return;
   }
 
@@ -365,8 +366,7 @@ const fetchData = async () => {
       r.trim().toLowerCase()
     );
 
-    /* ================= BUILD MATCHES ================= */
-
+    // 🔥 MATCH BUILD
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
@@ -396,8 +396,7 @@ const fetchData = async () => {
       allMatches.push(...matchesWithData);
     });
 
-    /* ================= SORT MATCHES ================= */
-
+    // 🔥 SORT (important for proper scheduling)
     const roundOrder = {
       "Round 1": 1,
       "Round 2": 2,
@@ -417,26 +416,25 @@ const fetchData = async () => {
       return (a.matchNo || 0) - (b.matchNo || 0);
     });
 
-    // 🔥 REF UPDATE
     allMatchesRef.current = allMatches;
 
     /* ================= DAY LOGIC ================= */
 
-    // ✅ DAY 1
+    // ✅ DAY 1 (fill max possible)
     const day1 = buildGrid(allMatches);
 
-    // ✅ DAY 2 (remaining only)
+    // ✅ DAY 2 (remaining matches only)
     const day2 = buildGrid(day1.remainingMatches);
 
-    /* ================= STATE UPDATE ================= */
+    /* ================= STATE SET ================= */
 
     setDay1Grid(day1.grid);
     setDay2Grid(day2.grid);
 
-    // 🔥 only final leftover
+    // 🔥 ONLY final remaining (rare case)
     setNotPlacedMatches(day2.remainingMatches);
 
-    // 🔥 drag grid (only day1)
+    // 🔥 for drag-drop (Day1 working grid)
     setGrid(day1.grid);
 
   } catch (err) {
@@ -551,61 +549,42 @@ const fetchData = async () => {
   };
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
-
-  // 🔴 VALIDATION
-  if (!selectedEventId) {
-    toast.error("Please select event");
-    return;
-  }
-
-  if (!selectedDate) {
-    toast.error("Please select date");
-    return;
-  }
-
-  if (!grid || grid.length === 0) {
-    toast.error("No matches to save");
-    return;
-  }
-
+    console.log("SAVE DATE =", selectedDate);
+console.log("EVENT =", selectedEventId);
   try {
-
-    // 🔥 CLEAN GRID (only required data send karo)
-    const formattedGrid = grid.map((row) =>
-      row.map((cell) => ({
-        matchId: cell?.match?._id || null,
-        time: cell.time,
-        court: cell.court,
-      }))
-    );
-
-    const payload = {
-      eventId: selectedEventId,
-      playDate: selectedDate,
-      grid: formattedGrid,
-    };
-
-    console.log("SENDING DATA:", payload);
-
+    
     const res = await axios.post(
       `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
-      payload,
+      {
+        eventId: selectedEventId,
+        playDate: selectedDate,
+        grid: grid,
+      },
       { withCredentials: true }
     );
 
     console.log("Saved:", res.data);
-
-    toast.success("✅ Order Of Play Saved Successfully");
-
+    toast.success("Order Of Play Saved");
   } catch (err) {
-
-    console.error("SAVE ERROR:", err.response?.data || err);
-
-    toast.error(
-      err.response?.data?.message || "Save Failed ❌"
-    );
+    console.log("ERROR:", err.response?.data || err);
+    toast.error("Save Failed");
   }
 };
+
+  /* ================= SETTINGS ================= */
+
+  const handleReset = () => {
+
+    setShowFilters(
+      !showFilters
+    );
+
+    setHideGrid(
+      !showFilters
+    );
+
+  };
+
   /* ================= PRINT ================= */
 
   const handlePrint = () => {
