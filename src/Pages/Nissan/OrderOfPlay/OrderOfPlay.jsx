@@ -443,12 +443,12 @@ const buildGrid = (matches) => {
   let temp = [];
   const maxRows = Math.max(...Object.values(matchesPerCourt));
 
-  const timeSlotPlayers = {};   // same time conflict
-  const playerLastRow = {};     // consecutive check
+  const timeSlotPlayers = {};
+  const playerLastRow = {};
 
   let notPlacedMatches = [];
 
-  // 🔥 EMPTY GRID CREATE
+  // GRID CREATE
   for (let i = 0; i < maxRows; i++) {
     let row = [];
 
@@ -463,10 +463,9 @@ const buildGrid = (matches) => {
     temp.push(row);
   }
 
-  // 🔥 PLACE MATCHES
+  // PLACE MATCHES
   matches.forEach((match) => {
     const players = getPlayers(match);
-
     let placed = false;
 
     for (let i = 0; i < maxRows; i++) {
@@ -478,21 +477,16 @@ const buildGrid = (matches) => {
 
       for (let j = 0; j < courtCount; j++) {
 
-        // ❌ court capacity
         if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-
-        // ❌ already filled
         if (temp[i][j].match) continue;
 
         const slotSet = timeSlotPlayers[time];
 
-        // ❌ SAME TIME CONFLICT
         const sameTimeConflict = players.some((p) =>
           slotSet.has(p)
         );
         if (sameTimeConflict) continue;
 
-        // ❌ CONSECUTIVE COURT CHECK
         let consecutiveConflict = false;
 
         players.forEach((p) => {
@@ -515,13 +509,10 @@ const buildGrid = (matches) => {
 
         if (consecutiveConflict) continue;
 
-        // ✅ PLACE MATCH
+        // PLACE
         temp[i][j].match = match;
 
-        // update same time players
         players.forEach((p) => slotSet.add(p));
-
-        // update last row
         players.forEach((p) => {
           playerLastRow[p] = i;
         });
@@ -533,17 +524,12 @@ const buildGrid = (matches) => {
       if (placed) break;
     }
 
-    // ❌ NOT PLACED
     if (!placed) {
       notPlacedMatches.push(match);
     }
   });
 
   console.log("❌ NOT PLACED:", notPlacedMatches.length);
-  console.log("NOT PLACED DATA:", notPlacedMatches);
-
-  setGrid(temp);
-  setNotPlacedMatches(notPlacedMatches);
 
   return {
     grid: temp,
