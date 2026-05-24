@@ -524,7 +524,7 @@ const buildGrid = (matches) => {
 
   const timeSlotPlayers = {};
 
-  // 🟢 create empty grid
+  // 🟢 Create empty grid
   for (let i = 0; i < maxRows; i++) {
     let row = [];
 
@@ -539,13 +539,14 @@ const buildGrid = (matches) => {
     temp.push(row);
   }
 
-  // 🔥 main allocation
+  // 🔥 MAIN LOOP
   matches.forEach((match) => {
     const players = getPlayers(match);
 
     let bestSlot = null;
     let bestScore = -Infinity;
 
+    // 🔵 FIND BEST SLOT
     for (let i = 0; i < maxRows; i++) {
       const time = getTimeLabel(i);
 
@@ -559,7 +560,7 @@ const buildGrid = (matches) => {
 
         const slotSet = timeSlotPlayers[time];
 
-        // ❌ HARD RULE: same time conflict
+        // ❌ SAME TIME CONFLICT (HARD RULE)
         const sameTimeConflict = players.some((p) =>
           slotSet.has(p)
         );
@@ -568,7 +569,7 @@ const buildGrid = (matches) => {
 
         let score = 1;
 
-        // 🟢 SAME COURT (strong preference)
+        // 🟢 SAME COURT PREFERENCE
         if (i > 0) {
           const prevSameCourt = temp[i - 1][j]?.match;
 
@@ -585,7 +586,7 @@ const buildGrid = (matches) => {
           }
         }
 
-        // 🔴 DIFFERENT COURT (penalty)
+        // 🔴 DIFFERENT COURT PENALTY
         if (i > 0) {
           for (let cj = 0; cj < courtCount; cj++) {
             if (cj === j) continue;
@@ -605,7 +606,6 @@ const buildGrid = (matches) => {
           }
         }
 
-        // ✅ pick best slot
         if (score > bestScore) {
           bestScore = score;
           bestSlot = { i, j, time };
@@ -613,7 +613,9 @@ const buildGrid = (matches) => {
       }
     }
 
-    // ✅ assign best slot
+    let placed = false;
+
+    // ✅ PLACE BEST SLOT
     if (bestSlot) {
       const { i, j, time } = bestSlot;
 
@@ -626,8 +628,12 @@ const buildGrid = (matches) => {
       players.forEach((p) =>
         timeSlotPlayers[time].add(p)
       );
-    } else {
-      // 🔥 FALLBACK (NO MATCH SKIP)
+
+      placed = true;
+    }
+
+    // 🟡 FALLBACK 1 (no same-time conflict)
+    if (!placed) {
       outer: for (let i = 0; i < maxRows; i++) {
         const time = getTimeLabel(i);
 
@@ -646,18 +652,53 @@ const buildGrid = (matches) => {
 
           if (sameTimeConflict) continue;
 
-          // ✅ force place (ignore consecutive)
           temp[i][j].match = match;
 
           players.forEach((p) =>
             slotSet.add(p)
           );
 
+          placed = true;
           break outer;
         }
       }
     }
+
+    // 🔴 FINAL FALLBACK (force place, NO overwrite)
+    if (!placed) {
+      outer2: for (let i = 0; i < maxRows; i++) {
+        for (let j = 0; j < courtCount; j++) {
+          if (!temp[i][j].match) {
+            const time = getTimeLabel(i);
+
+            temp[i][j].match = match;
+
+            if (!timeSlotPlayers[time]) {
+              timeSlotPlayers[time] = new Set();
+            }
+
+            players.forEach((p) =>
+              timeSlotPlayers[time].add(p)
+            );
+
+            placed = true;
+            break outer2;
+          }
+        }
+      }
+    }
+
+    // ❌ STILL NOT PLACED (debug)
+    if (!placed) {
+      console.log("❌ Could not place match:", match._id);
+    }
   });
+
+  // 🔥 FINAL DEBUG
+  const filled = temp.flat().filter((c) => c.match).length;
+
+  console.log("✅ FILLED SLOTS =", filled);
+  console.log("📊 TOTAL MATCHES =", matches.length);
 
   setGrid(temp);
 };
