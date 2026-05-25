@@ -575,10 +575,9 @@ console.log("EVENT =", selectedEventId);
   /* ================= SETTINGS ================= */
 
   const handleReset = () => {
-  setShowFilters(prev => {
-    const newValue = !prev;
-    setHideGrid(newValue);
-    return newValue;
+  setShowFilters((prev) => {
+    setHideGrid(prev);   // 👈 yahan correct sync
+    return !prev;
   });
 };
 console.log("hideGrid:", hideGrid);
