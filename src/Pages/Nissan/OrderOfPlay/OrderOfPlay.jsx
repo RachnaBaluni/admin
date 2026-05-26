@@ -67,7 +67,7 @@ function DraggableMatch({
   team,
   side
 ) => {
-
+ console.log("MATCH DATA:", match);
   // NORMAL TEAM
   if (team?.partner1?.name) {
 
