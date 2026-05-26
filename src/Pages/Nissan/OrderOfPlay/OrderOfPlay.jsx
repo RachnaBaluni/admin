@@ -1171,7 +1171,7 @@ console.log("Remaining:", notPlacedMatches);
 
           {/* DAY TITLE */}
           <h2>
-            Day {dayIndex + 1} ({day.date})
+            Day {dayIndex + 1} 
           </h2>
 
           {/* HEADER */}
