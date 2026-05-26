@@ -1308,42 +1308,27 @@ console.log("Remaining:", notPlacedMatches);
       ))}
 
 <div style={{ marginTop: "30px" }}>
-  <h3>Remaining Matches ({notPlacedMatches.length})</h3>
+  <h3>
+    Remaining Matches: {notPlacedMatches.length}
+  </h3>
 
-  {notPlacedMatches.length === 0 ? (
-    <p style={{ color: "green" }}>
-      🎉 All matches scheduled successfully!
-    </p>
-  ) : (
-    <div
+  {/* ✅ SUCCESS MESSAGE */}
+  {notPlacedMatches.length === 0 && (
+    <p
       style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "10px",
         marginTop: "10px",
+        color: "green",
+        fontWeight: "bold",
       }}
     >
-      {notPlacedMatches.map((m, index) => (
-        <div
-          key={m._id}
-          style={{
-            padding: "8px 12px",
-            background: "#ffeaea",
-            borderRadius: "8px",
-            fontSize: "14px",
-            color: "#d32f2f",
-          }}
-        >
-          Match {index + 1}
-        </div>
-      ))}
-    </div>
+      🎉 All matches scheduled successfully!
+    </p>
   )}
 </div>
     </>
 
   )
 } 
-    </div>            
+    </div>        
   );
 }
