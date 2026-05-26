@@ -1203,6 +1203,8 @@ console.log("Remaining:", notPlacedMatches);
         )
       }
       {/* ADD NEXT DAY */}
+      {showFilters && (
+
 <div className={styles.addDayBox}>
   <h3 className={styles.addDayTitle}>📅 Add Next Day</h3>
 
@@ -1248,7 +1250,7 @@ console.log("Remaining:", notPlacedMatches);
     + Add Day
   </button>
 </div>
-
+      )}
 
       {/* GRID */}
 
@@ -1311,29 +1313,32 @@ console.log("Remaining:", notPlacedMatches);
 
         </div>
       ))}
+{showFilters && (
+  <div style={{ marginTop: "30px" }}>
+    
+    <h3>
+      Remaining Matches: {notPlacedMatches.length}
+    </h3>
 
-<div style={{ marginTop: "30px" }}>
-  <h3>
-    Remaining Matches: {notPlacedMatches.length}
-  </h3>
+    {/* ✅ SUCCESS MESSAGE */}
+    {notPlacedMatches.length === 0 && (
+      <p
+        style={{
+          marginTop: "10px",
+          color: "green",
+          fontWeight: "bold",
+        }}
+      >
+        🎉 All matches scheduled successfully!
+      </p>
+    )}
 
-  {/* ✅ SUCCESS MESSAGE */}
-  {notPlacedMatches.length === 0 && (
-    <p
-      style={{
-        marginTop: "10px",
-        color: "green",
-        fontWeight: "bold",
-      }}
-    >
-      🎉 All matches scheduled successfully!
-    </p>
-  )}
-</div>
+  </div>
+)}
     </>
+    )
+      }
 
-  )
-} 
-    </div>        
+    </div>
   );
 }
