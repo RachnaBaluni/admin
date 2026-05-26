@@ -472,7 +472,8 @@ const addNextDay = () => {
   const newDay = buildGrid(
     notPlacedMatches,
     newCourtCount,
-    newMatchesPerCourt
+    newMatchesPerCourt,
+    days
   );
 
   const updatedDays = [
@@ -500,108 +501,138 @@ console.log("CHECK VALID:", validateAllDays(updatedDays));
 
   /* ================= BUILD GRID ================= */
 
-  const buildGrid = (matches,courtCount,matchesPerCourt) => {
+  const buildGrid = (
+  matches,
+  courtCount,
+  matchesPerCourt,
+  existingDays = []
+) => {
 
-    let temp = [];
-    const maxRows = Math.max(...Object.values(matchesPerCourt));
+  let temp = [];
+  const maxRows = Math.max(...Object.values(matchesPerCourt));
 
-    const timeSlotPlayers = {};
-    const playerLastRow = {};
+  const timeSlotPlayers = {};
+  const playerLastRow = {};
+  const playerLastCourt = {};
 
-    let notPlacedMatches = [];
+  let notPlacedMatches = [];
 
-    // GRID CREATE
-    for (let i = 0; i < maxRows; i++) {
-      let row = [];
+  /* ================= GRID CREATE ================= */
 
-      for (let j = 0; j < courtCount; j++) {
-        row.push({
-          match: null,
-          time: getTimeLabel(i),
-          court: j + 1,
-        });
-      }
+  for (let i = 0; i < maxRows; i++) {
+    let row = [];
 
-      temp.push(row);
+    for (let j = 0; j < courtCount; j++) {
+      row.push({
+        match: null,
+        time: getTimeLabel(i),
+        court: j + 1,
+      });
     }
 
-    // PLACE MATCHES
-    matches.forEach((match) => {
+    temp.push(row);
+  }
 
-      const players = getPlayers(match);
-      let placed = false;
+  /* ================= 🔥 LOAD PREVIOUS DAYS ================= */
 
-      for (let i = 0; i < maxRows; i++) {
+  existingDays.forEach((day) => {
+    day.grid.forEach((row, i) => {
+      row.forEach((cell, j) => {
+        if (!cell?.match) return;
 
-        const time = getTimeLabel(i);
+        const players = getPlayers(cell.match);
+        const time = cell.time;
 
         if (!timeSlotPlayers[time]) {
           timeSlotPlayers[time] = new Set();
         }
 
-        for (let j = 0; j < courtCount; j++) {
+        players.forEach((p) => {
+          timeSlotPlayers[time].add(p);
+          playerLastRow[p] = i;
+          playerLastCourt[p] = j;
+        });
+      });
+    });
+  });
 
-          if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-          if (temp[i][j].match) continue;
+  /* ================= PLACE MATCHES ================= */
 
-          const slotSet = timeSlotPlayers[time];
+  matches.forEach((match) => {
 
-          const sameTimeConflict = players.some((p) =>
-            slotSet.has(p)
-          );
-          if (sameTimeConflict) continue;
+    const players = getPlayers(match);
+    let placed = false;
 
-          let consecutiveConflict = false;
+    for (let i = 0; i < maxRows; i++) {
 
-          players.forEach((p) => {
-            if (playerLastRow[p] !== undefined) {
+      const time = getTimeLabel(i);
 
-              const lastRow = playerLastRow[p];
+      if (!timeSlotPlayers[time]) {
+        timeSlotPlayers[time] = new Set();
+      }
 
-              if (Math.abs(lastRow - i) === 1) {
+      for (let j = 0; j < courtCount; j++) {
 
-                const lastCourtIndex =
-                  temp[lastRow]?.findIndex(
-                    (c) =>
-                      c.match &&
-                      getPlayers(c.match).includes(p)
-                  );
+        // ❌ slot full
+        if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+        if (temp[i][j].match) continue;
 
-                if (lastCourtIndex !== j) {
-                  consecutiveConflict = true;
-                }
+        const slotSet = timeSlotPlayers[time];
+
+        // ❌ SAME TIME CONFLICT (across ALL days)
+        const sameTimeConflict = players.some((p) =>
+          slotSet.has(p)
+        );
+        if (sameTimeConflict) continue;
+
+        // ❌ CONSECUTIVE MATCH CONFLICT
+        let consecutiveConflict = false;
+
+        players.forEach((p) => {
+          if (playerLastRow[p] !== undefined) {
+
+            const lastRow = playerLastRow[p];
+            const lastCourt = playerLastCourt[p];
+
+            if (Math.abs(lastRow - i) === 1) {
+
+              // 👉 allow only if same court
+              if (lastCourt !== j) {
+                consecutiveConflict = true;
               }
             }
-          });
+          }
+        });
 
-          if (consecutiveConflict) continue;
+        if (consecutiveConflict) continue;
 
-          // PLACE
-          temp[i][j].match = match;
+        /* ✅ PLACE MATCH */
+        temp[i][j].match = match;
 
-          players.forEach((p) => slotSet.add(p));
-          players.forEach((p) => {
-            playerLastRow[p] = i;
-          });
+        players.forEach((p) => {
+          slotSet.add(p);
+          playerLastRow[p] = i;
+          playerLastCourt[p] = j;
+        });
 
-          placed = true;
-          break;
-        }
-
-        if (placed) break;
+        placed = true;
+        break;
       }
 
-      if (!placed) {
-        notPlacedMatches.push(match);
-      }
+      if (placed) break;
+    }
 
-    });
+    if (!placed) {
+      notPlacedMatches.push(match);
+    }
 
-    return {
-      grid: temp,
-      remainingMatches: notPlacedMatches,
-    };
+  });
+
+  return {
+    grid: temp,
+    remainingMatches: notPlacedMatches,
   };
+};
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
     console.log("SAVE DATE =", selectedDate);
