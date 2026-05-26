@@ -469,14 +469,13 @@ const addNextDay = () => {
     return;
   }
 
-  //  Build new day grid using remaining matches
   const newDay = buildGrid(
     notPlacedMatches,
     newCourtCount,
     newMatchesPerCourt
   );
 
-  setDays([
+  const updatedDays = [
     ...days,
     {
       date: newDayDate,
@@ -484,12 +483,18 @@ const addNextDay = () => {
       matchesPerCourt: newMatchesPerCourt,
       grid: newDay.grid,
     },
-  ]);
+  ];
+console.log("CHECK VALID:", validateAllDays(updatedDays));
 
-  //  Update remaining matches
+
+  if (!validateAllDays(updatedDays)) {
+    toast.error("❌ Same player same time across days");
+    return;
+  }
+
+  // ✅ APPLY ONLY IF VALID
+  setDays(updatedDays);
   setNotPlacedMatches(newDay.remainingMatches);
-
-  // reset inputs
   setNewDayDate("");
 };
 
@@ -704,34 +709,67 @@ console.log("hideGrid:", hideGrid);
     };
 
     const validateAllDays = (daysData) => {
-  const timeMap = {};
 
-  daysData.forEach((day) => {
-    day.grid.forEach((row) => {
-      row.forEach((cell) => {
-        if (!cell?.match) return;
+  const timeMap = {};
+  const playerLastMatch = {}; // 🔥 track last match globally
+
+  for (const day of daysData) {
+
+    for (let i = 0; i < day.grid.length; i++) {
+
+      for (let j = 0; j < day.grid[i].length; j++) {
+
+        const cell = day.grid[i][j];
+        if (!cell?.match) continue;
 
         const players = getPlayers(cell.match);
         const time = cell.time;
 
+        // 🔥 SAME TIME CHECK (across all days)
         if (!timeMap[time]) {
           timeMap[time] = new Set();
         }
 
         for (const p of players) {
           if (timeMap[time].has(p)) {
-            return false; // ❌ same player same time across days
+            return false;
           }
         }
 
+        // 🔥 CONSECUTIVE CHECK (across all days)
+        for (const p of players) {
+
+          if (playerLastMatch[p]) {
+
+            const last = playerLastMatch[p];
+
+            const isNextMatch =
+              last.dayIndex === daysData.indexOf(day) &&
+              Math.abs(last.rowIndex - i) === 1;
+
+            if (isNextMatch && last.court !== j) {
+              return false;
+            }
+          }
+        }
+
+        // ✅ UPDATE TRACKERS
         players.forEach((p) => timeMap[time].add(p));
-      });
-    });
-  });
+
+        players.forEach((p) => {
+          playerLastMatch[p] = {
+            dayIndex: daysData.indexOf(day),
+            rowIndex: i,
+            court: j,
+          };
+        });
+
+      }
+    }
+  }
 
   return true;
 };
-
   /* ================= DRAG END ================= */
 
   const handleDragEnd = (event) => {
