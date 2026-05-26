@@ -480,6 +480,12 @@ const addNextDay = () => {
     return;
   }
 
+  const newMatches = [
+  ...notPlacedMatches,        // ❗ shifted
+   
+];
+
+
   const newDay = buildGrid(
   newMatches,
   newCourtCount,
@@ -507,10 +513,6 @@ console.log("CHECK VALID:", validateAllDays(updatedDays));
   (m) => !m.Winner
 );
 
-const newMatches = [
-  ...notPlacedMatches,        // ❗ shifted
-   
-];
 
 
 
@@ -910,7 +912,7 @@ console.log("hideGrid:", hideGrid);
 
       for (const p of players) {
         if (timeMap[time].has(p)) {
-          return false; // ❌ same player same time
+          return "❌ Same player same time"; //  same player same time
         }
       }
 
@@ -927,7 +929,7 @@ console.log("hideGrid:", hideGrid);
             );
 
             if (lastCourt !== j) {
-              return false;
+              return "❌ Consecutive matches on different courts"; // consecutive matches on different courts
             }
           }
         }
