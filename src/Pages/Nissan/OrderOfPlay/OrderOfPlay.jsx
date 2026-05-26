@@ -296,7 +296,6 @@ const [newMatchesPerCourt, setNewMatchesPerCourt] = useState({
 
 const [grid, setGrid] = useState([]);
   const [events, setEvents] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
 
 
 
