@@ -705,230 +705,132 @@ console.log("hideGrid:", hideGrid);
 
   /* ================= DRAG END ================= */
 
-  const handleDragEnd =
-    (event) => {
+  const handleDragEnd = (event) => {
+  const { active, over } = event;
+  if (!over) return;
 
-      const {
-        active,
-        over,
-      } = event;
+  const activeId = active.id;
+  const overId = over.id;
 
-      if (!over) return;
+  let activePos = null;
+  let overPos = null;
+  let activeDayIndex = null;
+  let overDayIndex = null;
 
-      const activeId =
-        active.id;
-
-      const overId =
-        over.id;
-
-      if (
-        activeId === overId
-      ) {
-        return;
-      }
-
-      let activePos =
-        null;
-
-      let overPos =
-        null;
-
-      grid.forEach(
-        (row, i) => {
-
-          row.forEach(
-            (
-              cell,
-              j
-            ) => {
-
-              if (
-                cell?.match?._id ===
-                activeId
-              ) {
-
-                activePos = {
-                  i,
-                  j,
-                };
-
-              }
-
-              if (
-                `slot-${i}-${j}` ===
-                overId
-              ) {
-
-                overPos = {
-                  i,
-                  j,
-                };
-
-              }
-
-            }
-          );
-
+  // 🔍 Find positions
+  days.forEach((day, dIndex) => {
+    day.grid.forEach((row, i) => {
+      row.forEach((cell, j) => {
+        if (cell?.match?._id === activeId) {
+          activePos = { i, j };
+          activeDayIndex = dIndex;
         }
-      );
 
-      if (
-        !activePos ||
-        !overPos
-      ) {
-        return;
-      }
+        if (`slot-${dIndex}-${i}-${j}` === overId) {
+          overPos = { i, j };
+          overDayIndex = dIndex;
+        }
+      });
+    });
+  });
 
-      const newGrid =
-        JSON.parse(
-          JSON.stringify(grid)
-        );
+  if (!activePos || !overPos) return;
 
-      const dragged =
-        newGrid[
-          activePos.i
-        ][activePos.j];
+  // ❌ cross day swap allowed? (YES for you)
+  const sourceDay = activeDayIndex;
+  const targetDay = overDayIndex;
 
-      const target =
-        newGrid[
-          overPos.i
-        ][overPos.j];
+  const newDays = JSON.parse(JSON.stringify(days));
 
-      if (
-        !dragged?.match ||
-        !target?.match
-      ) {
-        return;
-      }
+  const dragged =
+    newDays[sourceDay].grid[activePos.i][activePos.j];
 
-      const tempMatch =
-        dragged.match;
+  const target =
+    newDays[targetDay].grid[overPos.i][overPos.j];
 
-      dragged.match =
-        target.match;
+  if (!dragged?.match) return;
 
-      target.match =
-        tempMatch;
+  // 👉 if same day → swap
+  if (sourceDay === targetDay) {
+    if (!target?.match) return;
 
-      /* VALIDATION */
+    const temp = dragged.match;
+    dragged.match = target.match;
+    target.match = temp;
+  } else {
+    // 👉 MOVE to next day (shift logic)
+    if (target?.match) {
+      toast.error("❌ Target slot not empty");
+      return;
+    }
 
-      const swappedMatches = [
-        {
-          match: dragged.match,
-          time: dragged.time,
-          court: dragged.court,
-          rowIndex: activePos.i,
-        },
-        {
-          match: target.match,
-          time: target.time,
-          court: target.court,
-          rowIndex: overPos.i,
-        },
-      ];
+    target.match = dragged.match;
+    dragged.match = null;
+  }
 
-      for (const swapped of swappedMatches) {
+  // 🔥 VALIDATION FUNCTION
+  const validateDay = (grid) => {
+    const playerLastRow = {};
+    const timeSlotPlayers = {};
 
-        const swappedPlayers =
-          getPlayers(swapped.match);
+    for (let i = 0; i < grid.length; i++) {
+      for (let j = 0; j < grid[i].length; j++) {
+        const cell = grid[i][j];
+        if (!cell?.match) continue;
 
-        for (
-          let i = 0;
-          i < newGrid.length;
-          i++
-        ) {
+        const players = getPlayers(cell.match);
+        const time = cell.time;
 
-          for (
-            let j = 0;
-            j < newGrid[i].length;
-            j++
-          ) {
+        if (!timeSlotPlayers[time]) {
+          timeSlotPlayers[time] = new Set();
+        }
 
-            const cell =
-              newGrid[i][j];
+        const slotSet = timeSlotPlayers[time];
 
-            if (!cell?.match) {
-              continue;
-            }
+        // ❌ same time conflict
+        for (const p of players) {
+          if (slotSet.has(p)) return false;
+        }
 
-            const isSameCell =
-  i === swapped.rowIndex &&
-  j === swapped.court - 1;
+        // ❌ consecutive conflict
+        for (const p of players) {
+          if (playerLastRow[p] !== undefined) {
+            const diff = Math.abs(playerLastRow[p] - i);
 
-if (isSameCell) continue;
-
-            const cellPlayers =
-              getPlayers(cell.match);
-
-            const samePlayer =
-              swappedPlayers.some((p) =>
-                cellPlayers.includes(p)
+            if (diff === 1) {
+              const lastCourt = grid[playerLastRow[p]].findIndex(
+                (c) =>
+                  c.match &&
+                  getPlayers(c.match).includes(p)
               );
 
-            if (!samePlayer) {
-              continue;
+              if (lastCourt !== j) return false;
             }
-
-            /* SAME TIME */
-
-            const overlap = swappedPlayers.some((p) =>
-  cellPlayers.includes(p)
-);
-
-if (
-  overlap &&
-  swapped.time === cell.time &&
-  (i !== swapped.rowIndex || j !== swapped.court - 1)
-) {
-  toast.error(
-    "❌ Same player cannot play on different courts at same time"
-  );
-  return;
-}
-
-            /* CONSECUTIVE */
-
-            const diff =
-              Math.abs(
-                swapped.rowIndex - i
-              );
-              const samePlayerConflict =
-  swappedPlayers.some((p) =>
-    cellPlayers.includes(p)
-  );
-
-            if (
-              diff === 1 &&
-              swapped.court !==
-                cell.court
-            ) {
-
-              toast.error(
-                "❌ Consecutive matches must be on same court"
-              );
-
-              return;
-
-            }
-
           }
-
         }
 
+        players.forEach((p) => slotSet.add(p));
+        players.forEach((p) => (playerLastRow[p] = i));
       }
+    }
 
-      setGrid(newGrid);
-      setDays((prevDays) => {
-  const updated = [...prevDays];
-  updated[0].grid = newGrid; // only Day 1 drag
-  return updated;
-});
+    return true;
+  };
 
-      toast.success(
-        "✅ Match swapped"
-      );
+  // ❌ validate both days
+  if (
+    !validateDay(newDays[sourceDay].grid) ||
+    !validateDay(newDays[targetDay].grid)
+  ) {
+    toast.error("❌ Invalid move (conflict detected)");
+    return;
+  }
 
-    };
+  // ✅ APPLY
+  setDays(newDays);
+
+  toast.success("✅ Match moved successfully");
+};
 console.log("DAYS:", days);
 console.log("Remaining:", notPlacedMatches);
   /* ================= UI ================= */
