@@ -68,6 +68,7 @@ function DraggableMatch({
   side
 ) => {
  console.log("MATCH DATA:", match);
+ console.log("WINNER CHECK:", match.Winner);
   // NORMAL TEAM
   if (team?.partner1?.name) {
 
@@ -108,6 +109,22 @@ function DraggableMatch({
   const rightMatch =
     currentMatchNo * 2;
 
+  // ✅ DIRECT TEAM
+if (team?.partner1?.name) {
+  return `${team.partner1?.name}${
+    team.partner2 ? " & " + team.partner2?.name : ""
+  }`;
+}
+
+if (match?.Winner) {
+  return `${match.Winner.partner1?.name || ""}${
+    match.Winner.partner2
+      ? " & " + match.Winner.partner2?.name
+      : ""
+  }`;
+}
+
+
   // FIND PREVIOUS ROUND MATCHES
   const leftPrevMatch =
   allMatchesRef.current.find(
@@ -130,9 +147,9 @@ function DraggableMatch({
   if (!m) return null;
 
   // ✅ winner already decided
-  if (m.winner) {
-    return `${m.winner.partner1?.name || ""}${
-      m.winner.partner2 ? " & " + m.winner.partner2?.name : ""
+  if (m.Winner) {
+    return `${m.Winner.partner1?.name || ""}${
+      m.Winner.partner2 ? " & " + m.Winner.partner2?.name : ""
     }`;
   }
 
