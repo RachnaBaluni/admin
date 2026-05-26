@@ -396,8 +396,10 @@ const fetchData = async () => {
       const roundCounters = {};
 
       const matchesWithData = filteredMatches.map((m) => {
+        
+        console.log("FULL MATCH OBJECT:", m);
         const stage = (m.Stage || "Round 1").trim();
-
+        
         if (!roundCounters[stage]) {
           roundCounters[stage] = 1;
         }
@@ -405,8 +407,7 @@ const fetchData = async () => {
         return {
           ...m,
           category: ev.name,
-          matchNo: roundCounters[stage]++,
-        };
+          matchNo: m.Match_number  };
       });
 
       allMatches.push(...matchesWithData);
