@@ -302,7 +302,6 @@ const [grid, setGrid] = useState([]);
 
   const [notPlacedMatches, setNotPlacedMatches] = useState([]);
 
-  const [selectedRounds, setSelectedRounds] = useState(["Round 1"]);
   const [courtCount, setCourtCount] = useState(4);
   const [selectedEventId, setSelectedEventId] = useState("");
 
