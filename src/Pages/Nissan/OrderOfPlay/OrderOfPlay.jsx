@@ -110,69 +110,54 @@ function DraggableMatch({
 
   // FIND PREVIOUS ROUND MATCHES
   const leftPrevMatch =
-    allMatchesRef.current.find(
-      (m) =>
-        m.Stage === `Round ${prevRound}` &&
-        m.matchNo === leftMatch
-    );
-
+  allMatchesRef.current.find(
+    (m) =>
+      m.Stage === `Round ${prevRound}` &&
+      m.matchNo === leftMatch &&
+      m.category === match.category   // ✅ ADD THIS
+  );
   const rightPrevMatch =
-    allMatchesRef.current.find(
-      (m) =>
-        m.Stage === `Round ${prevRound}` &&
-        m.matchNo === rightMatch
-    );
+  allMatchesRef.current.find(
+    (m) =>
+      m.Stage === `Round ${prevRound}` &&
+      m.matchNo === rightMatch &&
+      m.category === match.category   // ✅ ADD THIS
+  );
 
   // AUTO WINNER LOGIC
-  const getAutoWinner = (m) => {
+  const getWinnerName = (m) => {
 
-    if (!m) return null;
+  if (!m) return null;
 
-    const team1Exists =
-      m.Team1?.partner1?.name;
+  // ✅ winner already decided
+  if (m.winner) {
+    return `${m.winner.partner1?.name || ""}${
+      m.winner.partner2 ? " & " + m.winner.partner2?.name : ""
+    }`;
+  }
 
-    const team2Exists =
-      m.Team2?.partner1?.name;
+  const team1Exists = m.Team1?.partner1?.name;
+  const team2Exists = m.Team2?.partner1?.name;
 
-    // Team1 vs TBD
-    if (
-      team1Exists &&
-      !team2Exists
-    ) {
+  if (team1Exists && !team2Exists) {
+    return `${m.Team1.partner1?.name}${
+      m.Team1.partner2 ? " & " + m.Team1.partner2?.name : ""
+    }`;
+  }
 
-      return `${m.Team1.partner1?.name}
-      ${
-        m.Team1.partner2
-          ? " & " + m.Team1.partner2?.name
-          : ""
-      }`;
+  if (!team1Exists && team2Exists) {
+    return `${m.Team2.partner1?.name}${
+      m.Team2.partner2 ? " & " + m.Team2.partner2?.name : ""
+    }`;
+  }
 
-    }
-
-    // TBD vs Team2
-    if (
-      !team1Exists &&
-      team2Exists
-    ) {
-
-      return `${m.Team2.partner1?.name}
-      ${
-        m.Team2.partner2
-          ? " & " + m.Team2.partner2?.name
-          : ""
-      }`;
-
-    }
-
-    return null;
-
-  };
-
+  return null;
+};
   // LEFT SIDE
   if (side === 1) {
 
     const autoWinner =
-      getAutoWinner(leftPrevMatch);
+      getWinnerName(leftPrevMatch);
 
     if (autoWinner) {
       return autoWinner;
@@ -184,11 +169,12 @@ function DraggableMatch({
 
   // RIGHT SIDE
   const autoWinner =
-    getAutoWinner(rightPrevMatch);
+    getWinnerName(rightPrevMatch);
 
   if (autoWinner) {
     return autoWinner;
   }
+  console.log(leftPrevMatch);
 
   return `R${prevRound} M${rightMatch} Winner`;
 
