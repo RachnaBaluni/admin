@@ -1014,43 +1014,6 @@ console.log("Remaining:", notPlacedMatches);
       >
         Add Day
       </button>
-      {/* ✅ YAHAN PASTE KARO */}
-<div style={{ marginTop: "30px" }}>
-  <h3>Remaining Matches ({notPlacedMatches.length})</h3>
-
-  {notPlacedMatches.length === 0 ? (
-    <p style={{ color: "green" }}>
-      🎉 All matches scheduled successfully!
-    </p>
-  ) : (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "10px",
-        marginTop: "10px",
-      }}
-    >
-      {notPlacedMatches.map((m) => (
-        <div
-          key={m._id}
-          style={{
-            padding: "8px 12px",
-            background: "#ffeaea",
-            borderRadius: "8px",
-            fontSize: "14px",
-            color: "#d32f2f",
-          }}
-        >
-          {/* ❌ CATEGORY REMOVE */}
-          {/* {m.category} - */}
-
-          ✅ {m.Stage}
-        </div>
-      ))}
-    </div>
-  )}
-</div>
 
     </div>
 
@@ -1337,10 +1300,43 @@ console.log("Remaining:", notPlacedMatches);
         </div>
       ))}
 
-      
-    </>
-  )
-}
+<div style={{ marginTop: "30px" }}>
+  <h3>Remaining Matches ({notPlacedMatches.length})</h3>
+
+  {notPlacedMatches.length === 0 ? (
+    <p style={{ color: "green" }}>
+      🎉 All matches scheduled successfully!
+    </p>
+  ) : (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "10px",
+        marginTop: "10px",
+      }}
+    >
+      {notPlacedMatches.map((m, index) => (
+        <div
+          key={m._id}
+          style={{
+            padding: "8px 12px",
+            background: "#ffeaea",
+            borderRadius: "8px",
+            fontSize: "14px",
+            color: "#d32f2f",
+          }}
+        >
+          Match {index + 1}
+        </div>
+      ))}
     </div>
+  )}
+</div>
+    </>
+
+  )
+} 
+    </div>            
   );
 }
