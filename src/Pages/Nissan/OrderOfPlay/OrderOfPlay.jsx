@@ -703,6 +703,35 @@ console.log("hideGrid:", hideGrid);
 
     };
 
+    const validateAllDays = (daysData) => {
+  const timeMap = {};
+
+  daysData.forEach((day) => {
+    day.grid.forEach((row) => {
+      row.forEach((cell) => {
+        if (!cell?.match) return;
+
+        const players = getPlayers(cell.match);
+        const time = cell.time;
+
+        if (!timeMap[time]) {
+          timeMap[time] = new Set();
+        }
+
+        for (const p of players) {
+          if (timeMap[time].has(p)) {
+            return false; // ❌ same player same time across days
+          }
+        }
+
+        players.forEach((p) => timeMap[time].add(p));
+      });
+    });
+  });
+
+  return true;
+};
+
   /* ================= DRAG END ================= */
 
   const handleDragEnd = (event) => {
@@ -824,12 +853,13 @@ console.log("hideGrid:", hideGrid);
 
   // ❌ validate both days
   if (
-    !validateDay(newDays[sourceDay].grid) ||
-    !validateDay(newDays[targetDay].grid)
-  ) {
-    toast.error("❌ Invalid move (conflict detected)");
-    return;
-  }
+  !validateDay(newDays[sourceDay].grid) ||
+  !validateDay(newDays[targetDay].grid) ||
+  !validateAllDays(newDays)
+) {
+  toast.error("❌ Invalid move (player conflict across days)");
+  return;
+}
 
   // ✅ APPLY
   setDays(newDays);
