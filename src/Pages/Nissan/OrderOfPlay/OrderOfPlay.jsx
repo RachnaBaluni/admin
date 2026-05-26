@@ -973,7 +973,50 @@ console.log("Remaining:", notPlacedMatches);
       </div>
 
 
-     
+      {/* (Add Next Day UI) */}
+    <div style={{ marginTop: "30px" }}>
+
+      <h3>Add Next Day</h3>
+
+      <input
+        type="date"
+        value={newDayDate}
+        onChange={(e) => setNewDayDate(e.target.value)}
+      />
+
+      <input
+        type="number"
+        value={newCourtCount}
+        onChange={(e) => setNewCourtCount(Number(e.target.value))}
+        placeholder="Courts"
+      />
+
+      <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+        {Array.from({ length: newCourtCount }).map((_, i) => (
+          <input
+            key={i}
+            type="number"
+            placeholder={`Court ${i + 1}`}
+            value={newMatchesPerCourt[i + 1] || 10}
+            onChange={(e) =>
+              setNewMatchesPerCourt({
+                ...newMatchesPerCourt,
+                [i + 1]: Number(e.target.value),
+              })
+            }
+          />
+        ))}
+      </div>
+
+      <button
+        onClick={addNextDay}
+        style={{ marginTop: "15px" }}
+      >
+        Add Day
+      </button>
+
+    </div>
+
       
       
 
@@ -1195,54 +1238,6 @@ console.log("Remaining:", notPlacedMatches);
         )
       }
 
-
-      {/* ADD NEXT DAY */}
-<div className={styles.addDayBox}>
-  <h3 className={styles.addDayTitle}>📅 Add Next Day</h3>
-
-  <div className={styles.addDayRow}>
-    <input
-      type="date"
-      value={newDayDate}
-      onChange={(e) => setNewDayDate(e.target.value)}
-      className={styles.input}
-    />
-
-    <input
-      type="number"
-      value={newCourtCount}
-      onChange={(e) => setNewCourtCount(Number(e.target.value))}
-      placeholder="Courts"
-      className={styles.input}
-    />
-  </div>
-
-  <div className={styles.courtInputs}>
-    {Array.from({ length: newCourtCount }).map((_, i) => (
-      <input
-        key={i}
-        type="number"
-        placeholder={`Court ${i + 1}`}
-        value={newMatchesPerCourt[i + 1] || 10}
-        onChange={(e) =>
-          setNewMatchesPerCourt({
-            ...newMatchesPerCourt,
-            [i + 1]: Number(e.target.value),
-          })
-        }
-        className={styles.input}
-      />
-    ))}
-  </div>
-
-  <button
-    onClick={addNextDay}
-    className={styles.addBtn}
-  >
-    + Add Day
-  </button>
-</div>
-
       {/* GRID */}
 
 {
@@ -1305,25 +1300,42 @@ console.log("Remaining:", notPlacedMatches);
         </div>
       ))}
 
-      {/* REMAINING MATCHES */}
-      <div style={{ marginTop: "40px" }}>
-        <h2>Remaining Matches: {notPlacedMatches.length}</h2>
+      <div className={styles.remainingWrapper}>
+  
+  {/* LEFT SIDE */}
+  <div className={styles.remainingList}>
+    <h2>Remaining Matches ({notPlacedMatches.length})</h2>
 
- 
-
-
-
-        {notPlacedMatches.length === 0 ? (
-          <p>All matches scheduled ✅</p>
-        ) : (
-          notPlacedMatches.map((m) => (
-            <div key={m._id} style={{ marginBottom: "8px", color: "red" }}>
-              {m.category} - {m.Stage}
-            </div>
-          ))
-        )}
+    {notPlacedMatches.length === 0 ? (
+      <p className={styles.successText}>
+        🎉 All matches scheduled successfully!
+      </p>
+    ) : (
+      <div className={styles.matchList}>
+        {notPlacedMatches.map((m) => (
+          <div key={m._id} className={styles.matchItem}>
+            {m.category} - {m.Stage}
+          </div>
+        ))}
       </div>
+    )}
+  </div>
 
+  {/* RIGHT SIDE */}
+  <div className={styles.summaryBox}>
+    <h3>Summary</h3>
+
+    <p>Total Remaining:</p>
+    <h1>{notPlacedMatches.length}</h1>
+
+    {notPlacedMatches.length === 0 ? (
+      <p className={styles.successText}>All Done ✅</p>
+    ) : (
+      <p className={styles.warningText}>Pending Matches</p>
+    )}
+  </div>
+
+</div>
     </>
   )
 }

@@ -414,3 +414,56 @@
 .addBtn:hover {
   background: #15803d;
 }
+.remainingWrapper {
+  display: flex;
+  gap: 20px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.remainingList {
+  flex: 2;
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.matchList {
+  margin-top: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.matchItem {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.summaryBox {
+  flex: 1;
+  background: #f1f5f9;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.summaryBox h1 {
+  font-size: 32px;
+  margin: 10px 0;
+}
+
+.successText {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.warningText {
+  color: #dc2626;
+  font-weight: 500;
+}
