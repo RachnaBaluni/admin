@@ -1014,6 +1014,43 @@ console.log("Remaining:", notPlacedMatches);
       >
         Add Day
       </button>
+      {/* ✅ YAHAN PASTE KARO */}
+<div style={{ marginTop: "30px" }}>
+  <h3>Remaining Matches ({notPlacedMatches.length})</h3>
+
+  {notPlacedMatches.length === 0 ? (
+    <p style={{ color: "green" }}>
+      🎉 All matches scheduled successfully!
+    </p>
+  ) : (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "10px",
+        marginTop: "10px",
+      }}
+    >
+      {notPlacedMatches.map((m) => (
+        <div
+          key={m._id}
+          style={{
+            padding: "8px 12px",
+            background: "#ffeaea",
+            borderRadius: "8px",
+            fontSize: "14px",
+            color: "#d32f2f",
+          }}
+        >
+          {/* ❌ CATEGORY REMOVE */}
+          {/* {m.category} - */}
+
+          ✅ {m.Stage}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
     </div>
 
@@ -1300,42 +1337,7 @@ console.log("Remaining:", notPlacedMatches);
         </div>
       ))}
 
-      <div className={styles.remainingWrapper}>
-  
-  {/* LEFT SIDE */}
-  <div className={styles.remainingList}>
-    <h2>Remaining Matches ({notPlacedMatches.length})</h2>
-
-    {notPlacedMatches.length === 0 ? (
-      <p className={styles.successText}>
-        🎉 All matches scheduled successfully!
-      </p>
-    ) : (
-      <div className={styles.matchList}>
-        {notPlacedMatches.map((m) => (
-          <div key={m._id} className={styles.matchItem}>
-            {m.category} - {m.Stage}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-
-  {/* RIGHT SIDE */}
-  <div className={styles.summaryBox}>
-    <h3>Summary</h3>
-
-    <p>Total Remaining:</p>
-    <h1>{notPlacedMatches.length}</h1>
-
-    {notPlacedMatches.length === 0 ? (
-      <p className={styles.successText}>All Done ✅</p>
-    ) : (
-      <p className={styles.warningText}>Pending Matches</p>
-    )}
-  </div>
-
-</div>
+      
     </>
   )
 }
