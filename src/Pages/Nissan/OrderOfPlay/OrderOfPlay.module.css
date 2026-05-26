@@ -359,3 +359,58 @@
     min-height: auto;
   }
 }
+
+.addDayBox {
+  margin-top: 40px;
+  padding: 25px;
+  background: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.addDayTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.addDayRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.input:focus {
+  border-color: #2563eb;
+}
+
+.courtInputs {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.addBtn {
+  margin-top: 15px;
+  padding: 10px 18px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.addBtn:hover {
+  background: #15803d;
+}

@@ -973,50 +973,7 @@ console.log("Remaining:", notPlacedMatches);
       </div>
 
 
-      {/* (Add Next Day UI) */}
-    <div style={{ marginTop: "30px" }}>
-
-      <h3>Add Next Day</h3>
-
-      <input
-        type="date"
-        value={newDayDate}
-        onChange={(e) => setNewDayDate(e.target.value)}
-      />
-
-      <input
-        type="number"
-        value={newCourtCount}
-        onChange={(e) => setNewCourtCount(Number(e.target.value))}
-        placeholder="Courts"
-      />
-
-      <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-        {Array.from({ length: newCourtCount }).map((_, i) => (
-          <input
-            key={i}
-            type="number"
-            placeholder={`Court ${i + 1}`}
-            value={newMatchesPerCourt[i + 1] || 10}
-            onChange={(e) =>
-              setNewMatchesPerCourt({
-                ...newMatchesPerCourt,
-                [i + 1]: Number(e.target.value),
-              })
-            }
-          />
-        ))}
-      </div>
-
-      <button
-        onClick={addNextDay}
-        style={{ marginTop: "15px" }}
-      >
-        Add Day
-      </button>
-
-    </div>
-
+     
       
       
 
@@ -1237,6 +1194,54 @@ console.log("Remaining:", notPlacedMatches);
 
         )
       }
+
+
+      {/* ADD NEXT DAY */}
+<div className={styles.addDayBox}>
+  <h3 className={styles.addDayTitle}>📅 Add Next Day</h3>
+
+  <div className={styles.addDayRow}>
+    <input
+      type="date"
+      value={newDayDate}
+      onChange={(e) => setNewDayDate(e.target.value)}
+      className={styles.input}
+    />
+
+    <input
+      type="number"
+      value={newCourtCount}
+      onChange={(e) => setNewCourtCount(Number(e.target.value))}
+      placeholder="Courts"
+      className={styles.input}
+    />
+  </div>
+
+  <div className={styles.courtInputs}>
+    {Array.from({ length: newCourtCount }).map((_, i) => (
+      <input
+        key={i}
+        type="number"
+        placeholder={`Court ${i + 1}`}
+        value={newMatchesPerCourt[i + 1] || 10}
+        onChange={(e) =>
+          setNewMatchesPerCourt({
+            ...newMatchesPerCourt,
+            [i + 1]: Number(e.target.value),
+          })
+        }
+        className={styles.input}
+      />
+    ))}
+  </div>
+
+  <button
+    onClick={addNextDay}
+    className={styles.addBtn}
+  >
+    + Add Day
+  </button>
+</div>
 
       {/* GRID */}
 
