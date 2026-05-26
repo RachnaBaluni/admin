@@ -116,12 +116,12 @@ if (team?.partner1?.name) {
   }`;
 }
 
-if (match?.Winner) {
-  return `${match.Winner.partner1?.name || ""}${
-    match.Winner.partner2
-      ? " & " + match.Winner.partner2?.name
-      : ""
-  }`;
+//if (match?.Winner) {
+//  return `${match.Winner.partner1?.name || ""}${
+ //   match.Winner.partner2
+  //    ? " & " + match.Winner.partner2?.name
+ //     : ""
+  //}`;
 }
 
 
@@ -133,6 +133,7 @@ if (match?.Winner) {
       m.matchNo === leftMatch &&
       m.category === match.category   // ✅ ADD THIS
   );
+  console.log("LEFT MATCH:", leftMatch, leftPrevMatch);
   const rightPrevMatch =
   allMatchesRef.current.find(
     (m) =>
@@ -140,6 +141,7 @@ if (match?.Winner) {
       m.matchNo === rightMatch &&
       m.category === match.category   // ✅ ADD THIS
   );
+  console.log("RIGHT MATCH:", rightMatch, rightPrevMatch);
 
   // AUTO WINNER LOGIC
   const getWinnerName = (m) => {
@@ -382,17 +384,22 @@ const fetchData = async () => {
       r.trim().toLowerCase()
     );
 
+
     // 🔥 MATCH BUILD
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
 
-      const filteredMatches = matches.filter((m) =>
-        allowedRounds.includes(
-          (m.Stage || "").trim().toLowerCase()
-        )
-      );
+      const filteredMatches = matches.filter((m) => {
 
+  const isAllowedRound = allowedRounds.includes(
+    (m.Stage || "").trim().toLowerCase()
+  );
+if (m.Winner) return false;
+
+  return isAllowedRound;
+  
+});
       const roundCounters = {};
 
       const matchesWithData = filteredMatches.map((m) => {
@@ -458,7 +465,7 @@ setNotPlacedMatches(day1.remainingMatches);
   }
 };
 
-  /* =================new Days================= */
+/* =================new Days================= */
 
 
 const addNextDay = () => {
@@ -474,12 +481,11 @@ const addNextDay = () => {
   }
 
   const newDay = buildGrid(
-    notPlacedMatches,
-    newCourtCount,
-    newMatchesPerCourt,
-    days
-  );
-
+  newMatches,
+  newCourtCount,
+  newMatchesPerCourt,
+  days
+);
   const updatedDays = [
     ...days,
     {
@@ -496,6 +502,17 @@ console.log("CHECK VALID:", validateAllDays(updatedDays));
     toast.error("❌ Same player same time across days");
     return;
   }
+   
+  const remainingUnplayedMatches = allMatchesRef.current.filter(
+  (m) => !m.Winner
+);
+
+const newMatches = [
+  ...notPlacedMatches,        // ❗ shifted
+   
+];
+
+
 
   // ✅ APPLY ONLY IF VALID
   setDays(updatedDays);
@@ -637,7 +654,8 @@ console.log("CHECK VALID:", validateAllDays(updatedDays));
     remainingMatches: notPlacedMatches,
   };
 };
-  /* ================= SAVE DATA ================= */
+
+/* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
     console.log("SAVE DATE =", selectedDate);
 console.log("EVENT =", selectedEventId);
@@ -987,12 +1005,7 @@ console.log("Remaining:", notPlacedMatches);
 
       </div>
 
-
       
-
-      
-      
-
       {/* FILTERS */}
 
       {
