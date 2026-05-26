@@ -274,7 +274,14 @@ export default function OrderOfPlay() {
   };
 
   
-  
+  const [selectedCategories, setSelectedCategories] = useState([
+  "Cat.B(85+ combined)"
+]);
+
+const [selectedRounds, setSelectedRounds] = useState([
+  "Round 1",
+  "Round 2"
+]);
 
 const [days, setDays] = useState([]);
 
@@ -320,10 +327,10 @@ const [showFilters, setShowFilters] = useState(false);
   }, []);
 
   useEffect(() => {
-    if (events.length > 0) {
-      fetchData();
-    }
-  }, [events]);
+  if (events.length > 0 && selectedDate) {
+    fetchData();
+  }
+}, [events, selectedDate]);
 
   const fetchEvents = async () => {
     try {
@@ -335,7 +342,7 @@ const [showFilters, setShowFilters] = useState(false);
       const allEvents = res.data.data;
 
       setEvents(allEvents);
-      setSelectedCategories(allEvents.map((ev) => ev.name));
+      setSelectedDate(new Date().toISOString().split("T")[0]);
 setSelectedEventId(allEvents[0]?._id);
     } catch (err) {
       console.error(err);
