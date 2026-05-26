@@ -770,52 +770,57 @@ console.log("hideGrid:", hideGrid);
 
   // 🔥 VALIDATION FUNCTION
   const validateDay = (grid) => {
-    const playerLastRow = {};
-    const timeSlotPlayers = {};
+  const timeMap = {}; // 🔥 important
 
-    for (let i = 0; i < grid.length; i++) {
-      for (let j = 0; j < grid[i].length; j++) {
-        const cell = grid[i][j];
-        if (!cell?.match) continue;
+  const playerLastRow = {};
 
-        const players = getPlayers(cell.match);
-        const time = cell.time;
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
 
-        if (!timeSlotPlayers[time]) {
-          timeSlotPlayers[time] = new Set();
+      const cell = grid[i][j];
+      if (!cell?.match) continue;
+
+      const players = getPlayers(cell.match);
+      const time = cell.time;
+
+      // 🔥 SAME TIME CHECK (STRICT)
+      if (!timeMap[time]) {
+        timeMap[time] = new Set();
+      }
+
+      for (const p of players) {
+        if (timeMap[time].has(p)) {
+          return false; // ❌ same player same time
         }
+      }
 
-        const slotSet = timeSlotPlayers[time];
+      // 🔥 CONSECUTIVE CHECK
+      for (const p of players) {
+        if (playerLastRow[p] !== undefined) {
+          const diff = Math.abs(playerLastRow[p] - i);
 
-        // ❌ same time conflict
-        for (const p of players) {
-          if (slotSet.has(p)) return false;
-        }
+          if (diff === 1) {
+            const lastCourt = grid[playerLastRow[p]].findIndex(
+              (c) =>
+                c.match &&
+                getPlayers(c.match).includes(p)
+            );
 
-        // ❌ consecutive conflict
-        for (const p of players) {
-          if (playerLastRow[p] !== undefined) {
-            const diff = Math.abs(playerLastRow[p] - i);
-
-            if (diff === 1) {
-              const lastCourt = grid[playerLastRow[p]].findIndex(
-                (c) =>
-                  c.match &&
-                  getPlayers(c.match).includes(p)
-              );
-
-              if (lastCourt !== j) return false;
+            if (lastCourt !== j) {
+              return false;
             }
           }
         }
-
-        players.forEach((p) => slotSet.add(p));
-        players.forEach((p) => (playerLastRow[p] = i));
       }
-    }
 
-    return true;
-  };
+      // ✅ update trackers
+      players.forEach((p) => timeMap[time].add(p));
+      players.forEach((p) => (playerLastRow[p] = i));
+    }
+  }
+
+  return true;
+};
 
   // ❌ validate both days
   if (
