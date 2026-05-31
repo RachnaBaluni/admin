@@ -197,7 +197,7 @@ if (team?.partner1?.name) {
 
   return `R${prevRound} M${rightMatch} Winner`;
 
-};
+}
   return (
   <div
     ref={setNodeRef}
@@ -236,6 +236,7 @@ if (team?.partner1?.name) {
     </div>
   </div>
 );
+
 
 /* ================= DROP SLOT ================= */
 
