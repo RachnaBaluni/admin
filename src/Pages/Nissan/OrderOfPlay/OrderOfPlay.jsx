@@ -236,7 +236,7 @@ if (team?.partner1?.name) {
     </div>
   </div>
 );
-}
+
 /* ================= DROP SLOT ================= */
 
 function DroppableSlot({
@@ -278,7 +278,7 @@ export default function OrderOfPlay() {
     return d.toISOString().split("T")[0];
   };
 
-  
+  const [showRemainingOnly, setShowRemainingOnly] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([
   "Cat.B(85+ combined)"
 ]);
@@ -996,6 +996,15 @@ console.log("Remaining:", notPlacedMatches);
   Save Order
 </button>
 
+
+<button
+  className={styles.generateBtn}
+  onClick={() => setShowRemainingOnly(prev => !prev)}
+>
+  {showRemainingOnly ? "Show Scheduled Matches" : "Show Remaining Matches"}
+</button>
+
+
           <button
             className={styles.printBtn}
             onClick={handlePrint}
@@ -1277,22 +1286,67 @@ console.log("Remaining:", notPlacedMatches);
 </div>
       )}
 
-      {/* GRID */}
+     {/* GRID */}
 
 {
   !hideGrid && (
 
     <>
-      {days.map((day, dayIndex) => (
+    
+    {showRemainingOnly ? (
+
+      // 🔴 REMAINING MATCHES VIEW
+      <div style={{ marginTop: "30px" }}>
+        
+        <h2>
+          Remaining Matches ({notPlacedMatches.length})
+        </h2>
+
+        {notPlacedMatches.length === 0 ? (
+          <p style={{ color: "green", fontWeight: "bold" }}>
+            🎉 No remaining matches
+          </p>
+        ) : (
+
+          notPlacedMatches.map((match) => (
+            <div key={match._id} className={styles.matchCard}>
+
+              <div className={styles.category}>
+                {match.category}
+              </div>
+
+              <div className={styles.round}>
+                {match.Stage}
+              </div>
+
+              <div className={styles.team}>
+                {match.Team1?.partner1?.name || "TBD"}
+              </div>
+
+              <div className={styles.vs}>VS</div>
+
+              <div className={styles.team}>
+                {match.Team2?.partner1?.name || "TBD"}
+              </div>
+
+            </div>
+          ))
+
+        )}
+
+      </div>
+
+    ) : (
+
+      // 🟢 NORMAL GRID (same as your code)
+      days.map((day, dayIndex) => (
 
         <div key={dayIndex} style={{ marginBottom: "50px" }}>
 
-          {/* DAY TITLE */}
           <h2>
-            Day {dayIndex + 1} 
+            Day {dayIndex + 1}
           </h2>
 
-          {/* HEADER */}
           <div
             className={styles.header}
             style={{
@@ -1306,7 +1360,6 @@ console.log("Remaining:", notPlacedMatches);
             ))}
           </div>
 
-          {/* GRID */}
           <DndContext
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
@@ -1337,33 +1390,14 @@ console.log("Remaining:", notPlacedMatches);
           </DndContext>
 
         </div>
-      ))}
-{showFilters && (
-  <div style={{ marginTop: "30px" }}>
-    
-    <h3>
-      Remaining Matches: {notPlacedMatches.length}
-    </h3>
 
-    {/* ✅ SUCCESS MESSAGE */}
-    {notPlacedMatches.length === 0 && (
-      <p
-        style={{
-          marginTop: "10px",
-          color: "green",
-          fontWeight: "bold",
-        }}
-      >
-        🎉 All matches scheduled successfully!
-      </p>
+      ))
+
     )}
 
-  </div>
-)}
     </>
-    )
-      }
-
-    </div>
+  )
+}
+    </div>  
   );
 }
