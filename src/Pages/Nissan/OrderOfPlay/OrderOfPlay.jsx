@@ -237,6 +237,7 @@ if (team?.partner1?.name) {
   </div>
 );
 
+
 /* ================= DROP SLOT ================= */
 
 function DroppableSlot({
