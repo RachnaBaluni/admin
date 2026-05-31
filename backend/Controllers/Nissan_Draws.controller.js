@@ -141,3 +141,22 @@ exports.updateCourt = async (req, res) => {
     });
   }
 };
+
+// =========================
+// GET ALL DRAWS (ALL EVENTS)
+// =========================
+exports.getAllDraws = async (req, res) => {
+  try {
+    const draws = await drawService.getAllDraws();
+
+    res.status(200).json({
+      success: true,
+      data: draws,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

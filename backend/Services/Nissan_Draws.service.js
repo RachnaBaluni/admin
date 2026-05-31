@@ -266,3 +266,24 @@ exports.swapMatchup = async (
     throw new Error(error.message);
   }
 };
+
+/* =========================
+   GET ALL DRAWS (ALL EVENTS)
+   ========================= */
+exports.getAllDraws = async () => {
+  try {
+    return await Nissan_Draws.find()
+      .populate({
+        path: "Team1",
+        populate: { path: "partner1 partner2", select: "name" },
+      })
+      .populate({
+        path: "Team2",
+        populate: { path: "partner1 partner2", select: "name" },
+      })
+      .populate("Winner")
+      .populate("Event");
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};

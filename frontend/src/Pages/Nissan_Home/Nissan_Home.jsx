@@ -327,7 +327,7 @@ export default function Home() {
               className={styles.loginButton}
             >
               <span className={styles.buttonText}>View Registered Teams</span>
-            </Link> 
+            </Link>
             <Link to="/tournaments/draws" className={styles.registerButton}>
               <span className={styles.buttonText}>View Draws</span>
             </Link>
@@ -335,8 +335,11 @@ export default function Home() {
               <span className={styles.buttonText}>View Results</span>
             </Link>
             <Link to="/tournaments/viewresults" className={styles.registerButton}>
-                <span className={styles.buttonText}>View Results 2</span>
-                </Link>
+              <span className={styles.buttonText}>View Results 2</span>
+            </Link>
+            <Link to="/tournaments/view-order-play" className={styles.loginButton}>
+              <span className={styles.buttonText}>Order Of Play</span>
+            </Link>
           </div>
         </section>
 

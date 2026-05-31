@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 // CORS
 const allowedOrigins = [
   "https://frontend1-liart-theta.vercel.app",
-  "https://adminn-ebon.vercel.app",
+  "https://admin-beta-gules.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000"
 ];
@@ -39,7 +39,7 @@ app.use("/api/admin/", require("./Route/Admin.route.js"));
 app.use("/api/member/", require("./Route/Member.route.js"));
 app.use("/api/team/", require("./Route/Team.route.js"));
 app.use("/api/nissan-draws/", require("./Route/Nissan_Draws.route.js"));
-
+app.use("/api", require("./Route/OrderOfPlay"));
 const PORT = process.env.PORT || 3002;
 
 // Start Server

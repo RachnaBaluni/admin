@@ -46,7 +46,7 @@ const loginPlayer = async (req, res) => {
     const data = await PlayerService.loginPlayer(req.body);
     const token = jwt.sign(
       { id: data._id },
-      "secretkey123",   // ⚠️ baad me .env me dalna
+      "secretkey123",   
       { expiresIn: "7d" }
     );
 
@@ -58,7 +58,7 @@ const loginPlayer = async (req, res) => {
       token:token,
     });
   } catch (error) {
-  console.log("LOGIN ERROR 👉", error); // ✅ ADD THIS
+  console.log("LOGIN ERROR 👉", error); // 
 
   res.status(500).json({
     success: false,

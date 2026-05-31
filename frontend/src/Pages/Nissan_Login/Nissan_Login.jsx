@@ -30,8 +30,8 @@ const Nissan_Login = () => {
         }
       );
       if (res.data.success) {
-  console.log("LOGIN RESPONSE 👉", res.data);
-   console.log("PLAYER DATA 👉", res.data.data);
+  console.log("LOGIN RESPONSE ", res.data);
+   console.log("PLAYER DATA ", res.data.data);
 
   const token = res.data.token || res.data.data?.token;
 

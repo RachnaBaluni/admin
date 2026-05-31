@@ -21,17 +21,15 @@ const Match = ({
       (team.partner2 ? ` & ${team.partner2?.name}` : "");
   }
 
-  // ✅ HANDLE OBJECT + STRING + NULL
   const winnerId = matchWinnerId?._id || matchWinnerId;
-
-  // ✅ APPLY COLOR ONLY IF RESULT EXISTS
   const hasResult = !!winnerId;
 
   const isWinner =
     hasResult && team && String(team._id) === String(winnerId);
 
   const isLoser =
-    hasResult && team && String(team._id) !== String(winnerId);
+    hasResult &&
+    ((team && String(team._id) !== String(winnerId)) || !team);
 
   const handleClick = async () => {
     if (!team) return;
@@ -65,6 +63,7 @@ const Round = memo(({ title, matches, roundIndex, onUpdateMatch }) => {
     1: { offset: 120, gap: 180 },
     2: { offset: 260, gap: 500 },
     3: { offset: 520, gap: 1200 },
+    4: { offset: 1200, gap: 1500 },
   };
 
   const offset = customLayout[roundIndex]?.offset || 0;
@@ -155,17 +154,29 @@ const ViewResult = () => {
     fetchDraws();
   };
 
-  const rounds = Object.entries(
+  /* ================= ✅ FIXED ROUND LOGIC ================= */
+
+  const getRoundNumber = (stage) => {
+    if (!stage) return 0;
+
+    if (typeof stage === "number") return stage;
+
+    const match = stage.toString().match(/\d+/);
+    return match ? parseInt(match[0], 10) : 0;
+  };
+
+  const groupedRounds = Object.entries(
     draws.reduce((acc, d) => {
-      if (!acc[d.Stage]) acc[d.Stage] = [];
-      acc[d.Stage].push(d);
+      const key = getRoundNumber(d.Stage);
+
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(d);
+
       return acc;
     }, {})
-  )
-    .sort((a, b) => Number(a[0]) - Number(b[0]))
-    .map(([_, matches]) =>
-      matches.sort((a, b) => a.Match_number - b.Match_number)
-    );
+  ).sort((a, b) => a[0] - b[0]);
+
+  /* ================= RENDER ================= */
 
   return (
     <div className={styles.manageResultContainer}>
@@ -186,11 +197,13 @@ const ViewResult = () => {
       </div>
 
       <div className={styles.bracketContainer}>
-        {rounds.map((r, i) => (
+        {groupedRounds.map(([roundNumber, matches], i) => (
           <Round
-            key={i}
-            title={`Round ${i + 1}`}
-            matches={r}
+            key={roundNumber}
+            title={`Round ${roundNumber}`}
+            matches={matches.sort(
+              (a, b) => a.Match_number - b.Match_number
+            )}
             roundIndex={i}
             onUpdateMatch={handleUpdateMatch}
           />

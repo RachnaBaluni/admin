@@ -1,8 +1,13 @@
 /* ================= CONTAINER ================= */
 .manageResultContainer {
-  padding: 20px;
-  overflow-x: auto;
+ /* padding: 20px;
+  overflow-x: auto;*/
+  
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding: var(--spacing-lg);
 }
+
 
 /* ================= FILTER BUTTONS ================= */
 .eventFilterButtons {
@@ -130,10 +135,11 @@
 }
 /* ================= VS ================= */
 .vsSeparator {
+  display: block;       /* 🔥 force visible */
   text-align: center;
   padding: 4px;
   font-size: 11px;
-  margin: 4px 0;
+  margin: 6px 0;
   background: #eee;
   font-weight: 600;
 }

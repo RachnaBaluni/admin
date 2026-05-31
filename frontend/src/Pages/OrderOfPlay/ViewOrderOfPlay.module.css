@@ -1,0 +1,148 @@
+.container {
+  padding: 20px;
+  width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+/* HEADER */
+.header {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  min-width: 700px;
+}
+
+.header div {
+  background: #e6ffe6;
+  padding: 12px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid #ccc;
+}
+
+/* ROW */
+.row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  min-width: 700px;
+}
+
+/* SLOT */
+.slot {
+  border: 1px solid #ddd;
+  padding: 10px;
+  min-height: 120px;
+  min-width: 170px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+/* CARD */
+.card {
+  border: 1px dashed #bbb;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fafafa;
+  text-align: center;
+  word-break: break-word;
+  cursor: grab;
+}
+
+/* FIXED TIME */
+.fixedTime {
+  font-weight: bold;
+  color: blue;
+  margin-bottom: 6px;
+}
+
+/* CATEGORY */
+.category {
+  color: green;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+/* VS */
+.vs {
+  color: red;
+  font-weight: bold;
+  margin: 6px 0;
+}
+
+/* EMPTY */
+.empty {
+  text-align: center;
+  color: #aaa;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 768px) {
+
+  .container {
+    padding: 10px;
+  }
+
+  .header {
+    min-width: 650px;
+  }
+
+  .row {
+    min-width: 650px;
+  }
+
+  .slot {
+    padding: 8px;
+    min-height: 110px;
+    min-width: 160px;
+  }
+
+  .card {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .fixedTime {
+    font-size: 11px;
+  }
+
+  .category {
+    font-size: 11px;
+  }
+
+  .vs {
+    font-size: 12px;
+  }
+}
+
+/* ================= VERY SMALL MOBILE ================= */
+
+@media (max-width: 480px) {
+
+  .header {
+    min-width: 600px;
+  }
+
+  .row {
+    min-width: 600px;
+  }
+
+  .slot {
+    min-width: 150px;
+    padding: 6px;
+  }
+
+  .card {
+    font-size: 11px;
+    padding: 6px;
+  }
+
+  .fixedTime {
+    font-size: 10px;
+  }
+
+  .category {
+    font-size: 10px;
+  }
+
+}

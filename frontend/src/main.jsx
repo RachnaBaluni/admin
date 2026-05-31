@@ -31,6 +31,7 @@ import ViewResult from "./Pages/ViewResult/ViewResult.jsx";
 import Draws from "./Pages/Draws/Draws.jsx";
 import DrawDisplay from "./Pages/DrawDisplay/DrawDisplay.jsx";
 import DrawDisplaySetup from "./Pages/DrawDisplay/DrawDisplaySetup.jsx";
+import ViewOrderOfPlay from "./Pages/OrderOfPlay/ViewOrderOfPlay.jsx";
 
 
 const router = createBrowserRouter(
@@ -47,7 +48,7 @@ const router = createBrowserRouter(
        <Route path="/tournaments/viewresults" element={<ViewResult />} />
         <Route path="/tournaments/draws" element={<Draws />} />
         <Route path="/tournaments/drawdisplaysetup" element={<DrawDisplaySetup />} />
-
+        <Route path="/tournaments/view-order-play" element={<ViewOrderOfPlay />}/>
         <Route path="/login" element={<Login />} />
       </Route>
 
