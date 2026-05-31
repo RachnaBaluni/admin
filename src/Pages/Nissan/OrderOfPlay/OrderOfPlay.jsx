@@ -386,7 +386,7 @@ setNotPlacedMatches(day1.remainingMatches);
 
 /* =================new Days================= */
 
-
+/*
 const addNextDay = () => {
 
   if (!newDayDate) {
@@ -439,6 +439,67 @@ console.log("CHECK VALID:", validateAllDays(updatedDays));
   setDays(updatedDays);
   setNotPlacedMatches(newDay.remainingMatches);
   setNewDayDate("");
+};
+
+*/
+const addNextDay = () => {
+
+  if (!newDayDate) {
+    toast.error("Select date");
+    return;
+  }
+
+  // 👉 already nothing left
+  if (notPlacedMatches.length === 0) {
+    toast.success("All matches already scheduled ✅");
+    return;
+  }
+
+  // 🔥 1. pending matches (not completed yet)
+  const pendingMatches = allMatchesRef.current.filter(
+    (m) => !m.Winner
+  );
+
+  // 🔥 2. merge + remove duplicates safely
+  const uniqueMap = new Map();
+
+  [...notPlacedMatches, ...pendingMatches].forEach((m) => {
+    uniqueMap.set(m._id, m);
+  });
+
+  const newMatches = Array.from(uniqueMap.values());
+
+  // 🔥 3. build grid for new day
+  const newDay = buildGrid(
+    newMatches,
+    newCourtCount,
+    newMatchesPerCourt,
+    days
+  );
+
+  const updatedDays = [
+    ...days,
+    {
+      date: newDayDate,
+      courtCount: newCourtCount,
+      matchesPerCourt: newMatchesPerCourt,
+      grid: newDay.grid,
+      remaining: newDay.remainingMatches,
+    },
+  ];
+
+  // 🔥 4. validation
+  if (!validateAllDays(updatedDays)) {
+    toast.error("❌ Same player same time across days");
+    return;
+  }
+
+  // 🔥 5. APPLY STATE
+  setDays(updatedDays);
+  setNotPlacedMatches(newDay.remainingMatches);
+  setNewDayDate("");
+
+  toast.success("Day added successfully ✅");
 };
 
   /* ================= BUILD GRID ================= */
