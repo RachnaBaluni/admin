@@ -63,114 +63,179 @@ function DraggableMatch({
       }
     : undefined;
 
-  const getTeamName = (team, side) => {
-    console.log("MATCH DATA:", match);
-    console.log("WINNER CHECK:", match.Winner);
+  const getTeamName = (
+  team,
+  side
+) => {
+ console.log("MATCH DATA:", match);
+ console.log("WINNER CHECK:", match.Winner);
+  // NORMAL TEAM
+  if (team?.partner1?.name) {
 
-    // ✅ NORMAL TEAM
-    if (team?.partner1?.name) {
-      return `${team.partner1?.name || ""}${
-        team.partner2 ? " & " + team.partner2?.name : ""
-      }`;
-    }
+    return `${team.partner1?.name || ""}
+    ${
+      team.partner2
+        ? " & " + team.partner2?.name
+        : ""
+    }`;
 
-    const roundNumber = Number(
-      match.Stage?.replace("Round ", "")
+  }
+
+  // CURRENT ROUND
+  const roundNumber =
+    Number(
+      match.Stage?.replace(
+        "Round ",
+        ""
+      )
     );
 
-    if (!roundNumber || roundNumber === 1) {
-      return "TBD";
-    }
+  if (
+    !roundNumber ||
+    roundNumber === 1
+  ) {
+    return "TBD";
+  }
 
-    const prevRound = roundNumber - 1;
-    const currentMatchNo = match.matchNo || 1;
+  const prevRound =
+    roundNumber - 1;
 
-    const leftMatch = currentMatchNo * 2 - 1;
-    const rightMatch = currentMatchNo * 2;
+  const currentMatchNo =
+    match.matchNo || 1;
 
-    const leftPrevMatch = allMatchesRef.current.find(
-      (m) =>
-        m.Stage === `Round ${prevRound}` &&
-        m.matchNo === leftMatch &&
-        m.category === match.category
-    );
+  const leftMatch =
+    (currentMatchNo * 2) - 1;
 
-    const rightPrevMatch = allMatchesRef.current.find(
-      (m) =>
-        m.Stage === `Round ${prevRound}` &&
-        m.matchNo === rightMatch &&
-        m.category === match.category
-    );
+  const rightMatch =
+    currentMatchNo * 2;
 
-    const getWinnerName = (m) => {
-      if (!m) return null;
+  // ✅ DIRECT TEAM
+if (team?.partner1?.name) {
+  return `${team.partner1?.name}${
+    team.partner2 ? " & " + team.partner2?.name : ""
+  }`;
+}
 
-      if (m.Winner) {
-        return `${m.Winner.partner1?.name || ""}${
-          m.Winner.partner2
-            ? " & " + m.Winner.partner2?.name
-            : ""
-        }`;
-      }
+//if (match?.Winner) {
+//  return `${match.Winner.partner1?.name || ""}${
+ //   match.Winner.partner2
+  //    ? " & " + match.Winner.partner2?.name
+ //     : ""
+  //}`;
+}
 
-      const team1Exists = m.Team1?.partner1?.name;
-      const team2Exists = m.Team2?.partner1?.name;
 
-      if (team1Exists && !team2Exists) {
-        return `${m.Team1.partner1?.name}${
-          m.Team1.partner2
-            ? " & " + m.Team1.partner2?.name
-            : ""
-        }`;
-      }
-
-      if (!team1Exists && team2Exists) {
-        return `${m.Team2.partner1?.name}${
-          m.Team2.partner2
-            ? " & " + m.Team2.partner2?.name
-            : ""
-        }`;
-      }
-
-      return null;
-    };
-
-    if (side === 1) {
-      const autoWinner = getWinnerName(leftPrevMatch);
-      if (autoWinner) return autoWinner;
-      return `R${prevRound} M${leftMatch} Winner`;
-    }
-
-    const autoWinner = getWinnerName(rightPrevMatch);
-    if (autoWinner) return autoWinner;
-
-    return `R${prevRound} M${rightMatch} Winner`;
-  }; // ✅ IMPORTANT (yahan semicolon)
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={style}
-      className={styles.matchCard}
-    >
-      <div className={styles.time}>{time}</div>
-      <div className={styles.category}>{match.category}</div>
-      <div className={styles.round}>{match.Stage}</div>
-
-      <div className={styles.team}>
-        {getTeamName(match.Team1, 1)}
-      </div>
-
-      <div className={styles.vs}>VS</div>
-
-      <div className={styles.team}>
-        {getTeamName(match.Team2, 2)}
-      </div>
-    </div>
+  // FIND PREVIOUS ROUND MATCHES
+  const leftPrevMatch =
+  allMatchesRef.current.find(
+    (m) =>
+      m.Stage === `Round ${prevRound}` &&
+      m.matchNo === leftMatch &&
+      m.category === match.category   // ✅ ADD THIS
   );
-} 
+  console.log("LEFT MATCH:", leftMatch, leftPrevMatch);
+  const rightPrevMatch =
+  allMatchesRef.current.find(
+    (m) =>
+      m.Stage === `Round ${prevRound}` &&
+      m.matchNo === rightMatch &&
+      m.category === match.category   // ✅ ADD THIS
+  );
+  console.log("RIGHT MATCH:", rightMatch, rightPrevMatch);
+
+  // AUTO WINNER LOGIC
+  const getWinnerName = (m) => {
+
+  if (!m) return null;
+
+  // ✅ winner already decided
+  if (m.Winner) {
+    return `${m.Winner.partner1?.name || ""}${
+      m.Winner.partner2 ? " & " + m.Winner.partner2?.name : ""
+    }`;
+  }
+
+  const team1Exists = m.Team1?.partner1?.name;
+  const team2Exists = m.Team2?.partner1?.name;
+
+  if (team1Exists && !team2Exists) {
+    return `${m.Team1.partner1?.name}${
+      m.Team1.partner2 ? " & " + m.Team1.partner2?.name : ""
+    }`;
+  }
+
+  if (!team1Exists && team2Exists) {
+    return `${m.Team2.partner1?.name}${
+      m.Team2.partner2 ? " & " + m.Team2.partner2?.name : ""
+    }`;
+  }
+
+  return null;
+};
+  // LEFT SIDE
+  if (side === 1) {
+
+    const autoWinner =
+      getWinnerName(leftPrevMatch);
+
+    if (autoWinner) {
+      return autoWinner;
+    }
+
+    return `R${prevRound} M${leftMatch} Winner`;
+
+  }
+
+  // RIGHT SIDE
+  const autoWinner =
+    getWinnerName(rightPrevMatch);
+
+  if (autoWinner) {
+    return autoWinner;
+  }
+  console.log(leftPrevMatch);
+
+  return `R${prevRound} M${rightMatch} Winner`;
+
+};
+  return (
+  <div
+    ref={setNodeRef}
+    {...listeners}
+    {...attributes}
+    style={style}
+    className={styles.matchCard}
+  >
+    {/* TIME */}
+    <div className={styles.time}>
+      {time}
+    </div>
+
+    {/* CATEGORY */}
+    <div className={styles.category}>
+      {match.category}
+    </div>
+
+    {/* ROUND */}
+    <div className={styles.round}>
+      {match.Stage}
+    </div>
+
+    {/* TEAM 1 */}
+    <div className={styles.team}>
+      {getTeamName(match.Team1, 1)}
+    </div>
+
+    <div className={styles.vs}>
+      VS
+    </div>
+
+    {/* TEAM 2 */}
+    <div className={styles.team}>
+      {getTeamName(match.Team2, 2)}
+    </div>
+  </div>
+);
 
 /* ================= DROP SLOT ================= */
 
@@ -213,7 +278,7 @@ export default function OrderOfPlay() {
     return d.toISOString().split("T")[0];
   };
 
-  const [showRemainingOnly, setShowRemainingOnly] = useState(false);
+  
   const [selectedCategories, setSelectedCategories] = useState([
   "Cat.B(85+ combined)"
 ]);
@@ -931,15 +996,6 @@ console.log("Remaining:", notPlacedMatches);
   Save Order
 </button>
 
-
-<button
-  className={styles.generateBtn}
-  onClick={() => setShowRemainingOnly(prev => !prev)}
->
-  {showRemainingOnly ? "Show Scheduled Matches" : "Show Remaining Matches"}
-</button>
-
-
           <button
             className={styles.printBtn}
             onClick={handlePrint}
@@ -1221,67 +1277,22 @@ console.log("Remaining:", notPlacedMatches);
 </div>
       )}
 
-     {/* GRID */}
+      {/* GRID */}
 
 {
   !hideGrid && (
 
     <>
-    
-    {showRemainingOnly ? (
-
-      // 🔴 REMAINING MATCHES VIEW
-      <div style={{ marginTop: "30px" }}>
-        
-        <h2>
-          Remaining Matches ({notPlacedMatches.length})
-        </h2>
-
-        {notPlacedMatches.length === 0 ? (
-          <p style={{ color: "green", fontWeight: "bold" }}>
-            🎉 No remaining matches
-          </p>
-        ) : (
-
-          notPlacedMatches.map((match) => (
-            <div key={match._id} className={styles.matchCard}>
-
-              <div className={styles.category}>
-                {match.category}
-              </div>
-
-              <div className={styles.round}>
-                {match.Stage}
-              </div>
-
-              <div className={styles.team}>
-                {match.Team1?.partner1?.name || "TBD"}
-              </div>
-
-              <div className={styles.vs}>VS</div>
-
-              <div className={styles.team}>
-                {match.Team2?.partner1?.name || "TBD"}
-              </div>
-
-            </div>
-          ))
-
-        )}
-
-      </div>
-
-    ) : (
-
-      // 🟢 NORMAL GRID (same as your code)
-      days.map((day, dayIndex) => (
+      {days.map((day, dayIndex) => (
 
         <div key={dayIndex} style={{ marginBottom: "50px" }}>
 
+          {/* DAY TITLE */}
           <h2>
-            Day {dayIndex + 1}
+            Day {dayIndex + 1} 
           </h2>
 
+          {/* HEADER */}
           <div
             className={styles.header}
             style={{
@@ -1295,6 +1306,7 @@ console.log("Remaining:", notPlacedMatches);
             ))}
           </div>
 
+          {/* GRID */}
           <DndContext
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
@@ -1325,14 +1337,33 @@ console.log("Remaining:", notPlacedMatches);
           </DndContext>
 
         </div>
+      ))}
+{showFilters && (
+  <div style={{ marginTop: "30px" }}>
+    
+    <h3>
+      Remaining Matches: {notPlacedMatches.length}
+    </h3>
 
-      ))
-
+    {/* ✅ SUCCESS MESSAGE */}
+    {notPlacedMatches.length === 0 && (
+      <p
+        style={{
+          marginTop: "10px",
+          color: "green",
+          fontWeight: "bold",
+        }}
+      >
+        🎉 All matches scheduled successfully!
+      </p>
     )}
 
+  </div>
+)}
     </>
-  )
-}
-    </div>  
+    )
+      }
+
+    </div>
   );
 }
