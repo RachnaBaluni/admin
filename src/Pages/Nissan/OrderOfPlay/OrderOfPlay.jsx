@@ -195,6 +195,8 @@ export default function OrderOfPlay() {
     return d.toISOString().split("T")[0];
   };
 
+  const [showRemainingOnly, setShowRemainingOnly] = useState(false);
+
   
   const [selectedCategories, setSelectedCategories] = useState([
   "Cat.B(85+ combined)"
@@ -900,6 +902,9 @@ console.log("Remaining:", notPlacedMatches);
             Settings
           </button>
 
+
+          
+
           <button
             className={styles.generateBtn}
             onClick={fetchData}
@@ -1136,6 +1141,14 @@ console.log("Remaining:", notPlacedMatches);
                 Apply Changes
               </button>
 
+              <button
+               className={styles.generateBtn}
+                onClick={() => setShowRemainingOnly(true)}
+                 style={{ marginTop: "10px" }}
+               >
+                   Show Remaining Matches ({notPlacedMatches.length})
+                 </button>
+
             </div>
 
           </div>
@@ -1255,6 +1268,42 @@ console.log("Remaining:", notPlacedMatches);
 
         </div>
       ))}
+
+{/* 👇 ADD THIS RIGHT AFTER DAYS MAP ENDS */}
+{showRemainingOnly && (
+  <div className={styles.remainingBox}>
+
+    <h3>Remaining Matches</h3>
+
+    {notPlacedMatches.length === 0 ? (
+      <p style={{ color: "green", fontWeight: "bold" }}>
+        🎉 All matches scheduled successfully!
+      </p>
+    ) : (
+      notPlacedMatches.map((m, idx) => (
+        <div key={m._id || idx} className={styles.remainingItem}>
+          <p><b>Category:</b> {m.category}</p>
+          <p><b>Round:</b> {m.Stage}</p>
+          <p>
+            <b>Match:</b>{" "}
+            {m.Team1?.partner1?.name} vs {m.Team2?.partner1?.name}
+          </p>
+        </div>
+      ))
+    )}
+
+    <button
+      className={styles.printBtn}
+      onClick={() => setShowRemainingOnly(false)}
+      style={{ marginTop: "10px" }}
+    >
+      Close
+    </button>
+
+  </div>
+)}
+
+      
 {showFilters && (
   <div style={{ marginTop: "30px" }}>
     
