@@ -923,7 +923,7 @@ console.log("hideGrid:", hideGrid);
 
   return true;
 };
-
+  
   // ❌ validate both days
   if (
   !validateDay(newDays[sourceDay].grid) ||
