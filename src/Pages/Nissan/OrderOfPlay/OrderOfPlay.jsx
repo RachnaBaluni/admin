@@ -743,57 +743,7 @@ console.log("hideGrid:", hideGrid);
 
     };
 
-    const validateAllDays = (daysData) => {
-  for (const day of daysData) {
-
-    const timeMap = {};
-    const playerLastRow = {};
-
-    for (let i = 0; i < day.grid.length; i++) {
-      for (let j = 0; j < day.grid[i].length; j++) {
-
-        const cell = day.grid[i][j];
-        if (!cell?.match) continue;
-
-        const players = getPlayers(cell.match);
-        const time = cell.time;
-
-        // ❌ SAME PLAYER SAME TIME (ONLY SAME DAY)
-        if (!timeMap[time]) timeMap[time] = new Set();
-
-        for (const p of players) {
-          if (timeMap[time].has(p)) {
-            return false; // ❌ conflict same day only
-          }
-        }
-
-        // ❌ CONSECUTIVE CHECK (ONLY SAME DAY)
-        for (const p of players) {
-          if (playerLastRow[p] !== undefined) {
-            const diff = Math.abs(playerLastRow[p] - i);
-
-            if (diff === 1) {
-              const lastCourt = day.grid[playerLastRow[p]].findIndex(
-                (c) =>
-                  c.match &&
-                  getPlayers(c.match).includes(p)
-              );
-
-              if (lastCourt !== j) {
-                return false;
-              }
-            }
-          }
-        }
-
-        players.forEach((p) => timeMap[time].add(p));
-        players.forEach((p) => (playerLastRow[p] = i));
-      }
-    }
-  }
-
-  return true;
-};
+    
   /* ================= DRAG END ================= */
 
   const handleDragEnd = (event) => {
@@ -914,19 +864,30 @@ console.log("hideGrid:", hideGrid);
 };
 
   // ❌ validate both days
-  if (
-  !validateDay(newDays[sourceDay].grid) ||
-  !validateDay(newDays[targetDay].grid) ||
-  !validateAllDays(newDays)
-) {
-  toast.error("❌ Invalid move (player conflict across days)");
+ // 👉 source day validation
+const sourceError = validateDay(newDays[sourceDay].grid);
+
+if (sourceError !== true) {
+  toast.error(sourceError);
   return;
 }
 
-  // ✅ APPLY
-  setDays(newDays);
+// 👉 target day validation (sirf agar different day ho)
+if (sourceDay !== targetDay) {
+  const targetError = validateDay(newDays[targetDay].grid);
 
-  toast.success("✅ Match moved successfully");
+  if (targetError !== true) {
+    toast.error(targetError);
+    return;
+  }
+}
+
+// ✅ APPLY
+setDays(newDays);
+toast.success("✅ Match moved successfully");
+
+  // ✅ APPLY
+  
 };
 console.log("DAYS:", days);
 console.log("Remaining:", notPlacedMatches);
