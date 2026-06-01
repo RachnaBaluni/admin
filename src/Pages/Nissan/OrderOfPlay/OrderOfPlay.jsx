@@ -925,12 +925,22 @@ console.log("hideGrid:", hideGrid);
 };
 
   // ❌ validate both days
-  if (
-  !validateDay(newDays[sourceDay].grid) ||
-  !validateDay(newDays[targetDay].grid) ||
-  !validateAllDays(newDays)
-) {
-  toast.error("❌ Invalid move (player conflict across days)");
+  const sourceCheck = validateDay(newDays[sourceDay].grid);
+const targetCheck = validateDay(newDays[targetDay].grid);
+const allCheck = validateAllDays(newDays);
+
+if (sourceCheck === "SAME_TIME" || targetCheck === "SAME_TIME") {
+  toast.error("❌ Same player cannot play at same time");
+  return;
+}
+
+if (sourceCheck === "CONSECUTIVE" || targetCheck === "CONSECUTIVE") {
+  toast.error("❌ Consecutive matches must be on same court");
+  return;
+}
+
+if (!allCheck) {
+  toast.error("❌ Cross-day conflict detected");
   return;
 }
 
