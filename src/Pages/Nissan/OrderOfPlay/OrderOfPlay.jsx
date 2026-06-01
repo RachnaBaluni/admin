@@ -213,7 +213,10 @@ const [newDayDate, setNewDayDate] = useState("");
 const [newCourtCount, setNewCourtCount] = useState(4);
 const [newMatchesPerCourt, setNewMatchesPerCourt] = useState({
   1: 4, 2: 4, 3: 4, 4: 4
+
 });
+
+
 
     const [hideGrid, setHideGrid] = useState(false);
 
@@ -233,6 +236,16 @@ const [showFilters, setShowFilters] = useState(false);
   const [matchesPerCourt, setMatchesPerCourt] = useState({
     1: 4, 2: 4, 3: 4, 4: 4
   });
+useEffect(() => {
+  let updated = {};
+
+  for (let i = 1; i <= courtCount; i++) {
+    updated[i] = matchesPerCourt[i] || 4;
+  }
+
+  setMatchesPerCourt(updated);
+}, [courtCount]);
+  
   const roundsList = [
   "Round 1",
   "Round 2",
@@ -1181,7 +1194,7 @@ console.log("Remaining:", notPlacedMatches);
                           min="1"
                           max="10"
                           value={
-                            matchesPerCourt[index + 1] || 10
+                            matchesPerCourt[index + 1] ||  4
                           }
                           onChange={(e) => {
                            const value = Math.min(10, Math.max(1, Number(e.target.value)));
@@ -1258,7 +1271,7 @@ console.log("Remaining:", notPlacedMatches);
         key={i}
         type="number"
         placeholder={`Court ${i + 1}`}
-        value={newMatchesPerCourt[i + 1] || 10}
+        value={newMatchesPerCourt[i + 1] || 4}
         onChange={(e) =>
           setNewMatchesPerCourt({
             ...newMatchesPerCourt,
