@@ -743,7 +743,68 @@ console.log("hideGrid:", hideGrid);
 
     };
 
-    
+    const validateAllDays = (daysData) => {
+
+  const timeMap = {};
+  const playerLastMatch = {}; // 🔥 track last match globally
+
+  for (const day of daysData) {
+
+    for (let i = 0; i < day.grid.length; i++) {
+
+      for (let j = 0; j < day.grid[i].length; j++) {
+
+        const cell = day.grid[i][j];
+        if (!cell?.match) continue;
+
+        const players = getPlayers(cell.match);
+        const time = cell.time;
+
+        // 🔥 SAME TIME CHECK (across all days)
+        if (!timeMap[time]) {
+          timeMap[time] = new Set();
+        }
+
+        for (const p of players) {
+          if (timeMap[time].has(p)) {
+            return false;
+          }
+        }
+
+        // 🔥 CONSECUTIVE CHECK (across all days)
+        for (const p of players) {
+
+          if (playerLastMatch[p]) {
+
+            const last = playerLastMatch[p];
+
+            const isNextMatch =
+              last.dayIndex === daysData.indexOf(day) &&
+              Math.abs(last.rowIndex - i) === 1;
+
+            if (isNextMatch && last.court !== j) {
+              return false;
+            }
+          }
+        }
+
+        // ✅ UPDATE TRACKERS
+        players.forEach((p) => timeMap[time].add(p));
+
+        players.forEach((p) => {
+          playerLastMatch[p] = {
+            dayIndex: daysData.indexOf(day),
+            rowIndex: i,
+            court: j,
+          };
+        });
+
+      }
+    }
+  }
+
+  return true;
+};
   /* ================= DRAG END ================= */
 
   const handleDragEnd = (event) => {
@@ -885,7 +946,6 @@ if (sourceDay !== targetDay) {
 // ✅ APPLY
 setDays(newDays);
 toast.success("✅ Match moved successfully");
-
   // ✅ APPLY
   
 };
