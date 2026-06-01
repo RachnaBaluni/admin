@@ -916,6 +916,7 @@ console.log("hideGrid:", hideGrid);
           }
         }
       }
+    }
 
       // ✅ update trackers
       players.forEach((p) => timeMap[time].add(p));
@@ -1406,4 +1407,4 @@ console.log("Remaining:", notPlacedMatches);
     </div>
   );
 }
-}
+
