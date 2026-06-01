@@ -744,14 +744,12 @@ console.log("hideGrid:", hideGrid);
     };
 
     const validateAllDays = (daysData) => {
-
-  const timeMap = {};
-  const playerLastMatch = {}; // 🔥 track last match globally
-
   for (const day of daysData) {
 
-    for (let i = 0; i < day.grid.length; i++) {
+    const timeMap = {};
+    const playerLastRow = {};
 
+    for (let i = 0; i < day.grid.length; i++) {
       for (let j = 0; j < day.grid[i].length; j++) {
 
         const cell = day.grid[i][j];
@@ -760,45 +758,36 @@ console.log("hideGrid:", hideGrid);
         const players = getPlayers(cell.match);
         const time = cell.time;
 
-        // 🔥 SAME TIME CHECK (across all days)
-        if (!timeMap[time]) {
-          timeMap[time] = new Set();
-        }
+        // ❌ SAME PLAYER SAME TIME (ONLY SAME DAY)
+        if (!timeMap[time]) timeMap[time] = new Set();
 
         for (const p of players) {
           if (timeMap[time].has(p)) {
-            return false;
+            return false; // ❌ conflict same day only
           }
         }
 
-        // 🔥 CONSECUTIVE CHECK (across all days)
+        // ❌ CONSECUTIVE CHECK (ONLY SAME DAY)
         for (const p of players) {
+          if (playerLastRow[p] !== undefined) {
+            const diff = Math.abs(playerLastRow[p] - i);
 
-          if (playerLastMatch[p]) {
+            if (diff === 1) {
+              const lastCourt = day.grid[playerLastRow[p]].findIndex(
+                (c) =>
+                  c.match &&
+                  getPlayers(c.match).includes(p)
+              );
 
-            const last = playerLastMatch[p];
-
-            const isNextMatch =
-              last.dayIndex === daysData.indexOf(day) &&
-              Math.abs(last.rowIndex - i) === 1;
-
-            if (isNextMatch && last.court !== j) {
-              return false;
+              if (lastCourt !== j) {
+                return false;
+              }
             }
           }
         }
 
-        // ✅ UPDATE TRACKERS
         players.forEach((p) => timeMap[time].add(p));
-
-        players.forEach((p) => {
-          playerLastMatch[p] = {
-            dayIndex: daysData.indexOf(day),
-            rowIndex: i,
-            court: j,
-          };
-        });
-
+        players.forEach((p) => (playerLastRow[p] = i));
       }
     }
   }
@@ -923,7 +912,7 @@ console.log("hideGrid:", hideGrid);
 
   return true;
 };
-  
+
   // ❌ validate both days
   if (
   !validateDay(newDays[sourceDay].grid) ||
