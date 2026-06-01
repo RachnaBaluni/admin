@@ -772,18 +772,20 @@ console.log("hideGrid:", hideGrid);
         }
 
         // 🔥 CONSECUTIVE CHECK (across all days)
-        for (const p of players) {
+                for (const p of players) {
+          if (playerLastRow[p] !== undefined) {
+            const diff = Math.abs(playerLastRow[p] - i);
 
-          if (playerLastMatch[p]) {
+            if (diff === 1) {
+              const lastCourt = day.grid[playerLastRow[p]].findIndex(
+                (c) =>
+                  c.match &&
+                  getPlayers(c.match).includes(p)
+              );
 
-            const last = playerLastMatch[p];
+              if (lastCourt !== j) {
+                return false;
 
-            const isNextMatch =
-              last.dayIndex === daysData.indexOf(day) &&
-              Math.abs(last.rowIndex - i) === 1;
-
-            if (isNextMatch && last.court !== j) {
-              return false;
             }
           }
         }
