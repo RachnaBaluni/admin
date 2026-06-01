@@ -212,7 +212,7 @@ const [days, setDays] = useState([]);
 const [newDayDate, setNewDayDate] = useState("");
 const [newCourtCount, setNewCourtCount] = useState(4);
 const [newMatchesPerCourt, setNewMatchesPerCourt] = useState({
-  1: 10, 2: 10, 3: 10, 4: 10
+  1: 4, 2: 4, 3: 4, 4: 4
 });
 
     const [hideGrid, setHideGrid] = useState(false);
@@ -231,7 +231,7 @@ const [grid, setGrid] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
 const [showFilters, setShowFilters] = useState(false);
   const [matchesPerCourt, setMatchesPerCourt] = useState({
-    1: 10, 2: 10, 3: 10, 4: 10
+    1: 4, 2: 4, 3: 4, 4: 4
   });
   const roundsList = [
   "Round 1",
@@ -1183,13 +1183,14 @@ console.log("Remaining:", notPlacedMatches);
                           value={
                             matchesPerCourt[index + 1] || 10
                           }
-                          onChange={(e) =>
-                            setMatchesPerCourt({
-                              ...matchesPerCourt,
-                              [index + 1]:
-                                Number(e.target.value),
-                            })
-                          }
+                          onChange={(e) => {
+                           const value = Math.min(10, Math.max(1, Number(e.target.value)));
+
+                           setMatchesPerCourt({
+                           ...matchesPerCourt,
+                             [index + 1]: value,
+                             });
+                             }}
                           className={styles.courtInput}
                         />
 
