@@ -772,20 +772,18 @@ console.log("hideGrid:", hideGrid);
         }
 
         // 🔥 CONSECUTIVE CHECK (across all days)
-                for (const p of players) {
-          if (playerLastRow[p] !== undefined) {
-            const diff = Math.abs(playerLastRow[p] - i);
+        for (const p of players) {
 
-            if (diff === 1) {
-              const lastCourt = day.grid[playerLastRow[p]].findIndex(
-                (c) =>
-                  c.match &&
-                  getPlayers(c.match).includes(p)
-              );
+          if (playerLastMatch[p]) {
 
-              if (lastCourt !== j) {
-                return false;
+            const last = playerLastMatch[p];
 
+            const isNextMatch =
+              last.dayIndex === daysData.indexOf(day) &&
+              Math.abs(last.rowIndex - i) === 1;
+
+            if (isNextMatch && last.court !== j) {
+              return false;
             }
           }
         }
@@ -916,7 +914,6 @@ console.log("hideGrid:", hideGrid);
           }
         }
       }
-    }
 
       // ✅ update trackers
       players.forEach((p) => timeMap[time].add(p));
@@ -928,22 +925,12 @@ console.log("hideGrid:", hideGrid);
 };
 
   // ❌ validate both days
-  const sourceCheck = validateDay(newDays[sourceDay].grid);
-const targetCheck = validateDay(newDays[targetDay].grid);
-const allCheck = validateAllDays(newDays);
-
-if (sourceCheck === "SAME_TIME" || targetCheck === "SAME_TIME") {
-  toast.error("❌ Same player cannot play at same time");
-  return;
-}
-
-if (sourceCheck === "CONSECUTIVE" || targetCheck === "CONSECUTIVE") {
-  toast.error("❌ Consecutive matches must be on same court");
-  return;
-}
-
-if (!allCheck) {
-  toast.error("❌ Cross-day conflict detected");
+  if (
+  !validateDay(newDays[sourceDay].grid) ||
+  !validateDay(newDays[targetDay].grid) ||
+  !validateAllDays(newDays)
+) {
+  toast.error("❌ Invalid move (player conflict across days)");
   return;
 }
 
@@ -1407,4 +1394,3 @@ console.log("Remaining:", notPlacedMatches);
     </div>
   );
 }
-
