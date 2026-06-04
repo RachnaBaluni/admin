@@ -130,12 +130,18 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
   return (
     <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={style}
-      className={styles.matchCard}
-    >
+  ref={setNodeRef}
+  {...listeners}
+  {...attributes}
+  style={style}
+  className={`${styles.matchCard} ${
+    match?.forcedPlacement ? styles.forcedMatch : ""
+  }`}
+>
+      
+      <div>
+       Forced: {String(match?.forcedPlacement)}
+       </div>
       <div className={styles.time}>{time}</div>
       <div className={styles.category}>{match.category}</div>
       <div className={styles.round}>{match.Stage}</div>
