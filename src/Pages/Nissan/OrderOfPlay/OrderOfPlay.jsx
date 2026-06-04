@@ -134,7 +134,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   match.matchNo,
   match.forcedPlacement
 );
-
+console.log("MATCH OBJECT", match);
 
   return (
     <div
