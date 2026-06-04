@@ -833,10 +833,16 @@ if (!placed) {
         }
 
         for (const p of players) {
-          if (timeMap[time].has(p)) {
-            return false;
-          }
-        }
+  if (timeMap[time].has(p)) {
+
+    console.log("CONFLICT PLAYER ID:", p);
+    console.log("TIME:", time);
+    console.log("MATCH NO:", cell.match.matchNo);
+    console.log("MATCH:", cell.match);
+
+    return "❌ Same player same time";
+  }
+}
 
         // 🔥 CONSECUTIVE CHECK (across all days)
         for (const p of players) {
