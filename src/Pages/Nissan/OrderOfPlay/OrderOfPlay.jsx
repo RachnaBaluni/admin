@@ -199,15 +199,19 @@ export default function OrderOfPlay() {
 
   const allMatchesRef = useRef([]);
 
-  const getRemainingMatchName = (team) => {
-    if (team?.partner1?.name) {
-      return `${team.partner1.name}${
-        team.partner2?.name ? " & " + team.partner2.name : ""
-      }`;
-    }
+  const getRemainingMatchDisplay = (m) => {
+  const roundNumber = Number(m.Stage?.replace("Round ", ""));
 
-    return "Winner TBD";
-  };
+  if (roundNumber <= 1) {
+    return "TBD vs TBD";
+  }
+
+  const prevRound = roundNumber - 1;
+  const leftMatch = m.matchNo * 2 - 1;
+  const rightMatch = m.matchNo * 2;
+
+  return `R${prevRound} M${leftMatch} Winner vs R${prevRound} M${rightMatch} Winner`;
+};
 
   // 👇 YAHAN ADD KAR
   const getNextDate = (date) => {
@@ -1438,9 +1442,7 @@ console.log("Remaining:", notPlacedMatches);
           <p><b>Round:</b> {m.Stage}</p>
           <p>
   <b>Match:</b>{" "}
-  {getRemainingMatchName(m.Team1)}
-  {" vs "}
-  {getRemainingMatchName(m.Team2)}
+  {getRemainingMatchDisplay(m)}
 </p>
         </div>
       ))
