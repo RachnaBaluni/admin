@@ -1008,6 +1008,13 @@ console.log("CURRENT ROW =", i);
                 c.match &&
                 getPlayers(c.match).includes(p)
             );
+              console.log("CONSECUTIVE PLAYER =", p);
+  console.log("LAST ROW =", playerLastRow[p]);
+  console.log("CURRENT ROW =", i);
+  console.log("LAST COURT =", lastCourt);
+  console.log("CURRENT COURT =", j);
+  console.log("MATCH =", cell.match.matchNo);
+
 
             if (lastCourt !== j) {
               return "❌ Consecutive matches on different courts"; // consecutive matches on different courts
