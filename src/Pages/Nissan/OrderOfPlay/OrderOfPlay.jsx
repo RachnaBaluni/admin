@@ -583,6 +583,8 @@ const addNextDay = () => {
         if (!cell?.match) return;
 
         const players = getPlayers(cell.match);
+        console.log("MATCH =", cell.match.matchNo);
+console.log("PLAYERS =", players);
         const time = cell.time;
 
         if (!timeSlotPlayers[time]) {
