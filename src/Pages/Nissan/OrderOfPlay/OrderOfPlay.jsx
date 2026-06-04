@@ -54,8 +54,8 @@ function DraggableMatch({ match, time, allMatchesRef }) {
     : undefined;
 
   const getTeamName = (team, side) => {
-    console.log("MATCH DATA:", match);
-    console.log("WINNER CHECK:", match.Winner);
+    //console.log("MATCH DATA:", match);
+    //console.log("WINNER CHECK:", match.Winner);
 
     if (team?.partner1?.name) {
       return `${team.partner1?.name || ""}${
@@ -129,12 +129,8 @@ function DraggableMatch({ match, time, allMatchesRef }) {
     return `R${prevRound} M${rightMatch} Winner`;
   };
 
-  console.log(
-  "CARD",
-  match.matchNo,
-  match.forcedPlacement
-);
-console.log("MATCH OBJECT", match);
+  //console.log(  "CARD",match.matchNo,  match.forcedPlacement);
+//console.log("MATCH OBJECT", match);
 
   return (
     <div
@@ -349,7 +345,7 @@ const fetchData = async () => {
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
-      console.log("ALL MATCHES", matches);
+      //console.log("ALL MATCHES", matches);
 
 
       const filteredMatches = matches.filter((m) => {
@@ -366,7 +362,7 @@ const fetchData = async () => {
 
       const matchesWithData = filteredMatches.map((m) => {
         
-        console.log("FULL MATCH OBJECT:", m);
+        //console.log("FULL MATCH OBJECT:", m);
         const stage = (m.Stage || "Round 1").trim();
         
         if (!roundCounters[stage]) {
@@ -463,7 +459,7 @@ const addNextDay = () => {
       grid: newDay.grid,
     },
   ];
-console.log("CHECK VALID:", validateAllDays(updatedDays));
+//console.log("CHECK VALID:", validateAllDays(updatedDays));
 
 
   if (!validateAllDays(updatedDays)) {
@@ -630,14 +626,7 @@ const addNextDay = () => {
           slotSet.has(p)
         );
         if (sameTimeConflict) {
-  console.log(
-    "MATCH",
-    match.matchNo,
-    "PLAYERS",
-    players,
-    "TIME",
-    time
-  );
+  //console.log("MATCH",match.matchNo,"PLAYERS", players,"TIME" time);
   continue;
 }
 
@@ -694,11 +683,7 @@ if (!placed) {
           forcedPlacement: true,
         };
 
-      console.log(
-  "FORCED PLACED",
-  match.matchNo,
-  temp[r][c].match.forcedPlacement
-);
+      //console.log("FORCED PLACED", match.matchNo, temp[r][c].match.forcedPlacement););
         placed = true;
         break;
       }
@@ -721,8 +706,8 @@ if (!placed) {
 
 /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
-    console.log("SAVE DATE =", selectedDate);
-console.log("EVENT =", selectedEventId);
+    //console.log("SAVE DATE =", selectedDate);
+//console.log("EVENT =", selectedEventId);
   try {
     
     const res = await axios.post(
@@ -735,10 +720,10 @@ console.log("EVENT =", selectedEventId);
       { withCredentials: true }
     );
 
-    console.log("Saved:", res.data);
+    //console.log("Saved:", res.data);
     toast.success("Order Of Play Saved");
   } catch (err) {
-    console.log("ERROR:", err.response?.data || err);
+    //console.log("ERROR:", err.response?.data || err);
     toast.error("Save Failed");
   }
 };
@@ -749,7 +734,7 @@ console.log("EVENT =", selectedEventId);
   setShowFilters(prev => !prev);
   setHideGrid(false); // ALWAYS show grid
 };
-console.log("hideGrid:", hideGrid);
+//console.log("hideGrid:", hideGrid);
   /* ================= PRINT ================= */
 
   const handlePrint = () => {
@@ -891,7 +876,7 @@ console.log("hideGrid:", hideGrid);
 
   const handleDragEnd = (event) => {
 
-      console.log("DRAG END CALLED");
+      //console.log("DRAG END CALLED");
 
   const { active, over } = event;
   if (!over) return;
@@ -1014,7 +999,7 @@ console.log("hideGrid:", hideGrid);
   // ❌ validate both days
  // 👉 source day validation
 const sourceError = validateDay(newDays[sourceDay].grid);
-console.log("SOURCE VALIDATION =", sourceError);
+//console.log("SOURCE VALIDATION =", sourceError);
 
 if (sourceError !== true) {
   toast.error(sourceError);
@@ -1055,8 +1040,8 @@ toast.success("✅ Match moved successfully");
   // ✅ APPLY
   
 };
-console.log("DAYS:", days);
-console.log("Remaining:", notPlacedMatches);
+//console.log("DAYS:", days);
+//console.log("Remaining:", notPlacedMatches);
   /* ================= UI ================= */
 
   return (
