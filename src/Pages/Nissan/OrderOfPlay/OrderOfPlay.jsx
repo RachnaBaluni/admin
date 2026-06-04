@@ -638,10 +638,33 @@ const addNextDay = () => {
       if (placed) break;
     }
 
-    if (!placed) {
-      notPlacedMatches.push(match);
+if (!placed) {
+
+  // validation fail hui, ab khaali slot dhoondo
+  for (let r = 0; r < maxRows; r++) {
+    for (let c = 0; c < courtCount; c++) {
+
+      if (
+        r < (matchesPerCourt[c + 1] || 0) &&
+        !temp[r][c].match
+      ) {
+        temp[r][c].match = {
+          ...match,
+          forcedPlacement: true,
+        };
+
+        placed = true;
+        break;
+      }
     }
 
+    if (placed) break;
+  }
+}
+
+if (!placed) {
+  notPlacedMatches.push(match);
+}
   });
 
   return {
