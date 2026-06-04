@@ -148,7 +148,7 @@ console.log("MATCH OBJECT", match);
 >
       
       <div>
-       Forced: {String(match?.forcedPlacement)}
+       Match No: {match?.match_no}
        </div>
       <div className={styles.time}>{time}</div>
       <div className={styles.category}>{match.category}</div>
