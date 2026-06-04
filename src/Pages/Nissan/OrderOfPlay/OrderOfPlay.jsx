@@ -1027,18 +1027,6 @@ if (!validateAllDays(newDays)) {
 }
 
 
-if (timeMap[time].has(p)) {
-  console.log(
-    "Player Conflict",
-    p,
-    "Time",
-    time,
-    "Match",
-    cell.match.matchNo
-  );
-
-  return "❌ Same player same time";
-}
 
 // ✅ APPLY
 setDays(newDays);
