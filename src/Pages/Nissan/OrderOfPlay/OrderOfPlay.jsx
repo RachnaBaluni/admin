@@ -644,6 +644,8 @@ const addNextDay = () => {
       if (placed) break;
     }
 
+    console.log("NOT PLACED MATCH", match.matchNo);
+
 if (!placed) {
 
   // validation fail hui, ab khaali slot dhoondo
