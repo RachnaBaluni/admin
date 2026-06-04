@@ -868,6 +868,8 @@ console.log("hideGrid:", hideGrid);
   const handleDragEnd = (event) => {
   const { active, over } = event;
   if (!over) return;
+    if (active.id === over.id) return;
+
 
   const activeId = active.id;
   const overId = over.id;
