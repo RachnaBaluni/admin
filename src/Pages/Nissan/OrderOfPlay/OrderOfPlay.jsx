@@ -825,7 +825,7 @@ if (!placed) {
         if (!cell?.match) continue;
 
         const players = getPlayers(cell.match);
-        const time = cell.time;
+        const time = `${cell.time}-${i}`;
 
         // 🔥 SAME TIME CHECK (across all days)
         if (!timeMap[time]) {
@@ -961,7 +961,7 @@ if (!placed) {
       if (!cell?.match) continue;
 
       const players = getPlayers(cell.match);
-      const time = cell.time;
+      const time = `${cell.time}-${i}`;
 
       // 🔥 SAME TIME CHECK (STRICT)
       if (!timeMap[time]) {
