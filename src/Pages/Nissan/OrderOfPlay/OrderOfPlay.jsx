@@ -1014,6 +1014,7 @@ console.log("hideGrid:", hideGrid);
   // ❌ validate both days
  // 👉 source day validation
 const sourceError = validateDay(newDays[sourceDay].grid);
+console.log("SOURCE VALIDATION =", sourceError);
 
 if (sourceError !== true) {
   toast.error(sourceError);
@@ -1028,6 +1029,10 @@ if (sourceDay !== targetDay) {
     toast.error(targetError);
     return;
   }
+}
+if (!validateAllDays(newDays)) {
+  toast.error("❌ Same player conflict detected");
+  return;
 }
 
 // ✅ APPLY
