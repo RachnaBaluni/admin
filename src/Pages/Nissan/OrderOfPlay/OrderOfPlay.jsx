@@ -890,6 +890,9 @@ console.log("hideGrid:", hideGrid);
   /* ================= DRAG END ================= */
 
   const handleDragEnd = (event) => {
+
+      console.log("DRAG END CALLED");
+
   const { active, over } = event;
   if (!over) return;
     if (active.id === over.id) return;
@@ -1425,7 +1428,6 @@ console.log("Remaining:", notPlacedMatches);
         </div>
       ))}
 
-{/* 👇 ADD THIS RIGHT AFTER DAYS MAP ENDS */}
 {showRemainingOnly && (
   <div className={styles.remainingBox}>
 
