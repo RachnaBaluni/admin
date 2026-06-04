@@ -199,6 +199,16 @@ export default function OrderOfPlay() {
 
   const allMatchesRef = useRef([]);
 
+  const getRemainingMatchName = (team) => {
+    if (team?.partner1?.name) {
+      return `${team.partner1.name}${
+        team.partner2?.name ? " & " + team.partner2.name : ""
+      }`;
+    }
+
+    return "Winner TBD";
+  };
+
   // 👇 YAHAN ADD KAR
   const getNextDate = (date) => {
     if (!date) return "";
@@ -624,6 +634,7 @@ const addNextDay = () => {
     "TIME",
     time
   );
+  continue;
 }
 
         // ❌ CONSECUTIVE MATCH CONFLICT
@@ -1427,9 +1438,9 @@ console.log("Remaining:", notPlacedMatches);
           <p><b>Round:</b> {m.Stage}</p>
           <p>
   <b>Match:</b>{" "}
-  {getTeamName(m.Team1, 1)}
+  {getRemainingMatchName(m.Team1)}
   {" vs "}
-  {getTeamName(m.Team2, 2)}
+  {getRemainingMatchName(m.Team2)}
 </p>
         </div>
       ))
