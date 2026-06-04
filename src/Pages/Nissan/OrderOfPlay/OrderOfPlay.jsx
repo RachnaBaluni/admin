@@ -574,100 +574,82 @@ const addNextDay = () => {
 
   /* ================= PLACE MATCHES ================= */
 
- matches.forEach((match) => {
+  matches.forEach((match) => {
 
-  const players = getPlayers(match);
-  let placed = false;
-
-  for (let i = 0; i < maxRows; i++) {
-
-    const time = getTimeLabel(i);
-
-    if (!timeSlotPlayers[time]) {
-      timeSlotPlayers[time] = new Set();
-    }
-
-    for (let j = 0; j < courtCount; j++) {
-
-      // ❌ slot full
-      if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-      if (temp[i][j].match) continue;
-
-      const slotSet = timeSlotPlayers[time];
-
-      // ❌ SAME TIME CONFLICT
-      const sameTimeConflict = players.some((p) =>
-        slotSet.has(p)
-      );
-      if (sameTimeConflict) continue;
-
-      // ❌ CONSECUTIVE MATCH CONFLICT
-      let consecutiveConflict = false;
-
-      players.forEach((p) => {
-        if (playerLastRow[p] !== undefined) {
-
-          const lastRow = playerLastRow[p];
-          const lastCourt = playerLastCourt[p];
-
-          if (Math.abs(lastRow - i) === 1) {
-
-            if (lastCourt !== j) {
-              consecutiveConflict = true;
-            }
-          }
-        }
-      });
-
-      if (consecutiveConflict) continue;
-
-      /* ✅ NORMAL PLACE */
-      temp[i][j].match = match;
-
-      players.forEach((p) => {
-        slotSet.add(p);
-        playerLastRow[p] = i;
-        playerLastCourt[p] = j;
-      });
-
-      placed = true;
-      break;
-    }
-
-    if (placed) break;
-  }
-
-  // 🔥 VALIDATION FAIL HUI TO BHI FIT KARO
-  if (!placed) {
+    const players = getPlayers(match);
+    let placed = false;
 
     for (let i = 0; i < maxRows; i++) {
+
+      const time = getTimeLabel(i);
+
+      if (!timeSlotPlayers[time]) {
+        timeSlotPlayers[time] = new Set();
+      }
+
       for (let j = 0; j < courtCount; j++) {
 
-        if (
-          i < (matchesPerCourt[j + 1] || 0) &&
-          !temp[i][j].match
-        ) {
+        // ❌ slot full
+        if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+        if (temp[i][j].match) continue;
 
-          temp[i][j].match = {
-            ...match,
-            forcedPlacement: true,
-          };
+        const slotSet = timeSlotPlayers[time];
 
-          placed = true;
-          break;
-        }
+        // ❌ SAME TIME CONFLICT (across ALL days)
+        const sameTimeConflict = players.some((p) =>
+          slotSet.has(p)
+        );
+        if (sameTimeConflict) continue;
+
+        // ❌ CONSECUTIVE MATCH CONFLICT
+        let consecutiveConflict = false;
+
+        players.forEach((p) => {
+          if (playerLastRow[p] !== undefined) {
+
+            const lastRow = playerLastRow[p];
+            const lastCourt = playerLastCourt[p];
+
+            if (Math.abs(lastRow - i) === 1) {
+
+              // 👉 allow only if same court
+              if (lastCourt !== j) {
+                consecutiveConflict = true;
+              }
+            }
+          }
+        });
+
+        if (consecutiveConflict) continue;
+
+        /* ✅ PLACE MATCH */
+        temp[i][j].match = match;
+
+        players.forEach((p) => {
+          slotSet.add(p);
+          playerLastRow[p] = i;
+          playerLastCourt[p] = j;
+        });
+
+        placed = true;
+        break;
       }
 
       if (placed) break;
     }
-  }
 
-  // sirf tab remaining me jayega jab slots hi khatam ho gaye
-  if (!placed) {
-    notPlacedMatches.push(match);
-  }
+    if (!placed) {
+      notPlacedMatches.push(match);
+    }
 
-});
+  });
+
+  return {
+    grid: temp,
+    remainingMatches: notPlacedMatches,
+  };
+};
+
 /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
     console.log("SAVE DATE =", selectedDate);
@@ -1435,5 +1417,4 @@ console.log("Remaining:", notPlacedMatches);
 
     </div>
   );
-}
 }
