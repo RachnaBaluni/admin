@@ -989,6 +989,8 @@ if (!placed) {
             "PREVIOUS MATCH =",
             oldCell.match.matchNo
           );
+          console.log("PREVIOUS ROW =", r);
+console.log("CURRENT ROW =", i);
         }
       }
     }
