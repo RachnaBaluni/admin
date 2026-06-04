@@ -973,6 +973,25 @@ if (!placed) {
     console.log("CONFLICT PLAYER =", p);
     console.log("TIME =", time);
     console.log("MATCH =", cell.match.matchNo);
+
+
+     for (let r = 0; r <= i; r++) {
+      for (let c = 0; c < grid[r].length; c++) {
+
+        const oldCell = grid[r][c];
+
+        if (
+          oldCell?.match &&
+          oldCell.match._id !== cell.match._id &&
+          getPlayers(oldCell.match).includes(p)
+        ) {
+          console.log(
+            "PREVIOUS MATCH =",
+            oldCell.match.matchNo
+          );
+        }
+      }
+    }
     return "❌ Same player same time";
   }
 }
