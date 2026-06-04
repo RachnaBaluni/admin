@@ -148,7 +148,7 @@ console.log("MATCH OBJECT", match);
 >
       
       <div>
-       Match No: {match?.match_no}
+       Match No: {match?.matchNo}
        </div>
       <div className={styles.time}>{time}</div>
       <div className={styles.category}>{match.category}</div>
