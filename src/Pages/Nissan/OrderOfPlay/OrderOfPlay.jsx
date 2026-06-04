@@ -98,6 +98,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
           m.Team2.partner2 ? " & " + m.Team2.partner2?.name : ""
         }`;
       }
+      
 
       return null;
     };
@@ -127,6 +128,13 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
     return `R${prevRound} M${rightMatch} Winner`;
   };
+
+  console.log(
+  "CARD",
+  match.matchNo,
+  match.forcedPlacement
+);
+
 
   return (
     <div
@@ -644,7 +652,6 @@ const addNextDay = () => {
       if (placed) break;
     }
 
-    console.log("NOT PLACED MATCH", match.matchNo);
 
 if (!placed) {
 
@@ -661,6 +668,11 @@ if (!placed) {
           forcedPlacement: true,
         };
 
+      console.log(
+  "FORCED PLACED",
+  match.matchNo,
+  temp[r][c].match.forcedPlacement
+);
         placed = true;
         break;
       }
