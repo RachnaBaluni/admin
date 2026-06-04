@@ -335,6 +335,8 @@ const fetchData = async () => {
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
+      console.log("ALL MATCHES", matches);
+
 
       const filteredMatches = matches.filter((m) => {
 
