@@ -969,11 +969,13 @@ if (!placed) {
       }
 
       for (const p of players) {
-        if (timeMap[time].has(p)) {
-          return "❌ Same player same time"; //  same player same time
-        }
-      }
-
+  if (timeMap[time].has(p)) {
+    console.log("CONFLICT PLAYER =", p);
+    console.log("TIME =", time);
+    console.log("MATCH =", cell.match.matchNo);
+    return "❌ Same player same time";
+  }
+}
       // 🔥 CONSECUTIVE CHECK
       for (const p of players) {
         if (playerLastRow[p] !== undefined) {
