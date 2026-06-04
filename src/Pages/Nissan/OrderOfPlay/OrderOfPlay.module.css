@@ -467,3 +467,9 @@
   color: #dc2626;
   font-weight: 500;
 }
+
+.forcedMatch {
+  background-color: #ffe5e5 !important;
+  border: 2px solid red !important;
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+}
