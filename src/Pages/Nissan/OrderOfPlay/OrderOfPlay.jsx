@@ -1426,9 +1426,15 @@ console.log("Remaining:", notPlacedMatches);
           <p><b>Category:</b> {m.category}</p>
           <p><b>Round:</b> {m.Stage}</p>
           <p>
-            <b>Match:</b>{" "}
-            {m.Team1?.partner1?.name} vs {m.Team2?.partner1?.name}
-          </p>
+  <b>Match:</b>{" "}
+  {`${m.Team1?.partner1?.name || ""}${
+    m.Team1?.partner2?.name ? " & " + m.Team1.partner2.name : ""
+  }`}
+  {" vs "}
+  {`${m.Team2?.partner1?.name || ""}${
+    m.Team2?.partner2?.name ? " & " + m.Team2.partner2.name : ""
+  }`}
+</p>
         </div>
       ))
     )}
