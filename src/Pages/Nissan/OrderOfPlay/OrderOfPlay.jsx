@@ -923,7 +923,6 @@ const buildGrid = (
   });
 
     if (!activePos || !overPos) return;
-    if (!activePos || !overPos) return;
 
 if (
   sourceDay === targetDay &&
