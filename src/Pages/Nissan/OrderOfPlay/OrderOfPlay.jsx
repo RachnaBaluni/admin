@@ -388,16 +388,22 @@ const fetchData = async () => {
       "Round 6": 6,
     };
 
-    allMatches.sort((a, b) => {
-      const rDiff =
-        (roundOrder[a.Stage] || 99) -
-        (roundOrder[b.Stage] || 99);
+allMatches.sort((a, b) => {
+  // 1. forced matches LAST me jaaye
+  const forceDiff = (a.forcedPlacement === true) - (b.forcedPlacement === true);
+  if (forceDiff !== 0) return forceDiff;
 
-      if (rDiff !== 0) return rDiff;
+  // 2. round order
+  const rDiff =
+    (roundOrder[a.Stage] || 99) -
+    (roundOrder[b.Stage] || 99);
 
-      return (a.matchNo || 0) - (b.matchNo || 0);
-    });
+  if (rDiff !== 0) return rDiff;
 
+  // 3. match number
+  return (a.matchNo || 0) - (b.matchNo || 0);
+});
+    console.log("ALL MATCHES BEFORE GRID:", allMatches);
     allMatchesRef.current = allMatches;
 
     /* ================= DAY LOGIC ================= */
