@@ -819,7 +819,7 @@ const buildGrid = (
     };
 
     const validateAllDays = (daysData) => {
-
+    console.log("VALIDATE ALL DAYS");
   const timeMap = {};
   const playerLastMatch = {}; // 🔥 track last match globally
 
@@ -890,7 +890,7 @@ const buildGrid = (
 
   const handleDragEnd = (event) => {
 
-      //console.log("DRAG END CALLED");
+      console.log("DRAG END CALLED");
 
   const { active, over } = event;
   if (!over) return;
