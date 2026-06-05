@@ -389,20 +389,25 @@ const fetchData = async () => {
     };
 
 allMatches.sort((a, b) => {
-  // 1. forced matches LAST me jaaye
-  const forceDiff = (a.forcedPlacement === true) - (b.forcedPlacement === true);
+
+  // 🔥 1. forced matches ALWAYS last
+  const forceDiff =
+    (a.forcedPlacement === true) - (b.forcedPlacement === true);
+
   if (forceDiff !== 0) return forceDiff;
 
-  // 2. round order
+  // 🔥 2. round order
   const rDiff =
     (roundOrder[a.Stage] || 99) -
     (roundOrder[b.Stage] || 99);
 
   if (rDiff !== 0) return rDiff;
 
-  // 3. match number
+  // 🔥 3. match number
   return (a.matchNo || 0) - (b.matchNo || 0);
 });
+    console.log("FINAL MATCHES (AFTER SORT):", allMatches);
+
     console.log("ALL MATCHES BEFORE GRID:", allMatches);
     allMatchesRef.current = allMatches;
 
@@ -549,7 +554,7 @@ const addNextDay = () => {
 
   /* ================= BUILD GRID ================= */
 
-  const buildGrid = (
+const buildGrid = (
   matches,
   courtCount,
   matchesPerCourt,
@@ -564,6 +569,7 @@ const addNextDay = () => {
   const playerLastCourt = {};
 
   let notPlacedMatches = [];
+  let forcedMatches = []; // ✅ added
 
   /* ================= GRID CREATE ================= */
 
@@ -589,8 +595,6 @@ const addNextDay = () => {
         if (!cell?.match) return;
 
         const players = getPlayers(cell.match);
-        console.log("MATCH =", cell.match.matchNo);
-console.log("PLAYERS =", players);
         const time = cell.time;
 
         if (!timeSlotPlayers[time]) {
@@ -606,7 +610,7 @@ console.log("PLAYERS =", players);
     });
   });
 
-  /* ================= PLACE MATCHES ================= */
+  /* ================= 🔥 PLACE MATCHES ================= */
 
   matches.forEach((match) => {
 
@@ -623,33 +627,26 @@ console.log("PLAYERS =", players);
 
       for (let j = 0; j < courtCount; j++) {
 
-        // ❌ slot full
         if (i >= (matchesPerCourt[j + 1] || 0)) continue;
         if (temp[i][j].match) continue;
 
         const slotSet = timeSlotPlayers[time];
 
-        // ❌ SAME TIME CONFLICT (across ALL days)
+        // ❌ SAME TIME CONFLICT
         const sameTimeConflict = players.some((p) =>
           slotSet.has(p)
         );
-        if (sameTimeConflict) {
-  //console.log("MATCH",match.matchNo,"PLAYERS", players,"TIME" time);
-  continue;
-}
+        if (sameTimeConflict) continue;
 
-        // ❌ CONSECUTIVE MATCH CONFLICT
+        // ❌ CONSECUTIVE CONFLICT
         let consecutiveConflict = false;
 
         players.forEach((p) => {
           if (playerLastRow[p] !== undefined) {
-
             const lastRow = playerLastRow[p];
             const lastCourt = playerLastCourt[p];
 
             if (Math.abs(lastRow - i) === 1) {
-
-              // 👉 allow only if same court
               if (lastCourt !== j) {
                 consecutiveConflict = true;
               }
@@ -659,7 +656,7 @@ console.log("PLAYERS =", players);
 
         if (consecutiveConflict) continue;
 
-        /* ✅ PLACE MATCH */
+        /* ✅ PLACE NORMAL MATCH */
         temp[i][j].match = match;
 
         players.forEach((p) => {
@@ -675,43 +672,46 @@ console.log("PLAYERS =", players);
       if (placed) break;
     }
 
+    /* ================= 🔥 FORCED PLACEMENT ================= */
 
-if (!placed) {
+    if (!placed) {
+      for (let r = 0; r < maxRows; r++) {
+        for (let c = 0; c < courtCount; c++) {
 
-  // validation fail hui, ab khaali slot dhoondo
-  for (let r = 0; r < maxRows; r++) {
-    for (let c = 0; c < courtCount; c++) {
+          if (
+            r < (matchesPerCourt[c + 1] || 0) &&
+            !temp[r][c].match
+          ) {
 
-      if (
-        r < (matchesPerCourt[c + 1] || 0) &&
-        !temp[r][c].match
-      ) {
-        temp[r][c].match = {
-          ...match,
-          forcedPlacement: true,
-        };
+            temp[r][c].match = {
+              ...match,
+              forcedPlacement: true,
+            };
 
-      //console.log("FORCED PLACED", match.matchNo, temp[r][c].match.forcedPlacement););
-        placed = true;
-        break;
+            forcedMatches.push(temp[r][c].match); // ✅ IMPORTANT
+
+            placed = true;
+            break;
+          }
+        }
+
+        if (placed) break;
       }
     }
 
-    if (placed) break;
-  }
-}
+    /* ================= NOT PLACED ================= */
 
-if (!placed) {
-  notPlacedMatches.push(match);
-}
+    if (!placed) {
+      notPlacedMatches.push(match);
+    }
   });
 
   return {
     grid: temp,
     remainingMatches: notPlacedMatches,
+    forcedMatches, // ✅ useful for later sorting/UI
   };
 };
-
 /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
     //console.log("SAVE DATE =", selectedDate);
