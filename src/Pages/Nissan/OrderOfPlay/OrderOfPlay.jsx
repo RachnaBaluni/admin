@@ -858,7 +858,7 @@ if (!placed) {
               Math.abs(last.rowIndex - i) === 1;
 
             if (isNextMatch && last.court !== j) {
-              return false;
+              return "❌ Consecutive matches on different courts";
             }
           }
         }
