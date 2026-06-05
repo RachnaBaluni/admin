@@ -1003,7 +1003,7 @@ console.log("CURRENT ROW =", i);
       for (const p of players) {
         if (playerLastRow[p] !== undefined) {
           const diff = Math.abs(playerLastRow[p] - i);
-/*
+
           if (diff === 1) {
             const lastCourt = grid[playerLastRow[p]].findIndex(
               (c) =>
@@ -1022,7 +1022,7 @@ console.log("CURRENT ROW =", i);
               return "❌ Consecutive matches on different courts"; // consecutive matches on different courts
             }
           }
-            */
+            
         }
       }
 
@@ -1034,6 +1034,7 @@ console.log("CURRENT ROW =", i);
 
   return true;
 };
+/*
 
   // ❌ validate both days
  // 👉 source day validation
@@ -1044,6 +1045,7 @@ if (sourceError !== true) {
   toast.error(sourceError);
   return;
 }
+  */
 
 // 👉 target day validation (sirf agar different day ho)
 if (sourceDay !== targetDay) {
