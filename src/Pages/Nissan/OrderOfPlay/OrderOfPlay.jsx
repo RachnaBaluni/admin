@@ -922,7 +922,16 @@ const buildGrid = (
     });
   });
 
-  if (!activePos || !overPos) return;
+    if (!activePos || !overPos) return;
+    if (!activePos || !overPos) return;
+
+if (
+  sourceDay === targetDay &&
+  activePos.i === overPos.i &&
+  activePos.j === overPos.j
+) {
+  return;
+}
 
   // ❌ cross day swap allowed? (YES for you)
   const sourceDay = activeDayIndex;
