@@ -311,13 +311,9 @@ setSelectedEventId(allEvents[0]?._id);
   /* ================= FETCH DATA ================= */
 
 const fetchData = async () => {
-
-   if (!selectedDate) {
-    toast.error("Select date first");
-    return;
-  }
-
   try {
+    const allMatches = []; // ✅ always fresh
+
     const filteredEvents =
       selectedCategories.length > 0
         ? events.filter((ev) =>
@@ -334,51 +330,24 @@ const fetchData = async () => {
       )
     );
 
-    let allMatches = [];
-
-    const allowedRounds = selectedRounds.map((r) =>
-      r.trim().toLowerCase()
-    );
-
-
-    // 🔥 MATCH BUILD
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
-      //console.log("ALL MATCHES", matches);
 
+      const filteredMatches = matches.filter(
+        (m) => !m.Winner
+      );
 
-      const filteredMatches = matches.filter((m) => {
-
-  const isAllowedRound = allowedRounds.includes(
-    (m.Stage || "").trim().toLowerCase()
-  );
-  if (m.Winner) return false;
-
-  return isAllowedRound;
-  
-});
-      const roundCounters = {};
-
-      const matchesWithData = filteredMatches.map((m) => {
-        
-        //console.log("FULL MATCH OBJECT:", m);
-        const stage = (m.Stage || "Round 1").trim();
-        
-        if (!roundCounters[stage]) {
-          roundCounters[stage] = 1;
-        }
-
-        return {
-          ...m,
-          category: ev.name,
-          matchNo: m.Match_number  };
-      });
+      const matchesWithData = filteredMatches.map((m) => ({
+        ...m,
+        category: ev.name,
+        matchNo: m.Match_number,
+      }));
 
       allMatches.push(...matchesWithData);
     });
 
-    // 🔥 SORT (important for proper scheduling)
+    // ✅ SORT (stable order)
     const roundOrder = {
       "Round 1": 1,
       "Round 2": 2,
@@ -388,47 +357,45 @@ const fetchData = async () => {
       "Round 6": 6,
     };
 
-allMatches.sort((a, b) => {
-  // 1. forced matches LAST me jaaye
-  const forceDiff = (a.forcedPlacement === true) - (b.forcedPlacement === true);
-  if (forceDiff !== 0) return forceDiff;
+    allMatches.sort((a, b) => {
+      const rDiff =
+        (roundOrder[a.Stage] || 99) -
+        (roundOrder[b.Stage] || 99);
 
-  // 2. round order
-  const rDiff =
-    (roundOrder[a.Stage] || 99) -
-    (roundOrder[b.Stage] || 99);
+      if (rDiff !== 0) return rDiff;
 
-  if (rDiff !== 0) return rDiff;
+      return (a.matchNo || 0) - (b.matchNo || 0);
+    });
 
-  // 3. match number
-  return (a.matchNo || 0) - (b.matchNo || 0);
-});
-    console.log("ALL MATCHES BEFORE GRID:", allMatches);
+    // ✅ IMPORTANT: overwrite ref (no accumulation)
     allMatchesRef.current = allMatches;
 
-    /* ================= DAY LOGIC ================= */
+    // ✅ BUILD GRID FRESH EVERY TIME
+    const day1 = buildGrid(
+      allMatches,
+      courtCount,
+      matchesPerCourt
+    );
 
-    const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
+    setDays([
+      {
+        date: selectedDate,
+        courtCount,
+        matchesPerCourt,
+        grid: day1.grid,
+        remaining: day1.remainingMatches,
+      },
+    ]);
 
-setDays([
-  {
-    date: selectedDate,
-    courtCount,
-    matchesPerCourt,
-    grid: day1.grid,
-    remaining: day1.remainingMatches,
-  },
-]);
+    setGrid(day1.grid);
+    setNotPlacedMatches(day1.remainingMatches);
 
-setGrid(day1.grid);
-setNotPlacedMatches(day1.remainingMatches);
-
+    console.log("FINAL MATCH COUNT:", allMatches.length);
   } catch (err) {
     console.error(err);
     toast.error("Error loading matches");
   }
 };
-
 /* =================new Days================= */
 
 /*
