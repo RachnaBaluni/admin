@@ -675,8 +675,8 @@ const buildGrid = (
     /* ================= 🔥 FORCED PLACEMENT ================= */
 
     if (!placed) {
-      for (let r = 0; r < maxRows; r++) {
-        for (let c = 0; c < courtCount; c++) {
+      for (let r = maxRows - 1; r >= 0; r--) {
+  for (let c = 0; c < courtCount; c++) {
 
           if (
             r < (matchesPerCourt[c + 1] || 0) &&
