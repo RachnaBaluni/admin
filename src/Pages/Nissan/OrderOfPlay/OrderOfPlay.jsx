@@ -1056,12 +1056,12 @@ if (sourceDay !== targetDay) {
     return;
   }
 }
-/*
-if (!validateAllDays(newDays)) {
-  toast.error("❌ Same player conflict detected");
+const allDaysError = validateAllDays(newDays);
+
+if (allDaysError !== true) {
+  toast.error(allDaysError);
   return;
 }
-  */
 
 
 
