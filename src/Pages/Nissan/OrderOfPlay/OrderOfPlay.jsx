@@ -884,10 +884,12 @@ const buildGrid = (
     "CURRENTCOURT=", j
               );
                console.log("LAST MATCH ID =", last.matchId);
-  console.log("CURRENT MATCH ID =", cell.match._id);
+console.log("LAST MATCH NO =", last.matchNo);
 
-  console.log("CURRENT MATCH NO =", cell.match.matchNo);
-              
+console.log("CURRENT MATCH ID =", cell.match._id);
+console.log("CURRENT MATCH NO =", cell.match.matchNo);
+
+console.log("CURRENT MATCH =", cell.match);
               return "❌ Consecutive matches on different courts";
             }
             
@@ -902,6 +904,9 @@ const buildGrid = (
             dayIndex: daysData.indexOf(day),
             rowIndex: i,
             court: j,
+                matchId: cell.match._id,
+    matchNo: cell.match.matchNo,
+
           };
         });
 
