@@ -817,7 +817,49 @@ const buildGrid = (
       setSelectedRounds(updated);
 
     };
+  const validateLocalMove = (grid, i, j) => {
 
+  const cell = grid[i][j];
+  if (!cell?.match || cell.match.forcedPlacement) return true;
+
+  const players = getPlayers(cell.match);
+
+  // ONLY check nearby rows
+  const rowsToCheck = [i - 1, i, i + 1].filter(
+    r => r >= 0 && r < grid.length
+  );
+
+  for (const r of rowsToCheck) {
+    for (let c = 0; c < grid[r].length; c++) {
+
+      const other = grid[r][c];
+      if (!other?.match || other.match._id === cell.match._id) continue;
+      if (other.match.forcedPlacement) continue;
+
+      const otherPlayers = getPlayers(other.match);
+
+      // SAME TIME CHECK
+      if (other.time === cell.time) {
+        if (players.some(p => otherPlayers.includes(p))) {
+          return "❌ Same player same time";
+        }
+      }
+
+      // CONSECUTIVE CHECK
+      if (Math.abs(r - i) === 1 && c !== j) {
+        if (players.some(p => otherPlayers.includes(p))) {
+          return "❌ Consecutive matches on different courts";
+        }
+      }
+    }
+  }
+
+  return true;
+};
+  
+  
+  
+  
     const validateAllDays = (daysData) => {
     console.log("VALIDATE ALL DAYS");
  // const timeMap = {};
@@ -1113,8 +1155,29 @@ if (sourceDay !== targetDay) {
     toast.error(targetError);
     return;
   }
+    }
+    
+const sourceError = validateLocalMove(
+  newDays[sourceDay].grid,
+  activePos.i,
+  activePos.j
+);
+
+if (sourceError !== true) {
+  toast.error(sourceError);
+  return;
 }
-const allDaysError = validateAllDays(newDays);
+
+const targetError = validateLocalMove(
+  newDays[targetDay].grid,
+  overPos.i,
+  overPos.j
+);
+
+if (targetError !== true) {
+  toast.error(targetError);
+  return;
+}
 console.log("VALIDATION RESULT =", allDaysError);
 
 if (allDaysError !== true) {
