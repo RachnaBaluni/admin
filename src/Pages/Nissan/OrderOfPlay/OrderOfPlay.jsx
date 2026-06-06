@@ -892,7 +892,9 @@ const buildGrid = (
 
       console.log("DRAG END CALLED");
 
-  const { active, over } = event;
+    const { active, over } = event;
+     console.log("ACTIVE =", active?.id);
+  console.log("OVER =", over?.id);
   if (!over) return;
     if (active.id === over.id) return;
 
@@ -923,7 +925,7 @@ const buildGrid = (
   });
 
     if (!activePos || !overPos) return;
-
+/*
 if (
   sourceDay === targetDay &&
   activePos.i === overPos.i &&
@@ -931,6 +933,8 @@ if (
 ) {
   return;
 }
+
+*/
 
   // ❌ cross day swap allowed? (YES for you)
   const sourceDay = activeDayIndex;
