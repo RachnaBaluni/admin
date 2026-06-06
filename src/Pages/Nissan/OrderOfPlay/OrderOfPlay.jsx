@@ -1075,16 +1075,22 @@ if (sourceDay !== targetDay) {
   }
 }
 const allDaysError = validateAllDays(newDays);
+console.log("VALIDATION RESULT =", allDaysError);
 
 if (allDaysError !== true) {
   toast.error(allDaysError);
   return;
 }
 
+    
+    console.log("BEFORE SET DAYS");
+
 
 
 // ✅ APPLY
-setDays(newDays);
+    setDays(newDays);
+    console.log("AFTER SET DAYS");
+
 toast.success("✅ Match moved successfully");
   // ✅ APPLY
   
