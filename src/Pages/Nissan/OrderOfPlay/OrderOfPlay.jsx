@@ -818,7 +818,7 @@ const buildGrid = (
 
     };
 
-    const validateAllDays = (daysData) => {
+    const validateAllDays = (daysData,activeMatch) => {
     console.log("VALIDATE ALL DAYS");
   const timeMap = {};
   const playerLastMatch = {}; // 🔥 track last match globally
