@@ -820,10 +820,12 @@ const buildGrid = (
 
     const validateAllDays = (daysData) => {
     console.log("VALIDATE ALL DAYS");
-  const timeMap = {};
-  const playerLastMatch = {}; // 🔥 track last match globally
+ // const timeMap = {};
+  //const playerLastMatch = {}; // 🔥 track last match globally
 
-  for (const day of daysData) {
+      for (const day of daysData) {
+    const timeMap = {};
+  const playerLastMatch = {};
 
     for (let i = 0; i < day.grid.length; i++) {
 
@@ -833,7 +835,7 @@ const buildGrid = (
         if (!cell?.match) continue;
 
         const players = getPlayers(cell.match);
-        const time = `${cell.time}-${i}`;
+        const time = cell.time;
 
         // 🔥 SAME TIME CHECK (across all days)
         if (!timeMap[time]) {
@@ -889,7 +891,8 @@ console.log("LAST MATCH NO =", last.matchNo);
 console.log("CURRENT MATCH ID =", cell.match._id);
 console.log("CURRENT MATCH NO =", cell.match.matchNo);
 
-console.log("CURRENT MATCH =", cell.match);
+              console.log("CURRENT MATCH =", cell.match);
+              
               return "❌ Consecutive matches on different courts";
             }
             
@@ -900,14 +903,22 @@ console.log("CURRENT MATCH =", cell.match);
         players.forEach((p) => timeMap[time].add(p));
 
         players.forEach((p) => {
-          playerLastMatch[p] = {
-            dayIndex: daysData.indexOf(day),
-            rowIndex: i,
-            court: j,
-                matchId: cell.match._id,
+          if (
+  !playerLastMatch[p] ||
+  daysData.indexOf(day) > playerLastMatch[p].dayIndex ||
+  (
+    daysData.indexOf(day) === playerLastMatch[p].dayIndex &&
+    i > playerLastMatch[p].rowIndex
+  )
+) {
+  playerLastMatch[p] = {
+    dayIndex: daysData.indexOf(day),
+    rowIndex: i,
+    court: j,
+    matchId: cell.match._id,
     matchNo: cell.match.matchNo,
-
-          };
+  };
+}
         });
 
       }
