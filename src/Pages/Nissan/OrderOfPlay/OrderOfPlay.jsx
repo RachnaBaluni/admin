@@ -818,7 +818,7 @@ const buildGrid = (
 
     };
 
-    const validateAllDays = (daysData,activeMatch) => {
+    const validateAllDays = (daysData) => {
     console.log("VALIDATE ALL DAYS");
   const timeMap = {};
   const playerLastMatch = {}; // 🔥 track last match globally
@@ -883,15 +883,7 @@ const buildGrid = (
     "LASTCOURT=", last.court,
     "CURRENTCOURT=", j
               );
-    
-      console.log("CONSECUTIVE CONFLICT");
-
-  console.log("ACTIVE MATCH ID =", active?.id); // agar active available hai
-  console.log("CONFLICT PLAYER =", p);
-
-  console.log("LAST =", last);
-  console.log("CURRENT MATCH =", match);
-
+              
               return "❌ Consecutive matches on different courts";
             }
             
