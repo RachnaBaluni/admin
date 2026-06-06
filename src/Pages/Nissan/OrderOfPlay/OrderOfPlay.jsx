@@ -882,7 +882,16 @@ const buildGrid = (
     "CURRENTROW=", i,
     "LASTCOURT=", last.court,
     "CURRENTCOURT=", j
-  );
+              );
+    
+      console.log("CONSECUTIVE CONFLICT");
+
+  console.log("ACTIVE MATCH ID =", active?.id); // agar active available hai
+  console.log("CONFLICT PLAYER =", p);
+
+  console.log("LAST =", last);
+  console.log("CURRENT MATCH =", match);
+
               return "❌ Consecutive matches on different courts";
             }
             
