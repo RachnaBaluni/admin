@@ -863,15 +863,15 @@ const buildGrid = (
               last.dayIndex === daysData.indexOf(day) &&
               Math.abs(last.rowIndex - i) === 1;
 
-            console.log({
-  player: p,
-  lastRow: last.rowIndex,
-  currentRow: i,
-  diff: Math.abs(last.rowIndex - i),
-  isNextMatch,
-  lastCourt: last.court,
-  currentCourt: j,
-});
+            console.log(
+  "PLAYER=", p,
+  "LASTROW=", last.rowIndex,
+  "CURRENTROW=", i,
+  "DIFF=", Math.abs(last.rowIndex - i),
+  "ISNEXT=", isNextMatch,
+  "LASTCOURT=", last.court,
+  "CURRENTCOURT=", j
+);
             
             /*
             if (isNextMatch && last.court !== j) {
