@@ -871,10 +871,11 @@ console.log("CURRENT ROW =", i);
 console.log("LAST COURT =", last.court);
 console.log("CURRENT COURT =", j);
             
-            
+            /*
             if (isNextMatch && last.court !== j) {
               return "❌ Consecutive matches on different courts";
             }
+            */
           }
         }
 
