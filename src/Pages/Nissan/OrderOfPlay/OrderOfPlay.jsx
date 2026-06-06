@@ -873,13 +873,19 @@ const buildGrid = (
   "CURRENTCOURT=", j
 );
             
-            /*
+            
             if (isNextMatch && last.court !== j) {
-              return "❌ Consecutive matches on different courts";
-            }
-            */
-          }
-        }
+  console.log("CONSECUTIVE CONFLICT");
+  console.log(
+    "PLAYER=", p,
+    "LASTROW=", last.rowIndex,
+    "CURRENTROW=", i,
+    "LASTCOURT=", last.court,
+    "CURRENTCOURT=", j
+  );
+
+  return "❌ Consecutive matches on different courts";
+}
 
         // ✅ UPDATE TRACKERS
         players.forEach((p) => timeMap[time].add(p));
