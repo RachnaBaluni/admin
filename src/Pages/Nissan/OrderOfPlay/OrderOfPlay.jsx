@@ -875,7 +875,7 @@ const buildGrid = (
             
             
             if (isNextMatch && last.court !== j) {
-  console.log("CONSECUTIVE CONFLICT");
+               console.log("CONSECUTIVE CONFLICT");
   console.log(
     "PLAYER=", p,
     "LASTROW=", last.rowIndex,
@@ -883,9 +883,11 @@ const buildGrid = (
     "LASTCOURT=", last.court,
     "CURRENTCOURT=", j
   );
-
-  return "❌ Consecutive matches on different courts";
-}
+              return "❌ Consecutive matches on different courts";
+            }
+            
+          }
+        }
 
         // ✅ UPDATE TRACKERS
         players.forEach((p) => timeMap[time].add(p));
