@@ -863,6 +863,15 @@ const buildGrid = (
               last.dayIndex === daysData.indexOf(day) &&
               Math.abs(last.rowIndex - i) === 1;
 
+            console.log("PLAYER =", p);
+console.log("LAST DAY =", last.dayIndex);
+console.log("CURRENT DAY =", daysData.indexOf(day));
+console.log("LAST ROW =", last.rowIndex);
+console.log("CURRENT ROW =", i);
+console.log("LAST COURT =", last.court);
+console.log("CURRENT COURT =", j);
+            
+            
             if (isNextMatch && last.court !== j) {
               return "❌ Consecutive matches on different courts";
             }
