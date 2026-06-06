@@ -883,6 +883,10 @@ const buildGrid = (
     "LASTCOURT=", last.court,
     "CURRENTCOURT=", j
               );
+               console.log("LAST MATCH ID =", last.matchId);
+  console.log("CURRENT MATCH ID =", cell.match._id);
+
+  console.log("CURRENT MATCH NO =", cell.match.matchNo);
               
               return "❌ Consecutive matches on different courts";
             }
