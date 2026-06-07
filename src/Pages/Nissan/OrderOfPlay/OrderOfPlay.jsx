@@ -927,6 +927,10 @@ if (
 
     const target = newDays[targetDay].grid[overPos.i][overPos.j];
 
+    const draggedPlayers = getPlayers(dragged.match || {});
+    const targetPlayers = getPlayers(target.match || {});
+
+    const affectedPlayers = [...new Set([...draggedPlayers, ...targetPlayers])];
     console.log("DRAGGED MATCH =", dragged?.match?.matchNo);
     console.log("DRAGGED DATA =", dragged?.match);
 
