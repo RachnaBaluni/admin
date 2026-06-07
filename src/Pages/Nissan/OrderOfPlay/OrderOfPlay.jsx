@@ -926,6 +926,12 @@ if (
 
     const target = newDays[targetDay].grid[overPos.i][overPos.j];
 
+    console.log("DRAGGED MATCH =", dragged?.match?.matchNo);
+    console.log("DRAGGED DATA =", dragged?.match);
+
+    console.log("TARGET MATCH =", target?.match?.matchNo);
+    console.log("TARGET DATA =", target?.match);
+
     if (!dragged?.match) return;
 
     // 👉 if same day → swap
