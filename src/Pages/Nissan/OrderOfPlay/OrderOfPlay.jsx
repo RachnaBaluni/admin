@@ -979,6 +979,13 @@ if (
           }
 
           for (const p of players) {
+            console.log(
+              "CONFLICT MATCH NO =",
+              cell.match.matchNo,
+              "TIME =",
+              time,
+            );
+
             if (timeMap[time].has(p)) {
               console.log("CONFLICT PLAYER =", p);
               console.log("TIME =", time);
