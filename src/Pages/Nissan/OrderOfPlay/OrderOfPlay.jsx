@@ -1000,9 +1000,14 @@ if (
                     oldCell.match._id !== cell.match._id &&
                     getPlayers(oldCell.match).includes(p)
                   ) {
-                    console.log("PREVIOUS MATCH =", oldCell.match.matchNo);
-                    console.log("PREVIOUS ROW =", r);
-                    console.log("CURRENT ROW =", i);
+                    console.log(
+                      "PREVIOUS MATCH NO =",
+                      oldCell.match.matchNo,
+                      "ROW =",
+                      r,
+                      "COURT =",
+                      c,
+                    );
                   }
                 }
               }
