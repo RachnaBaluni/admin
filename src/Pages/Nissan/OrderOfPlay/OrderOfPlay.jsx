@@ -932,9 +932,15 @@ if (
     if (sourceDay === targetDay) {
       if (!target?.match) return;
 
+      console.log("SOURCE CELL =", activePos);
+      console.log("TARGET CELL =", overPos);
+      console.log("DRAGGED MATCH =", dragged?.match?.matchNo);
+      console.log("TARGET MATCH BEFORE SWAP =", target?.match?.matchNo);
+
       const temp = dragged.match;
       dragged.match = target.match;
       target.match = temp;
+      console.log("TARGET MATCH AFTER SWAP =", target?.match?.matchNo);
     } else {
       // 👉 MOVE to next day (shift logic)
       if (target?.match) {
