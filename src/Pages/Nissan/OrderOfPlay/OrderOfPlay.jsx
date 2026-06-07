@@ -785,6 +785,7 @@ const addNextDay = () => {
               console.log("TIME:", time);
               console.log("MATCH NO:", cell.match.matchNo);
               console.log("MATCH:", cell.match);
+              console.log("MATCH KEYS =", Object.keys(cell.match));
 
               return "❌ Same player same time";
             }
