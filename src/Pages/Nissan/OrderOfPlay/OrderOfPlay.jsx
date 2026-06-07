@@ -1056,7 +1056,6 @@ if (sourceError !== true) {
     }
     console.log("BEFORE VALIDATE ALL DAYS");
 
-    /*
     const allDaysError = validateAllDays(newDays);
     console.log("VALIDATION RESULT =", allDaysError);
 
@@ -1064,7 +1063,6 @@ if (sourceError !== true) {
       toast.error(allDaysError);
       return;
     }
-    */
 
     console.log("BEFORE SET DAYS");
 
