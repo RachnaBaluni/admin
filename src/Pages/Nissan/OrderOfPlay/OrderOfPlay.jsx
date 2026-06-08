@@ -585,6 +585,14 @@ const addNextDay = () => {
           // ❌ SAME TIME CONFLICT
           const sameTimeConflict = players.some((p) => slotSet.has(p));
           if (sameTimeConflict) {
+            console.log(
+              "CONSECUTIVE CONFLICT =>",
+              match.matchNo,
+              "ROW =",
+              i,
+              "COURT =",
+              j,
+            );
             hadConflict = true;
             continue;
           }
@@ -606,6 +614,14 @@ const addNextDay = () => {
           });
 
           if (consecutiveConflict) {
+            console.log(
+              "CONSECUTIVE CONFLICT =>",
+              match.matchNo,
+              "ROW =",
+              i,
+              "COURT =",
+              j,
+            );
             hadConflict = true;
             continue;
           }
