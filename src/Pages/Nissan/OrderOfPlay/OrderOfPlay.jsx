@@ -567,6 +567,7 @@ const addNextDay = () => {
     matches.forEach((match) => {
       const players = getPlayers(match);
       let placed = false;
+      let hadConflict = false;
 
       for (let i = 0; i < maxRows; i++) {
         const time = getTimeLabel(i);
@@ -583,7 +584,10 @@ const addNextDay = () => {
 
           // ❌ SAME TIME CONFLICT
           const sameTimeConflict = players.some((p) => slotSet.has(p));
-          if (sameTimeConflict) continue;
+          if (sameTimeConflict) {
+            hadConflict = true;
+            continue;
+          }
 
           // ❌ CONSECUTIVE CONFLICT
           let consecutiveConflict = false;
@@ -601,7 +605,10 @@ const addNextDay = () => {
             }
           });
 
-          if (consecutiveConflict) continue;
+          if (consecutiveConflict) {
+            hadConflict = true;
+            continue;
+          }
 
           /* ✅ PLACE NORMAL MATCH */
           temp[i][j].match = match;
@@ -620,14 +627,13 @@ const addNextDay = () => {
       }
 
       /* ================= 🔥 FORCED PLACEMENT ================= */
-
       if (!placed) {
         for (let r = maxRows - 1; r >= 0; r--) {
           for (let c = 0; c < courtCount; c++) {
             if (r < (matchesPerCourt[c + 1] || 0) && !temp[r][c].match) {
               temp[r][c].match = {
                 ...match,
-                forcedPlacement: true,
+                forcedPlacement: hadConflict,
               };
 
               forcedMatches.push(temp[r][c].match); // ✅ IMPORTANT
