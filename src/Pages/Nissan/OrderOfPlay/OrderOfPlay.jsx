@@ -646,7 +646,7 @@ const addNextDay = () => {
         if (placed) break;
       }
 
-      onsole.log(
+      console.log(
         "MATCH",
         match.matchNo,
         "PLACED =",
