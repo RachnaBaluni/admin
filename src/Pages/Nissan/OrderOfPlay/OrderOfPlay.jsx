@@ -654,6 +654,14 @@ const addNextDay = () => {
       }
     });
 
+    console.log(
+      "ROWS =",
+      temp.map((row, idx) => ({
+        row: idx,
+        count: row.filter((c) => c.match).length,
+      })),
+    );
+
     return {
       grid: temp,
       remainingMatches: notPlacedMatches,
