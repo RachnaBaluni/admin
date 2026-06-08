@@ -628,6 +628,15 @@ const addNextDay = () => {
 
       /* ================= 🔥 FORCED PLACEMENT ================= */
       if (!placed) {
+        console.log(
+          "FORCED MATCH =>",
+          match.matchNo,
+          match.category,
+          match.Stage,
+          "HAD CONFLICT =",
+          hadConflict,
+        );
+
         for (let r = 0; r < maxRows; r++) {
           //for (let r = maxRows - 1; r >= 0; r--) {
           for (let c = 0; c < courtCount; c++) {
