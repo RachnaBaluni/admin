@@ -1080,13 +1080,28 @@ if (sourceError !== true) {
       return;
     }
 */
-    const affectedDays = [...new Set([sourceDay, targetDay])];
+    // 🔥 Sirf dragged card validate karo
+    const dragError = validateLocalMove(
+      newDays[sourceDay].grid,
+      overPos.i,
+      overPos.j,
+    );
 
-    for (const dayIndex of affectedDays) {
-      const error = validateDay(newDays[dayIndex].grid);
+    if (dragError !== true) {
+      toast.error(dragError);
+      return;
+    }
 
-      if (error !== true) {
-        toast.error(error);
+    // 🔥 Swap hua dusra card bhi validate karo
+    if (sourceDay === targetDay) {
+      const targetError = validateLocalMove(
+        newDays[targetDay].grid,
+        activePos.i,
+        activePos.j,
+      );
+
+      if (targetError !== true) {
+        toast.error(targetError);
         return;
       }
     }
