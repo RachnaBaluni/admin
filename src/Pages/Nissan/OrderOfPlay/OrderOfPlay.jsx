@@ -516,6 +516,10 @@ const addNextDay = () => {
     let temp = [];
     const maxRows = Math.max(...Object.values(matchesPerCourt));
 
+    console.log("TOTAL SLOTS =", courtCount * maxRows);
+
+    console.log("TOTAL MATCHES =", matches.length);
+
     const timeSlotPlayers = {};
     const playerLastRow = {};
     const playerLastCourt = {};
@@ -641,6 +645,15 @@ const addNextDay = () => {
 
         if (placed) break;
       }
+
+      onsole.log(
+        "MATCH",
+        match.matchNo,
+        "PLACED =",
+        placed,
+        "HAD CONFLICT =",
+        hadConflict,
+      );
 
       /* ================= 🔥 FORCED PLACEMENT ================= */
       if (!placed) {
