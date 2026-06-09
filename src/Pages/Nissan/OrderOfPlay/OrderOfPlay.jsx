@@ -574,10 +574,11 @@ const addNextDay = () => {
       let hadConflict = false;
 
       for (let i = 0; i < maxRows; i++) {
-        const time = getTimeLabel(i);
+        //const time = getTimeLabel(i);
+        const slotKey = `${getTimeLabel(i)}-${i}`;
 
-        if (!timeSlotPlayers[time]) {
-          timeSlotPlayers[time] = new Set();
+        if (!timeSlotPlayers[slotKey]) {
+          timeSlotPlayers[slotKey] = new Set();
         }
 
         for (let j = 0; j < courtCount; j++) {
