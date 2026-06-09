@@ -575,10 +575,10 @@ const addNextDay = () => {
 
       for (let i = 0; i < maxRows; i++) {
         //const time = getTimeLabel(i);
-        const slotKey = `${getTimeLabel(i)}-${i}`;
+        const time = `${getTimeLabel(i)}-${i}`;
 
-        if (!timeSlotPlayers[slotKey]) {
-          timeSlotPlayers[slotKey] = new Set();
+        if (!timeSlotPlayers[time]) {
+          timeSlotPlayers[time] = new Set();
         }
 
         for (let j = 0; j < courtCount; j++) {
