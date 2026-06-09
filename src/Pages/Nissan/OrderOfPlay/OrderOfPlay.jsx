@@ -656,6 +656,53 @@ const addNextDay = () => {
       );
 
       /* ================= 🔥 FORCED PLACEMENT ================= */
+      /* ================= RELAXED PASS ================= */
+      if (!placed) {
+        for (let i = maxRows - 1; i >= 0; i--) {
+          const time = getTimeLabel(i);
+
+          if (!timeSlotPlayers[time]) {
+            timeSlotPlayers[time] = new Set();
+          }
+
+          for (let j = 0; j < courtCount; j++) {
+            if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+            if (temp[i][j].match) continue;
+
+            const slotSet = timeSlotPlayers[time];
+
+            // ❌ only same time conflict check
+            const sameTimeConflict = players.some((p) => slotSet.has(p));
+
+            if (sameTimeConflict) continue;
+
+            temp[i][j].match = match;
+
+            players.forEach((p) => {
+              slotSet.add(p);
+              playerLastRow[p] = i;
+              playerLastCourt[p] = j;
+            });
+
+            placed = true;
+
+            console.log(
+              "RELAXED PLACEMENT =>",
+              match.matchNo,
+              "ROW =",
+              i,
+              "COURT =",
+              j,
+            );
+
+            break;
+          }
+
+          if (placed) break;
+        }
+      }
+
+      /* ================= FORCED PLACEMENT ================= */
       if (!placed) {
         console.log(
           "FORCED MATCH =>",
@@ -666,16 +713,15 @@ const addNextDay = () => {
           hadConflict,
         );
 
-        //for (let r = 0; r < maxRows; r++) {
         for (let r = maxRows - 1; r >= 0; r--) {
           for (let c = 0; c < courtCount; c++) {
             if (r < (matchesPerCourt[c + 1] || 0) && !temp[r][c].match) {
               temp[r][c].match = {
                 ...match,
-                forcedPlacement: hadConflict,
+                forcedPlacement: true,
               };
 
-              forcedMatches.push(temp[r][c].match); // ✅ IMPORTANT
+              forcedMatches.push(temp[r][c].match);
 
               placed = true;
               break;
