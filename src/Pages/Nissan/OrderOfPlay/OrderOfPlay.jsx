@@ -1179,9 +1179,6 @@ if (sourceError !== true) {
             Settings
           </button>
 
-          <button className={styles.generateBtn} onClick={fetchData}>
-            Generate Again
-          </button>
           <button className={styles.generateBtn} onClick={saveOrderOfPlay}>
             Save Order
           </button>
