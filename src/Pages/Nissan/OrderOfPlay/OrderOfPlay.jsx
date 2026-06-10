@@ -459,7 +459,7 @@ const addNextDay = () => {
       toast.success("All matches already scheduled ✅");
       return;
     }
-
+    /*
     // 🔥 1. pending matches (not completed yet)
     const pendingMatches = allMatchesRef.current.filter((m) => !m.Winner);
 
@@ -469,7 +469,7 @@ const addNextDay = () => {
     [...notPlacedMatches, ...pendingMatches].forEach((m) => {
       uniqueMap.set(m._id, m);
     });
-
+*/
     const newMatches = Array.from(uniqueMap.values());
 
     // 🔥 3. build grid for new day
