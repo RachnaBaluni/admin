@@ -751,28 +751,25 @@ const addNextDay = () => {
   };
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
-    console.log("DAYS =", days);
-    console.log("GRID =", grid);
-
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
-        {
-          eventId: selectedEventId,
-          playDate: selectedDate,
-          grid: grid,
-        },
-        { withCredentials: true },
-      );
+      for (const day of days) {
+        await axios.post(
+          `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
+          {
+            eventId: selectedEventId,
+            playDate: day.date,
+            grid: day.grid,
+          },
+          { withCredentials: true },
+        );
+      }
 
-      //console.log("Saved:", res.data);
-      toast.success("Order Of Play Saved");
+      toast.success("All days saved successfully ✅");
     } catch (err) {
-      //console.log("ERROR:", err.response?.data || err);
+      console.error(err);
       toast.error("Save Failed");
     }
   };
-
   /* ================= SETTINGS ================= */
 
   const handleReset = () => {
