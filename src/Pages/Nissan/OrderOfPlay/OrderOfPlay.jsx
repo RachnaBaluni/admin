@@ -461,12 +461,12 @@ const addNextDay = () => {
     }
 
     // 🔥 1. pending matches (not completed yet)
-    const pendingMatches = allMatchesRef.current.filter((m) => !m.Winner);
+    // const pendingMatches = allMatchesRef.current.filter((m) => !m.Winner);
 
     // 🔥 2. merge + remove duplicates safely
     const uniqueMap = new Map();
 
-    [...notPlacedMatches, ...pendingMatches].forEach((m) => {
+    [...notPlacedMatches].forEach((m) => {
       uniqueMap.set(m._id, m);
     });
 
