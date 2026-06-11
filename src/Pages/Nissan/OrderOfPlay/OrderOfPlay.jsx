@@ -751,6 +751,11 @@ const addNextDay = () => {
   };
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
+    alert("SAVE FUNCTION CALLED");
+
+    console.log("SAVE CLICKED");
+    console.log("DAYS =", days);
+    console.log("DAYS TO SAVE", days);
     try {
       for (const day of days) {
         await axios.post(
