@@ -751,8 +751,9 @@ const addNextDay = () => {
   };
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
-    //console.log("SAVE DATE =", selectedDate);
-    //console.log("EVENT =", selectedEventId);
+    console.log("DAYS =", days);
+    console.log("GRID =", grid);
+
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
