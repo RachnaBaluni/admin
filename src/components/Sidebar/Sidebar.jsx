@@ -63,7 +63,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             onClick={toggleNissanMenu}
           >
             <FiCalendar className={styles.icon} />
-            <span>Nissan Tournament</span>
+            <span>Ongoing Tournament</span>
             <FiChevronDown
               className={`${styles.chevron} ${
                 isNissanOpen ? styles.rotate : ""
@@ -74,13 +74,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <ul className={styles.submenu}>
               <li>
                 <NavLink
-                  to="/nissan/update-team-ranking"
+                  to="/nissan/update-events"
                   className={({ isActive }) => (isActive ? styles.active : "")}
                   onClick={toggleSidebar}
                 >
-                  <FiBarChart2 className={styles.icon} /> Update Team Ranking
+                  <FiEdit className={styles.icon} /> Update Events
                 </NavLink>
               </li>
+
               <li>
                 <NavLink
                   to="/nissan/view-player-list"
@@ -90,15 +91,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   <FiUsers className={styles.icon} /> View Player List
                 </NavLink>
               </li>
+
               <li>
                 <NavLink
-                  to="/nissan/view-player-journey"
+                  to="/nissan/update-team-ranking"
                   className={({ isActive }) => (isActive ? styles.active : "")}
                   onClick={toggleSidebar}
                 >
-                  <FiUsers className={styles.icon} /> View Player Journey
+                  <FiBarChart2 className={styles.icon} /> Update Team Ranking
                 </NavLink>
               </li>
+
               <li>
                 <NavLink
                   to="/nissan/manage-draw"
@@ -109,18 +112,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 </NavLink>
               </li>
 
-
-
               <li>
                 <NavLink
-                  to="/nissan/manage-result"
+                  to="/nissan/order-of-play"
                   className={({ isActive }) => (isActive ? styles.active : "")}
                   onClick={toggleSidebar}
                 >
-                  <FiClipboard className={styles.icon} /> Manage Result
+                  <FiCalendar className={styles.icon} /> Order of Play
                 </NavLink>
               </li>
-
 
               <li>
                 <NavLink
@@ -128,28 +128,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   className={({ isActive }) => (isActive ? styles.active : "")}
                   onClick={toggleSidebar}
                 >
-                   <FiGrid className={styles.icon} /> Manage Result 2
+                  <FiGrid className={styles.icon} /> Manage Result 2
                 </NavLink>
-              </li> 
-               
-               <li>
-  <NavLink
-    to="/nissan/order-of-play"
-    className={({ isActive }) => (isActive ? styles.active : "")}
-    onClick={toggleSidebar}
-  >
-    <FiCalendar className={styles.icon} /> Order of Play
-  </NavLink>
-</li>
-
+              </li>
 
               <li>
                 <NavLink
-                  to="/nissan/update-events"
+                  to="/nissan/view-player-journey"
                   className={({ isActive }) => (isActive ? styles.active : "")}
                   onClick={toggleSidebar}
                 >
-                  <FiEdit className={styles.icon} /> Update Events
+                  <FiUsers className={styles.icon} /> View Player Journey
                 </NavLink>
               </li>
             </ul>
