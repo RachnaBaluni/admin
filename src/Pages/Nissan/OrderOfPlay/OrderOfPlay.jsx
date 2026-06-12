@@ -135,9 +135,12 @@ function DraggableMatch({ match, time, allMatchesRef }) {
         match?.forcedPlacement ? styles.forcedMatch : ""
       }`}
     >
-      <div>Match No: {match?.matchNo}</div>
+      <div className={styles.category}>
+        {match.category?.split("(")[0]?.trim()} - Match No: {match?.matchNo}
+      </div>
+
       <div className={styles.time}>{time}</div>
-      <div className={styles.category}>{match.category}</div>
+
       <div className={styles.round}>{match.Stage}</div>
 
       <div className={styles.team}>{getTeamName(match.Team1, 1)}</div>
