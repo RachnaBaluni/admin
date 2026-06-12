@@ -128,7 +128,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   className={({ isActive }) => (isActive ? styles.active : "")}
                   onClick={toggleSidebar}
                 >
-                  <FiGrid className={styles.icon} /> Manage Result 2
+                  <FiGrid className={styles.icon} /> Manage Result
                 </NavLink>
               </li>
 
