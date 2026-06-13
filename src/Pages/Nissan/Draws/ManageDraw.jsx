@@ -85,139 +85,115 @@ const Round = ({
   return (
     <div className={styles.roundContainer}>
       <h2 className={styles.roundTitle}>{title}</h2>
+
       <div className={styles.matchesContainer}>
-        {matches.map((match, matchIndex) => (
-          <React.Fragment
-            key={match._id || `match-${roundIndex}-${matchIndex}`}
-          >
-            <div className={styles.matchPair}>
-              <div className={styles.matchNumber}>
-                Match {match.Match_number}
-              </div>
-              <div className={styles.matchMeta}>
-                <input
-                  type="time"
-                  value={match.MatchTime || ""}
-                  className={styles.timeInput}
-                  onChange={(e) =>
-                    onUpdateTime(match._id, e.target.value)
-                  }
+        {matches.map((match, matchIndex) => {
+          const isByeMatch = roundIndex === 0 && (!match.Team1 || !match.Team2);
+
+          const visibleMatchNumber = isByeMatch
+            ? "-"
+            : matches
+                .filter((m) => !(roundIndex === 0 && (!m.Team1 || !m.Team2)))
+                .findIndex((m) => m._id === match._id) + 1;
+
+          return (
+            <React.Fragment
+              key={match._id || `match-${roundIndex}-${matchIndex}`}
+            >
+              <div className={styles.matchPair}>
+                <div className={styles.matchNumber}>
+                  Match {visibleMatchNumber}
+                </div>
+
+                <div className={styles.matchMeta}>
+                  <input
+                    type="time"
+                    value={match.MatchTime || ""}
+                    className={styles.timeInput}
+                    onChange={(e) => onUpdateTime(match._id, e.target.value)}
+                  />
+
+                  <select
+                    value={match.CourtNumber || ""}
+                    className={styles.courtSelect}
+                    onChange={(e) =>
+                      onUpdateCourt(match._id, Number(e.target.value))
+                    }
+                  >
+                    <option value="">Court</option>
+                    {[1, 2, 3, 4].map((court) => (
+                      <option key={court} value={court}>
+                        Court {court}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <Match
+                  team={match.Team1}
+                  roundIndex={roundIndex}
+                  matchId={match._id}
+                  slotType="Team1"
                 />
 
-                <select
-                  value={match.CourtNumber || ""}
-                  className={styles.courtSelect}
-                  onChange={(e) =>
-                    onUpdateCourt(match._id, Number(e.target.value))
-                  }
-                >
-                  <option value="">Court</option>
-                  {[1, 2, 3, 4].map((court) => (
-                    <option key={court} value={court}>
-                      Court {court}
-                    </option>
-                  ))}
-                </select>
+                <Match
+                  team={match.Team2}
+                  roundIndex={roundIndex}
+                  matchId={match._id}
+                  slotType="Team2"
+                />
               </div>
 
-              <Match
-                team={match.Team1}
-                roundIndex={roundIndex}
-                matchId={match._id}
-                slotType="Team1"
-              />
-              <Match
-                team={match.Team2}
-                roundIndex={roundIndex}
-                matchId={match._id}
-                slotType="Team2"
-              />
-            </div>
-            {!isLastRound && <div className={styles.connectorLine}></div>}
-          </React.Fragment>
-        ))}
+              {!isLastRound && <div className={styles.connectorLine}></div>}
+            </React.Fragment>
+          );
+        })}
       </div>
     </div>
   );
-};
 
-const ManageDraw = () => {
-  const [events, setEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState("");
-  const [draws, setDraws] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // =====================
+  // UPDATE MATCH TIME
+  // =====================
+  const updateMatchTime = async (drawId, matchTime) => {
+    // optimistic UI update
+    setDraws((prev) =>
+      prev.map((draw) =>
+        draw._id === drawId ? { ...draw, MatchTime: matchTime } : draw,
+      ),
+    );
 
-  const fetchDraws = async () => {
-     console.log("fetchDraws CALLED");
-     console.log("SELECTED EVENT:", selectedEvent);
-    if (selectedEvent) {
-      setLoading(true);
-      try {
-        const drawsRes = await api.get(
-          `${
-            import.meta.env.VITE_APP_BACKEND_URL
-          }/api/nissan-draws/${selectedEvent}`,
-          { withCredentials: true }
-        );
-        console.log(" DRAW API RESPONSE:", drawsRes.data);
-        setDraws(drawsRes.data.data);
-      } catch (error) {
-        toast.error(error.response?.data?.message || "Error fetching data.");
-        console.error("Error fetching data:", error);
-        setDraws([]);
-      }
-      setLoading(false);
+    try {
+      await api.post(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/updateTime/${drawId}`,
+        { matchTime },
+        { withCredentials: true },
+      );
+    } catch (error) {
+      toast.error("Failed to update match time");
     }
   };
 
-
-// =====================
-// UPDATE MATCH TIME
-// =====================
-const updateMatchTime = async (drawId, matchTime) => {
-  // optimistic UI update
-  setDraws((prev) =>
-    prev.map((draw) =>
-      draw._id === drawId
-        ? { ...draw, MatchTime: matchTime }
-        : draw
-    )
-  );
-
-  try {
-    await api.post(
-      `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/updateTime/${drawId}`,
-      { matchTime },
-      { withCredentials: true }
+  // =====================
+  // UPDATE COURT NUMBER
+  // =====================
+  const updateMatchCourt = async (drawId, matchCourt) => {
+    setDraws((prev) =>
+      prev.map((draw) =>
+        draw._id === drawId ? { ...draw, CourtNumber: matchCourt } : draw,
+      ),
     );
-  } catch (error) {
-    toast.error("Failed to update match time");
-  }
-};
 
-// =====================
-// UPDATE COURT NUMBER
-// =====================
-const updateMatchCourt = async (drawId, matchCourt) => {
-  setDraws((prev) =>
-    prev.map((draw) =>
-      draw._id === drawId
-        ? { ...draw, CourtNumber: matchCourt }
-        : draw
-    )
-  );
-
-  try {
-    await api.post(
-      `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/updateCourt/${drawId}`,
-      { matchCourt },
-      { withCredentials: true }
-    );
-  } catch (error) {
-    toast.error("Failed to update court number");
-  }
-};
-
+    try {
+      await api.post(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/updateCourt/${drawId}`,
+        { matchCourt },
+        { withCredentials: true },
+      );
+    } catch (error) {
+      toast.error("Failed to update court number");
+    }
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -226,7 +202,7 @@ const updateMatchCourt = async (drawId, matchCourt) => {
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
           {
             withCredentials: true,
-          }
+          },
         );
         setEvents(res.data.data);
         if (res.data.data.length > 0) {
@@ -251,13 +227,13 @@ const updateMatchCourt = async (drawId, matchCourt) => {
         await api.post(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/`,
           { eventId: selectedEvent },
-          { withCredentials: true }
+          { withCredentials: true },
         );
         toast.success("Draws created/reset successfully!");
         fetchDraws();
       } catch (error) {
         toast.error(
-          error.response?.data?.message || "Failed to create/reset draws."
+          error.response?.data?.message || "Failed to create/reset draws.",
         );
         console.error("Error creating draws:", error);
       }
@@ -274,7 +250,7 @@ const updateMatchCourt = async (drawId, matchCourt) => {
             `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${
               draw._id
             }`,
-            { withCredentials: true }
+            { withCredentials: true },
           );
         }
         setDraws([]);
@@ -338,10 +314,10 @@ const updateMatchCourt = async (drawId, matchCourt) => {
     // Find the original source and target draws from the current state (before setDraws)
     const currentDraws = draws; // Use the state variable directly
     const originalSourceDraw = currentDraws.find(
-      (draw) => draw._id === sourceMatchId
+      (draw) => draw._id === sourceMatchId,
     );
     const originalTargetDraw = currentDraws.find(
-      (draw) => draw._id === targetMatchId
+      (draw) => draw._id === targetMatchId,
     );
 
     if (!originalSourceDraw || !originalTargetDraw) {
@@ -383,7 +359,7 @@ const updateMatchCourt = async (drawId, matchCourt) => {
             ? originalTargetTeam._id
             : null,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       toast.success("Draw updated successfully!");
     } catch (error) {
@@ -424,8 +400,8 @@ const updateMatchCourt = async (drawId, matchCourt) => {
           {loading
             ? "Loading..."
             : draws.length > 0
-            ? "Reset Draws"
-            : "Create Draws"}
+              ? "Reset Draws"
+              : "Create Draws"}
         </button>
         {draws.length > 0 && (
           <button
@@ -461,7 +437,6 @@ const updateMatchCourt = async (drawId, matchCourt) => {
                 onUpdateTime={updateMatchTime}
                 onUpdateCourt={updateMatchCourt}
               />
-
             ))}
           </div>
         </DndContext>
