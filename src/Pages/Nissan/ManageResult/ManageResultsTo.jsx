@@ -202,58 +202,69 @@ const Round = memo(
       <div className={styles.roundContainer}>
         <h2 className={styles.roundTitle}>{title}</h2>
         <div className={styles.matchesContainer}>
-          {matches.map((match, matchIndex) => (
-            <React.Fragment
-              key={match._id || `match-${roundIndex}-${matchIndex}`}
-            >
-              <div className={styles.matchPair}>
-                <div className={styles.matchNumber}>
-                  Match {match.Match_number}
+          {matches.map((match, matchIndex) => {
+            const isByeMatch =
+              roundIndex === 0 && (!match.Team1 || !match.Team2);
+
+            const visibleMatchNumber = isByeMatch
+              ? "-"
+              : matches
+                  .filter((m) => !(roundIndex === 0 && (!m.Team1 || !m.Team2)))
+                  .findIndex((m) => m._id === match._id) + 1;
+
+            return (
+              <React.Fragment
+                key={match._id || `match-${roundIndex}-${matchIndex}`}
+              >
+                <div className={styles.matchPair}>
+                  <div className={styles.matchNumber}>
+                    Match {visibleMatchNumber}
+                  </div>
+                  {/* Status Dropdown */}
+                  <select
+                    value={match.Status} // Default to current status
+                    onChange={(e) =>
+                      handleStatusChange(match._id, e.target.value)
+                    }
+                    className={styles.matchStatusDropdown} // New CSS class for styling
+                  >
+                    <option value="Upcoming">Upcoming</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                  <Match
+                    key={`${match._id}-team1`} // Add key
+                    team={match.Team1}
+                    opponentTeam={match.Team2} // Pass opponent
+                    roundIndex={roundIndex}
+                    matchId={match._id}
+                    slotType="Team1"
+                    onUpdateMatch={handleUpdateMatchWithScore} // Use new handler for winner selection
+                    matchWinnerId={match.Winner?._id || match.Winner} // Ensure it's always an ID
+                    onScoreChange={handleScoreChange} // Pass score change handler (local)
+                    onScoreSave={handleScoreSave} // Pass score save handler (backend)
+                    initialScore={matchScores[match._id]?.Team1} // Pass initial score
+                  />
+                  <div className={styles.vsSeparator}>V/S</div>{" "}
+                  {/* New V/S separator */}
+                  <Match
+                    key={`${match._id}-team2`} // Add key
+                    team={match.Team2}
+                    opponentTeam={match.Team1} // Pass opponent
+                    roundIndex={roundIndex}
+                    matchId={match._id}
+                    slotType="Team2"
+                    onUpdateMatch={handleUpdateMatchWithScore} // Use new handler for winner selection
+                    matchWinnerId={match.Winner?._id || match.Winner} // Ensure it's always an ID
+                    onScoreChange={handleScoreChange} // Pass score change handler (local)
+                    onScoreSave={handleScoreSave} // Pass score save handler (backend)
+                    initialScore={matchScores[match._id]?.Team2} // Pass initial score
+                  />
                 </div>
-                {/* Status Dropdown */}
-                <select
-                  value={match.Status} // Default to current status
-                  onChange={(e) =>
-                    handleStatusChange(match._id, e.target.value)
-                  }
-                  className={styles.matchStatusDropdown} // New CSS class for styling
-                >
-                  <option value="Upcoming">Upcoming</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                </select>
-                <Match
-                  key={`${match._id}-team1`} // Add key
-                  team={match.Team1}
-                  opponentTeam={match.Team2} // Pass opponent
-                  roundIndex={roundIndex}
-                  matchId={match._id}
-                  slotType="Team1"
-                  onUpdateMatch={handleUpdateMatchWithScore} // Use new handler for winner selection
-                  matchWinnerId={match.Winner?._id || match.Winner} // Ensure it's always an ID
-                  onScoreChange={handleScoreChange} // Pass score change handler (local)
-                  onScoreSave={handleScoreSave} // Pass score save handler (backend)
-                  initialScore={matchScores[match._id]?.Team1} // Pass initial score
-                />
-                <div className={styles.vsSeparator}>V/S</div>{" "}
-                {/* New V/S separator */}
-                <Match
-                  key={`${match._id}-team2`} // Add key
-                  team={match.Team2}
-                  opponentTeam={match.Team1} // Pass opponent
-                  roundIndex={roundIndex}
-                  matchId={match._id}
-                  slotType="Team2"
-                  onUpdateMatch={handleUpdateMatchWithScore} // Use new handler for winner selection
-                  matchWinnerId={match.Winner?._id || match.Winner} // Ensure it's always an ID
-                  onScoreChange={handleScoreChange} // Pass score change handler (local)
-                  onScoreSave={handleScoreSave} // Pass score save handler (backend)
-                  initialScore={matchScores[match._id]?.Team2} // Pass initial score
-                />
-              </div>
-              {!isLastRound && <div className={styles.connectorLine}></div>}
-            </React.Fragment>
-          ))}
+                {!isLastRound && <div className={styles.connectorLine}></div>}
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
     );
