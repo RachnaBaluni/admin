@@ -85,7 +85,6 @@ const Round = ({
   return (
     <div className={styles.roundContainer}>
       <h2 className={styles.roundTitle}>{title}</h2>
-
       <div className={styles.matchesContainer}>
         {matches.map((match, matchIndex) => {
           const isByeMatch = roundIndex === 0 && (!match.Team1 || !match.Team2);
@@ -104,7 +103,6 @@ const Round = ({
                 <div className={styles.matchNumber}>
                   Match {visibleMatchNumber}
                 </div>
-
                 <div className={styles.matchMeta}>
                   <input
                     type="time"
@@ -135,7 +133,6 @@ const Round = ({
                   matchId={match._id}
                   slotType="Team1"
                 />
-
                 <Match
                   team={match.Team2}
                   roundIndex={roundIndex}
@@ -143,7 +140,6 @@ const Round = ({
                   slotType="Team2"
                 />
               </div>
-
               {!isLastRound && <div className={styles.connectorLine}></div>}
             </React.Fragment>
           );
@@ -151,6 +147,36 @@ const Round = ({
       </div>
     </div>
   );
+};
+
+const ManageDraw = () => {
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState("");
+  const [draws, setDraws] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchDraws = async () => {
+    console.log("fetchDraws CALLED");
+    console.log("SELECTED EVENT:", selectedEvent);
+    if (selectedEvent) {
+      setLoading(true);
+      try {
+        const drawsRes = await api.get(
+          `${
+            import.meta.env.VITE_APP_BACKEND_URL
+          }/api/nissan-draws/${selectedEvent}`,
+          { withCredentials: true },
+        );
+        console.log(" DRAW API RESPONSE:", drawsRes.data);
+        setDraws(drawsRes.data.data);
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Error fetching data.");
+        console.error("Error fetching data:", error);
+        setDraws([]);
+      }
+      setLoading(false);
+    }
+  };
 
   // =====================
   // UPDATE MATCH TIME
