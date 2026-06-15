@@ -5,7 +5,6 @@ import { FiTrash2 } from "react-icons/fi";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-
 const ViewPlayerList = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,8 +15,10 @@ const ViewPlayerList = () => {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/player/details`,
         {
           withCredentials: true,
-        }
+        },
       );
+      console.timeEnd("fetchPlayers");
+
       setPlayers(res.data.data);
       setLoading(false);
     } catch (error) {
@@ -25,7 +26,6 @@ const ViewPlayerList = () => {
       setLoading(false);
     }
   };
-
 
   const handleExportExcel = () => {
     const formattedData = players.map((player, index) => ({
@@ -57,13 +57,11 @@ const ViewPlayerList = () => {
     });
 
     const data = new Blob([excelBuffer], {
-      type:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
     });
 
     saveAs(data, "Player_List.xlsx");
   };
-
 
   useEffect(() => {
     fetchPlayers();
@@ -76,7 +74,7 @@ const ViewPlayerList = () => {
           import.meta.env.VITE_APP_BACKEND_URL
         }/api/player/toggle-fee/${playerId}`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
       fetchPlayers();
     } catch (error) {
@@ -91,7 +89,7 @@ const ViewPlayerList = () => {
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/player/${playerId}`,
           {
             withCredentials: true,
-          }
+          },
         );
         fetchPlayers();
       } catch (error) {
@@ -114,16 +112,10 @@ const ViewPlayerList = () => {
         <p>Total Players: {totalPlayers}</p>
         <p>Fee Paid: {feePaidPlayers}</p>
 
-        <button
-          className={styles.exportButton}
-          onClick={handleExportExcel}
-        >
+        <button className={styles.exportButton} onClick={handleExportExcel}>
           Export to Excel
-      </button>
-
-      
+        </button>
       </div>
-      
 
       <div className={styles.tableContainer}>
         <table>
