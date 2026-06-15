@@ -258,6 +258,17 @@ export default function OrderOfPlay() {
   }, []);
 
   useEffect(() => {
+    const savedDays = localStorage.getItem("orderPlayDays");
+
+    if (savedDays) {
+      setDays(JSON.parse(savedDays));
+    }
+  }, []);
+  useEffect(() => {
+    localStorage.setItem("orderPlayDays", JSON.stringify(days));
+  }, [days]);
+
+  useEffect(() => {
     if (events.length > 0 && selectedDate) {
       fetchData();
     }
