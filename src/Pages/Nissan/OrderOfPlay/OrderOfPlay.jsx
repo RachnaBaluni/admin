@@ -817,23 +817,7 @@ const addNextDay = () => {
     if (updated.includes(round)) {
       updated = updated.filter((r) => r !== round);
     } else {
-      if (updated.length >= 2) {
-        toast.error("Only 2 rounds allowed");
-
-        return;
-      }
-
       updated.push(round);
-    }
-
-    const nums = updated
-      .map((r) => Number(r.replace("Round ", "")))
-      .sort((a, b) => a - b);
-
-    if (nums.length === 2 && nums[1] - nums[0] !== 1) {
-      toast.error("Select consecutive rounds");
-
-      return;
     }
 
     setSelectedRounds(updated);
@@ -1306,7 +1290,7 @@ if (sourceError !== true) {
           {/* ROUNDS */}
 
           <div className={styles.roundSelector}>
-            <h3>Select Any 2 Consecutive Rounds</h3>
+            <h3>Select Rounds</h3>
 
             <div className={styles.roundButtons}>
               {roundsList.map((round) => (
