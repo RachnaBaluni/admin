@@ -258,6 +258,12 @@ export default function OrderOfPlay() {
   }, []);
 
   useEffect(() => {
+    if (selectedDate) {
+      localStorage.setItem("selectedDate", selectedDate);
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
     const savedDays = localStorage.getItem("orderPlayDays");
 
     if (savedDays) {
@@ -284,7 +290,13 @@ export default function OrderOfPlay() {
       const allEvents = res.data.data;
 
       setEvents(allEvents);
-      setSelectedDate(new Date().toISOString().split("T")[0]);
+      const savedDate = localStorage.getItem("selectedDate");
+
+      if (savedDate) {
+        setSelectedDate(savedDate);
+      } else {
+        setSelectedDate(new Date().toISOString().split("T")[0]);
+      }
       setSelectedEventId(allEvents[0]?._id);
     } catch (err) {
       console.error(err);
