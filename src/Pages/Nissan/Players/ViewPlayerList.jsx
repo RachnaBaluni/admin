@@ -17,7 +17,7 @@ const ViewPlayerList = () => {
           withCredentials: true,
         },
       );
-      console.timeEnd("fetchPlayers");
+      console.log("API Time:", Date.now() - start, "ms");
 
       setPlayers(res.data.data);
       setLoading(false);
