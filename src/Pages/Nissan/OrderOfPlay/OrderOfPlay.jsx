@@ -268,17 +268,6 @@ export default function OrderOfPlay() {
     }
   }, [selectedDate]);
 
-  useEffect(() => {
-    const navigationEntries = performance.getEntriesByType("navigation");
-
-    if (
-      navigationEntries.length > 0 &&
-      navigationEntries[0].type === "reload"
-    ) {
-      sessionStorage.removeItem("orderPlayDays");
-    }
-  }, []);
-
   /*
   useEffect(() => {
     if (events.length > 0 && selectedDate) {
