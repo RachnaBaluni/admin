@@ -259,7 +259,7 @@ export default function OrderOfPlay() {
 
   useEffect(() => {
     if (selectedDate) {
-      localStorage.setItem("selectedDate", selectedDate);
+      sessionStorage.setItem("selectedDate", selectedDate);
     }
   }, [selectedDate]);
 
