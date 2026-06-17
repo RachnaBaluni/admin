@@ -204,6 +204,11 @@ export default function OrderOfPlay() {
   const [selectedRounds, setSelectedRounds] = useState(["Round 1", "Round 2"]);
 
   const [days, setDays] = useState([]);
+  useEffect(() => {
+    if (days.length > 0) {
+      sessionStorage.setItem("orderPlayDays", JSON.stringify(days));
+    }
+  }, [days]);
 
   const [newDayDate, setNewDayDate] = useState("");
   const [newCourtCount, setNewCourtCount] = useState(4);
