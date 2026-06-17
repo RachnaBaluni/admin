@@ -263,14 +263,6 @@ export default function OrderOfPlay() {
     }
   }, [selectedDate]);
 
-  useEffect(() => {
-    const navEntries = performance.getEntriesByType("navigation");
-
-    if (navEntries.length > 0 && navEntries[0].type === "reload") {
-      sessionStorage.removeItem("orderPlayDays");
-    }
-  }, []);
-
   /*
   useEffect(() => {
     if (events.length > 0 && selectedDate) {
@@ -284,6 +276,20 @@ export default function OrderOfPlay() {
       fetchData();
     }
   }, [events, selectedDate]);
+
+  useEffect(() => {
+    const savedDays = sessionStorage.getItem("orderPlayDays");
+
+    if (savedDays) {
+      setDays(JSON.parse(savedDays));
+      return;
+    }
+
+    if (events.length > 0 && selectedDate) {
+      fetchData();
+    }
+  }, [events, selectedDate]);
+
   const fetchEvents = async () => {
     try {
       const res = await axios.get(
