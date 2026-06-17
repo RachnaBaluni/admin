@@ -203,8 +203,10 @@ export default function OrderOfPlay() {
 
   const [selectedRounds, setSelectedRounds] = useState(["Round 1", "Round 2"]);
 
-  const [days, setDays] = useState([]);
-
+  const [days, setDays] = useState(() => {
+    const savedDays = localStorage.getItem("orderPlayDays");
+    return savedDays ? JSON.parse(savedDays) : [];
+  });
   const [newDayDate, setNewDayDate] = useState("");
   const [newCourtCount, setNewCourtCount] = useState(4);
   const [newMatchesPerCourt, setNewMatchesPerCourt] = useState({
@@ -263,13 +265,6 @@ export default function OrderOfPlay() {
     }
   }, [selectedDate]);
 
-  useEffect(() => {
-    const savedDays = localStorage.getItem("orderPlayDays");
-
-    if (savedDays) {
-      setDays(JSON.parse(savedDays));
-    }
-  }, []);
   useEffect(() => {
     localStorage.setItem("orderPlayDays", JSON.stringify(days));
   }, [days]);
@@ -416,15 +411,17 @@ export default function OrderOfPlay() {
 
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
 
-      setDays([
-        {
-          date: selectedDate,
-          courtCount,
-          matchesPerCourt,
-          grid: day1.grid,
-          remaining: day1.remainingMatches,
-        },
-      ]);
+      if (days.length === 0) {
+        setDays([
+          {
+            date: selectedDate,
+            courtCount,
+            matchesPerCourt,
+            grid: day1.grid,
+            remaining: day1.remainingMatches,
+          },
+        ]);
+      }
 
       setGrid(day1.grid);
       setNotPlacedMatches(day1.remainingMatches);
