@@ -263,17 +263,6 @@ export default function OrderOfPlay() {
     }
   }, [selectedDate]);
 
-  useEffect(() => {
-    const savedDays = sessionStorage.getItem("orderPlayDays");
-
-    if (savedDays) {
-      setDays(JSON.parse(savedDays));
-    }
-  }, []);
-
-  useEffect(() => {
-    sessionStorage.setItem("orderPlayDays", JSON.stringify(days));
-  }, [days]);
   /*
   useEffect(() => {
     if (events.length > 0 && selectedDate) {
@@ -423,17 +412,15 @@ export default function OrderOfPlay() {
 
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
 
-      if (days.length === 0) {
-        setDays([
-          {
-            date: selectedDate,
-            courtCount,
-            matchesPerCourt,
-            grid: day1.grid,
-            remaining: day1.remainingMatches,
-          },
-        ]);
-      }
+      setDays([
+        {
+          date: selectedDate,
+          courtCount,
+          matchesPerCourt,
+          grid: day1.grid,
+          remaining: day1.remainingMatches,
+        },
+      ]);
 
       setGrid(day1.grid);
       setNotPlacedMatches(day1.remainingMatches);
