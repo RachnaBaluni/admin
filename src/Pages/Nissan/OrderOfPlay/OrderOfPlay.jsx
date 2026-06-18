@@ -1475,7 +1475,7 @@ if (sourceError !== true) {
                 {dayIndex > 0 && (
                   <button
                     onClick={() => deleteDay(dayIndex)}
-                    className={styles.deleteBtn}
+                    className={styles.deleteDayBtn}
                   >
                     Delete Day
                   </button>
