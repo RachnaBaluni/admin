@@ -513,14 +513,11 @@ const addNextDay = () => {
       return;
     }
 
-    // 👉 already nothing left
+    //  already nothing left
     if (notPlacedMatches.length === 0) {
       toast.success("All matches already scheduled ✅");
       return;
     }
-
-    // 🔥 1. pending matches (not completed yet)
-    //const pendingMatches = allMatchesRef.current.filter((m) => !m.Winner);
 
     // 🔥 2. merge + remove duplicates safely
     const uniqueMap = new Map();
@@ -624,6 +621,35 @@ const addNextDay = () => {
         });
       });
     });
+    const deleteDay = (dayIndex) => {
+      if (dayIndex === 0) return;
+
+      const dayToDelete = days[dayIndex];
+
+      // Us day ke saare matches nikaalo
+      const deletedMatches = [];
+
+      dayToDelete.grid.forEach((row) => {
+        row.forEach((cell) => {
+          if (cell?.match) {
+            deletedMatches.push({
+              ...cell.match,
+              forcedPlacement: false,
+            });
+          }
+        });
+      });
+
+      // remove the day
+      const updatedDays = days.filter((_, index) => index !== dayIndex);
+
+      // put it back to the notPlacedMatches (with deduplication)
+      setNotPlacedMatches((prev) => [...deletedMatches, ...prev]);
+
+      setDays(updatedDays);
+
+      toast.success(`Day ${dayIndex + 1} deleted successfully`);
+    };
 
     /* ================= 🔥 PLACE MATCHES ================= */
 
@@ -1492,10 +1518,30 @@ if (sourceError !== true) {
         <>
           {days.map((day, dayIndex) => (
             <div key={dayIndex} style={{ marginBottom: "50px" }}>
-              {/* DAY TITLE */}
-              <h2>
-                Day {dayIndex + 1} - {day.date}
-              </h2>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "10px",
+                }}
+              >
+                <h2 style={{ margin: 0 }}>
+                  Day {dayIndex + 1} - {day.date}
+                </h2>
+
+                {dayIndex > 0 && (
+                  <button
+                    onClick={() => deleteDay(dayIndex)}
+                    style={{
+                      padding: "6px 12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Delete Day
+                  </button>
+                )}
+              </div>
 
               {/* HEADER */}
               <div
