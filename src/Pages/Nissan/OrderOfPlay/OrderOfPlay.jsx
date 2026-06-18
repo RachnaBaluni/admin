@@ -449,64 +449,7 @@ export default function OrderOfPlay() {
     }
   };
 
-  /* =================new Days================= */
-
-  /*
-const addNextDay = () => {
-
-  if (!newDayDate) {
-    toast.error("Select date");
-    return;
-  }
-
-  if (notPlacedMatches.length === 0) {
-    toast.success("All matches already scheduled ✅");
-    return;
-  }
-
-  const newMatches = [
-  ...notPlacedMatches,        // ❗ shifted
-   
-];
-
-
-  const newDay = buildGrid(
-  newMatches,
-  newCourtCount,
-  newMatchesPerCourt,
-  days
-);
-  const updatedDays = [
-    ...days,
-    {
-      date: newDayDate,
-      courtCount: newCourtCount,
-      matchesPerCourt: newMatchesPerCourt,
-      grid: newDay.grid,
-    },
-  ];
-//console.log("CHECK VALID:", validateAllDays(updatedDays));
-
-
-  if (!validateAllDays(updatedDays)) {
-    toast.error("❌ Same player same time across days");
-    return;
-  }
-   
-  const remainingUnplayedMatches = allMatchesRef.current.filter(
-  (m) => !m.Winner
-);
-
-
-
-
-  // ✅ APPLY ONLY IF VALID
-  setDays(updatedDays);
-  setNotPlacedMatches(newDay.remainingMatches);
-  setNewDayDate("");
-};
-
-*/
+  /* ================= ADD Next DAY ================= */
   const addNextDay = () => {
     if (!newDayDate) {
       toast.error("Select date");
@@ -560,7 +503,37 @@ const addNextDay = () => {
 
     toast.success("Day added successfully ✅");
   };
+  /* ================= REMOVE NEXT DAY ================= */
 
+  const deleteDay = (dayIndex) => {
+    if (dayIndex === 0) return;
+
+    const dayToDelete = days[dayIndex];
+
+    // Us day ke saare matches nikaalo
+    const deletedMatches = [];
+
+    dayToDelete.grid.forEach((row) => {
+      row.forEach((cell) => {
+        if (cell?.match) {
+          deletedMatches.push({
+            ...cell.match,
+            forcedPlacement: false,
+          });
+        }
+      });
+    });
+
+    // Day remove karo
+    const updatedDays = days.filter((_, index) => index !== dayIndex);
+
+    // Remaining matches me wapas daalo
+    setNotPlacedMatches((prev) => [...deletedMatches, ...prev]);
+
+    setDays(updatedDays);
+
+    toast.success(`Day ${dayIndex + 1} deleted successfully`);
+  };
   /* ================= BUILD GRID ================= */
 
   const buildGrid = (
@@ -621,37 +594,6 @@ const addNextDay = () => {
         });
       });
     });
-    const deleteDay = (dayIndex) => {
-      console.log("DELETE CLICKED", dayIndex);
-
-      if (dayIndex === 0) return;
-
-      const dayToDelete = days[dayIndex];
-
-      // Us day ke saare matches nikaalo
-      const deletedMatches = [];
-
-      dayToDelete.grid.forEach((row) => {
-        row.forEach((cell) => {
-          if (cell?.match) {
-            deletedMatches.push({
-              ...cell.match,
-              forcedPlacement: false,
-            });
-          }
-        });
-      });
-
-      // remove the day
-      const updatedDays = days.filter((_, index) => index !== dayIndex);
-
-      // put it back to the notPlacedMatches (with deduplication)
-      setNotPlacedMatches((prev) => [...deletedMatches, ...prev]);
-
-      setDays(updatedDays);
-
-      toast.success(`Day ${dayIndex + 1} deleted successfully`);
-    };
 
     /* ================= 🔥 PLACE MATCHES ================= */
 
