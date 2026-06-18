@@ -622,6 +622,8 @@ const addNextDay = () => {
       });
     });
     const deleteDay = (dayIndex) => {
+      console.log("DELETE CLICKED", dayIndex);
+
       if (dayIndex === 0) return;
 
       const dayToDelete = days[dayIndex];
