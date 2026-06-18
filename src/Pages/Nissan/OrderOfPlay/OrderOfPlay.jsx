@@ -170,6 +170,7 @@ function DroppableSlot({ children, id }) {
 
 export default function OrderOfPlay() {
   const allMatchesRef = useRef([]);
+  const todayDate = new Date().toISOString().split("T")[0];
 
   const getRemainingMatchDisplay = (m) => {
     const roundNumber = Number(m.Stage?.replace("Round ", ""));
@@ -428,12 +429,11 @@ export default function OrderOfPlay() {
       allMatchesRef.current = allMatches;
 
       /* ================= DAY LOGIC ================= */
-
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
 
       setDays([
         {
-          date: todayDate,
+          date: selectedDate,
           courtCount,
           matchesPerCourt,
           grid: day1.grid,
@@ -1469,7 +1469,9 @@ if (sourceError !== true) {
                 }}
               >
                 <h2 style={{ margin: 0 }}>
-                  Day {dayIndex + 1} - {day.date}
+                  <h2 style={{ margin: 0 }}>
+                    Day {dayIndex + 1} - {dayIndex === 0 ? todayDate : day.date}
+                  </h2>
                 </h2>
 
                 {dayIndex > 0 && (
