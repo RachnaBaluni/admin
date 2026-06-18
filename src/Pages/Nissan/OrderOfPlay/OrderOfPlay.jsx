@@ -1493,7 +1493,9 @@ if (sourceError !== true) {
           {days.map((day, dayIndex) => (
             <div key={dayIndex} style={{ marginBottom: "50px" }}>
               {/* DAY TITLE */}
-              <h2>Day {dayIndex + 1}</h2>
+              <h2>
+                Day {dayIndex + 1} - {day.date}
+              </h2>
 
               {/* HEADER */}
               <div
