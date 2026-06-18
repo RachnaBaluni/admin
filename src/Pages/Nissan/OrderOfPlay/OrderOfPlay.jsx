@@ -524,10 +524,8 @@ export default function OrderOfPlay() {
       });
     });
 
-    // Day remove karo
     const updatedDays = days.filter((_, index) => index !== dayIndex);
 
-    // Remaining matches me wapas daalo
     setNotPlacedMatches((prev) => [...deletedMatches, ...prev]);
 
     setDays(updatedDays);
@@ -1477,10 +1475,7 @@ if (sourceError !== true) {
                 {dayIndex > 0 && (
                   <button
                     onClick={() => deleteDay(dayIndex)}
-                    style={{
-                      padding: "6px 12px",
-                      cursor: "pointer",
-                    }}
+                    className={styles.deleteBtn}
                   >
                     Delete Day
                   </button>

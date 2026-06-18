@@ -471,3 +471,23 @@
   border: 2px solid red !important;
   box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
 }
+/* ================= DELETE DAY ================= */
+.deleteDayBtn {
+  padding: 8px 14px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.deleteDayBtn:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.deleteDayBtn:active {
+  transform: scale(0.98);
+}
