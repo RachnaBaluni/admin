@@ -433,7 +433,7 @@ export default function OrderOfPlay() {
 
       setDays([
         {
-          date: selectedDate,
+          date: today,
           courtCount,
           matchesPerCourt,
           grid: day1.grid,
