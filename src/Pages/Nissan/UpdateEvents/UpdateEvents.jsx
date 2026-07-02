@@ -16,9 +16,21 @@ const UpdateEvents = () => {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
         {
           withCredentials: true,
-        }
+        },
       );
-      setEvents(res.data.data);
+      const sortedEvents = res.data.data.sort((a, b) => {
+        const getOrder = (name) => {
+          if (name.startsWith("Cat.A")) return 1;
+          if (name.startsWith("Cat.B")) return 2;
+          if (name.startsWith("Cat.C")) return 3;
+          if (name.startsWith("Cat.D")) return 4;
+          return 999;
+        };
+
+        return getOrder(a.name) - getOrder(b.name);
+      });
+
+      setEvents(sortedEvents);
     } catch (error) {
       console.error("Error fetching events:", error);
     }
@@ -44,7 +56,7 @@ const UpdateEvents = () => {
       try {
         await api.delete(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/events/${eventId}`,
-          { withCredentials: true }
+          { withCredentials: true },
         );
         fetchEvents();
       } catch (error) {
@@ -145,7 +157,7 @@ const EventModal = ({ event, onClose }) => {
         await api.put(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/events/${event._id}`,
           dataToSubmit,
-          { withCredentials: true }
+          { withCredentials: true },
         );
       } else {
         await api.post(
@@ -153,7 +165,7 @@ const EventModal = ({ event, onClose }) => {
           dataToSubmit,
           {
             withCredentials: true,
-          }
+          },
         );
       }
       onClose();
