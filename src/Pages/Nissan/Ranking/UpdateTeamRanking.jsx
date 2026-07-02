@@ -119,7 +119,10 @@ const UpdateTeamRanking = () => {
         });
         setAllTeams(newAllTeams);
       } catch (error) {
-        console.error("Error updating team ranking:", error);
+        alert(
+          error.response?.data?.message ||
+            "You cannot update the team ranking because the draw has already been created for this category.",
+        );
         fetchAllTeams(); // Re-fetch to revert
       }
     };
@@ -163,7 +166,10 @@ const UpdateTeamRanking = () => {
         });
         setAllTeams(newAllTeams);
       } catch (error) {
-        console.error("Error updating team ranking:", error);
+        alert(
+          error.response?.data?.message ||
+            "You cannot update the team ranking because the draw has already been created for this category.",
+        );
         fetchAllTeams(); // Re-fetch to revert
       }
     }
