@@ -59,8 +59,9 @@ const UpdateEvents = () => {
           { withCredentials: true },
         );
         fetchEvents();
+        alert("Event deleted successfully.");
       } catch (error) {
-        console.error("Error deleting event:", error);
+        alert(error.response?.data?.message || "Unable to delete event.");
       }
     }
   };
