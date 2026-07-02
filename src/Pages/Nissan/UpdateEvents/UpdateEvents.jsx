@@ -170,6 +170,7 @@ const EventModal = ({ event, onClose }) => {
       }
       onClose();
     } catch (error) {
+      alert(error.response?.data?.message || "Error saving event");
       console.error("Error saving event:", error);
     }
   };
