@@ -15,9 +15,20 @@ const Events = () => {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/main-events`,
         {
           withCredentials: true,
-        }
+        },
       );
-      setMainEvents(res.data.data);
+      const sortedEvents = res.data.data.sort((a, b) => {
+        const order = {
+          "Cat.A": 1,
+          "Cat.B": 2,
+          "Cat.C": 3,
+          "Cat.D": 4,
+        };
+
+        return (order[a.name] || 999) - (order[b.name] || 999);
+      });
+
+      setMainEvents(sortedEvents);
     } catch (error) {
       console.error("Error fetching main events:", error);
     }
@@ -45,7 +56,7 @@ const Events = () => {
           `${
             import.meta.env.VITE_APP_BACKEND_URL
           }/api/main-events/delete/${eventId}`,
-          { withCredentials: true }
+          { withCredentials: true },
         );
         fetchMainEvents();
       } catch (error) {
