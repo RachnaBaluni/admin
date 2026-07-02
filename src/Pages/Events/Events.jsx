@@ -17,18 +17,7 @@ const Events = () => {
           withCredentials: true,
         },
       );
-      const sortedEvents = res.data.data.sort((a, b) => {
-        const order = {
-          "Cat.A": 1,
-          "Cat.B": 2,
-          "Cat.C": 3,
-          "Cat.D": 4,
-        };
-
-        return (order[a.name] || 999) - (order[b.name] || 999);
-      });
-
-      setMainEvents(sortedEvents);
+      setMainEvents(res.data.data);
     } catch (error) {
       console.error("Error fetching main events:", error);
     }
