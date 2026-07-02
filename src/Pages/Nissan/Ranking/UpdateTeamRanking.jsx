@@ -163,7 +163,6 @@ const UpdateTeamRanking = () => {
         });
         setAllTeams(newAllTeams);
       } catch (error) {
-        console.error("Error updating team ranking:", error);
         alert(
           error.response?.data?.message ||
             "Draw has already been created for this category. Ranking cannot be updated.",
