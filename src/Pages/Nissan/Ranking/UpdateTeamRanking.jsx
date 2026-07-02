@@ -58,7 +58,7 @@ const UpdateTeamRanking = () => {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const fetchAllTeams = async () => {
@@ -68,7 +68,7 @@ const UpdateTeamRanking = () => {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/team/all`,
         {
           withCredentials: true,
-        }
+        },
       );
       const teams = res.data.data;
       setAllTeams(teams);
@@ -109,7 +109,7 @@ const UpdateTeamRanking = () => {
         await api.put(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/team/update-ranking`,
           { orderedTeams: orderedTeamIds },
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         // Update the main list to maintain consistency
@@ -151,19 +151,24 @@ const UpdateTeamRanking = () => {
         await api.put(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/team/update-ranking`,
           { orderedTeams: orderedTeamIds },
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         // Update the main list to maintain consistency
         const newAllTeams = allTeams.map((team) => {
           const updatedTeam = updatedTeamsWithRanks.find(
-            (ut) => ut._id === team._id
+            (ut) => ut._id === team._id,
           );
           return updatedTeam || team;
         });
         setAllTeams(newAllTeams);
       } catch (error) {
         console.error("Error updating team ranking:", error);
+        alert(
+          error.response?.data?.message ||
+            "Draw has already been created for this category. Ranking cannot be updated.",
+        );
+
         fetchAllTeams(); // Re-fetch to revert
       }
     }
