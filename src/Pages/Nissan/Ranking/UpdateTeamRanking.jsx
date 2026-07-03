@@ -21,7 +21,10 @@ import { FiMove } from "react-icons/fi";
 
 const SortableItem = ({ id, item }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+    useSortable({
+      id,
+      disabled: item.drawCreated,
+    });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -40,8 +43,12 @@ const SortableItem = ({ id, item }) => {
       <td data-label="Player 2">
         {item.partner2 ? item.partner2.name : "N/A"}
       </td>
-      <td data-label="Drag" {...listeners} className={styles.dragHandle}>
-        <FiMove />
+      <td
+        data-label="Drag"
+        {...(!item.drawCreated ? listeners : {})}
+        className={styles.dragHandle}
+      >
+        {item.drawCreated ? "🔒" : <FiMove />}
       </td>
     </tr>
   );
