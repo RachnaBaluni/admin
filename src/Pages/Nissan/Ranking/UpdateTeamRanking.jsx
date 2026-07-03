@@ -147,7 +147,7 @@ const UpdateTeamRanking = () => {
         ...team,
         rank: index + 1,
       }));
-      setFilteredTeams(updatedTeamsWithRanks);
+      // setFilteredTeams(updatedTeamsWithRanks);
 
       const orderedTeamIds = updatedTeamsWithRanks.map((t) => t._id);
       try {
@@ -156,6 +156,7 @@ const UpdateTeamRanking = () => {
           { orderedTeams: orderedTeamIds },
           { withCredentials: true },
         );
+        setFilteredTeams(updatedTeamsWithRanks);
 
         // Update the main list to maintain consistency
         const newAllTeams = allTeams.map((team) => {
