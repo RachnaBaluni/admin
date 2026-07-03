@@ -353,22 +353,6 @@ const ManageDraw = () => {
 
     const originalTargetTeam = originalTargetDraw[targetSlotType]; // Team originally in the target slot
 
-    setDraws((prevDraws) => {
-      const newDraws = prevDraws.map((draw) => {
-        if (draw._id === sourceMatchId) {
-          const newSourceSlotValue = originalTargetTeam
-            ? originalTargetTeam
-            : null;
-          return { ...draw, [sourceSlotType]: newSourceSlotValue };
-        } else if (draw._id === targetMatchId) {
-          return { ...draw, [targetSlotType]: draggedTeam };
-        }
-        return draw;
-      });
-
-      return newDraws;
-    });
-
     // Make API call to save the changes
     try {
       await api.put(
@@ -387,6 +371,22 @@ const ManageDraw = () => {
         },
         { withCredentials: true },
       );
+      setDraws((prevDraws) => {
+        const newDraws = prevDraws.map((draw) => {
+          if (draw._id === sourceMatchId) {
+            const newSourceSlotValue = originalTargetTeam
+              ? originalTargetTeam
+              : null;
+            return { ...draw, [sourceSlotType]: newSourceSlotValue };
+          } else if (draw._id === targetMatchId) {
+            return { ...draw, [targetSlotType]: draggedTeam };
+          }
+          return draw;
+        });
+
+        return newDraws;
+      });
+
       toast.success("Draw updated successfully!");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update draw.");
