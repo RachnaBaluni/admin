@@ -303,9 +303,9 @@ const ManageDraw = () => {
 
     return Object.entries(roundsData)
       .sort(([stageA], [stageB]) => {
-        const numA = parseInt(stageA.split(" ")[1] || 0);
-        const numB = parseInt(stageB.split(" ")[1] || 0);
-        return numA - numB;
+        const order = ["Cat A", "Cat B", "Cat C", "Cat D"];
+
+        return order.indexOf(stageA) - order.indexOf(stageB);
       })
       .map(([stage, matches]) => ({
         title: stage,

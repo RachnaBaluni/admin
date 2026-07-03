@@ -779,7 +779,6 @@ export default function OrderOfPlay() {
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
     alert("SAVE FUNCTION CALLED");
-    console.log(JSON.stringify(grid[0], null, 2));
     console.log("SAVE CLICKED");
     console.log("DAYS =", days);
     console.log("DAYS TO SAVE", days);
