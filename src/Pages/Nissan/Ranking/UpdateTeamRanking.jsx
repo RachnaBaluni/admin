@@ -43,12 +43,8 @@ const SortableItem = ({ id, item }) => {
       <td data-label="Player 2">
         {item.partner2 ? item.partner2.name : "N/A"}
       </td>
-      <td
-        data-label="Drag"
-        {...(!item.drawCreated ? listeners : {})}
-        className={styles.dragHandle}
-      >
-        {item.drawCreated ? "🔒" : <FiMove />}
+      <td data-label="Drag" {...listeners} className={styles.dragHandle}>
+        <FiMove />
       </td>
     </tr>
   );
