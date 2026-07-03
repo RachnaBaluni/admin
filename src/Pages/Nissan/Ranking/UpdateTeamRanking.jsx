@@ -21,10 +21,7 @@ import { FiMove } from "react-icons/fi";
 
 const SortableItem = ({ id, item }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id,
-      disabled: item.drawCreated,
-    });
+    useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
