@@ -302,23 +302,23 @@ const ManageDraw = () => {
   const buildRounds = (draws) => {
     if (!draws || draws.length === 0) return [];
 
-    const getCategoryOrder = (stage) => {
-      if (stage.includes("Cat A")) return 0;
-      if (stage.includes("Cat B")) return 1;
-      if (stage.includes("Cat C")) return 2;
-      if (stage.includes("Cat D")) return 3;
-      return 99;
-    };
-
     const roundsData = draws.reduce((acc, draw) => {
       const { Stage } = draw;
-      if (!acc[Stage]) acc[Stage] = [];
+
+      if (!acc[Stage]) {
+        acc[Stage] = [];
+      }
+
       acc[Stage].push(draw);
       return acc;
     }, {});
 
     return Object.entries(roundsData)
-      .sort(([a], [b]) => getCategoryOrder(a) - getCategoryOrder(b))
+      .sort(([a], [b]) => {
+        const roundA = parseInt(a.replace("Round ", ""));
+        const roundB = parseInt(b.replace("Round ", ""));
+        return roundA - roundB;
+      })
       .map(([stage, matches]) => ({
         title: stage,
         matches: matches.sort((a, b) => a.Match_number - b.Match_number),
