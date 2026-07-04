@@ -387,6 +387,12 @@ export default function OrderOfPlay() {
           }
         });
 
+        Object.keys(roundWiseMatches).forEach((stage) => {
+          roundWiseMatches[stage].sort(
+            (a, b) => a.Match_number - b.Match_number,
+          );
+        });
+
         const matchesWithData = filteredMatches.map((m) => {
           //console.log("FULL MATCH OBJECT:", m);
           const stage = (m.Stage || "Round 1").trim();
