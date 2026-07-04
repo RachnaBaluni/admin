@@ -441,6 +441,19 @@ export default function OrderOfPlay() {
         // 🔥 3. match number
         return (a.matchNo || 0) - (b.matchNo || 0);
       });
+
+      console.table(
+        allMatches.map((m) => ({
+          Stage: m.Stage,
+          Match: m.matchNo,
+          Winner: m.Winner
+            ? `${m.Winner.partner1?.name}${
+                m.Winner.partner2 ? " & " + m.Winner.partner2?.name : ""
+              }`
+            : "No Winner",
+        })),
+      );
+
       console.log("FINAL MATCHES (AFTER SORT):", allMatches);
 
       console.log("ALL MATCHES BEFORE GRID:", allMatches);
