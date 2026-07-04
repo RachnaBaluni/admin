@@ -438,6 +438,16 @@ export default function OrderOfPlay() {
       console.log("FINAL MATCHES (AFTER SORT):", allMatches);
 
       console.log("ALL MATCHES BEFORE GRID:", allMatches);
+      console.table(
+        allMatches
+          .filter((m) => m.category.includes("Cat.B"))
+          .map((m) => ({
+            Stage: m.Stage,
+            Match_number: m.Match_number,
+            matchNo: m.matchNo,
+            category: m.category,
+          })),
+      );
       allMatchesRef.current = allMatches;
 
       /* ================= DAY LOGIC ================= */
