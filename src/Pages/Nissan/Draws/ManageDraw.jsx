@@ -230,15 +230,25 @@ const ManageDraw = () => {
             withCredentials: true,
           },
         );
-        setEvents(res.data.data);
-        if (res.data.data.length > 0) {
-          setSelectedEvent(res.data.data[0]._id);
+
+        // Sort events alphabetically
+        const sortedEvents = [...res.data.data].sort((a, b) =>
+          a.name.localeCompare(b.name, undefined, {
+            sensitivity: "base",
+          }),
+        );
+
+        setEvents(sortedEvents);
+
+        if (sortedEvents.length > 0) {
+          setSelectedEvent(sortedEvents[0]._id);
         }
       } catch (error) {
         toast.error("Error fetching events.");
         console.error("Error fetching events:", error);
       }
     };
+
     fetchEvents();
   }, []);
 
