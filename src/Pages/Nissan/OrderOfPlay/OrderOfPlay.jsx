@@ -322,6 +322,7 @@ export default function OrderOfPlay() {
   /* ================= FETCH DATA ================= */
 
   const fetchData = async () => {
+    console.log("fetchData called");
     if (!selectedDate) {
       toast.error("Select date first");
       return;
