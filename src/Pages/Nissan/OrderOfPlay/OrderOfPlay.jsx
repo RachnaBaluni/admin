@@ -269,6 +269,17 @@ export default function OrderOfPlay() {
     }
   }, [selectedDate]);
 
+  useEffect(() => {
+    if (!selectedDate || events.length === 0) return;
+
+    const interval = setInterval(() => {
+      console.log("Auto Refresh Order Of Play...");
+      fetchData();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [selectedDate, events, selectedCategories, selectedRounds]);
+
   /*
   useEffect(() => {
     if (events.length > 0 && selectedDate) {
