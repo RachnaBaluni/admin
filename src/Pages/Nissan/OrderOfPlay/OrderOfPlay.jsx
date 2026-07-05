@@ -781,8 +781,7 @@ export default function OrderOfPlay() {
       /* ================= RELAXED PASS ================= */
       if (!placed) {
         for (let i = maxRows - 1; i >= 0; i--) {
-          const time = getTimeLabel(i);
-
+          const time = `${getTimeLabel(i)}-${i}`;
           if (!timeSlotPlayers[time]) {
             timeSlotPlayers[time] = new Set();
           }
