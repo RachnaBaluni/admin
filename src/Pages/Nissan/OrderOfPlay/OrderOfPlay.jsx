@@ -42,7 +42,9 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   );
 
   const isCompleted = completedMatches.includes(match._id);
-
+  console.log("Winner:", match.Winner);
+  console.log("Team1:", match.Team1);
+  console.log("Team2:", match.Team2);
   console.log("Match ID:", match._id);
   console.log("Completed Matches:", completedMatches);
   console.log("Is Completed:", isCompleted);
