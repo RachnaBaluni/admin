@@ -1482,7 +1482,9 @@ if (sourceError !== true) {
                 }}
               >
                 <h2 style={{ margin: 0 }}>
-                  Day {dayIndex + 1} - {dayIndex === 0 ? todayDate : day.date}
+                  <h2 style={{ margin: 0 }}>
+                    Day {dayIndex + 1} - {dayIndex === 0 ? todayDate : day.date}
+                  </h2>
                 </h2>
 
                 {dayIndex > 0 && (
@@ -1541,7 +1543,7 @@ if (sourceError !== true) {
             </div>
           ))}
           {/* ADD NEXT DAY */}
-          {showFilters && (
+          {showFilters && dayIndex === days.length - 1 && (
             <div className={styles.addDayBox}>
               <h3 className={styles.addDayTitle}>📅 Add Next Day</h3>
 
