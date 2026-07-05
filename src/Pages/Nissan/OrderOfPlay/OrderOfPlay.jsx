@@ -1482,9 +1482,7 @@ if (sourceError !== true) {
                 }}
               >
                 <h2 style={{ margin: 0 }}>
-                  <h2 style={{ margin: 0 }}>
-                    Day {dayIndex + 1} - {dayIndex === 0 ? todayDate : day.date}
-                  </h2>
+                  Day {dayIndex + 1} - {dayIndex === 0 ? todayDate : day.date}
                 </h2>
 
                 {dayIndex > 0 && (
