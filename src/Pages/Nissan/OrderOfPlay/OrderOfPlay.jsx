@@ -732,6 +732,22 @@ export default function OrderOfPlay() {
               const lastCourt = playerLastCourt[p];
 
               if (Math.abs(lastRow - i) === 1) {
+                console.log(
+                  "PLAYER=",
+                  p,
+                  "LASTROW=",
+                  lastRow,
+                  "CURRENTROW=",
+                  i,
+                  "DIFF=",
+                  Math.abs(lastRow - i),
+                  "LASTCOURT=",
+                  lastCourt,
+                  "CURRENTCOURT=",
+                  j,
+                  "MATCH=",
+                  match.matchNo,
+                );
                 if (lastCourt !== j) {
                   consecutiveConflict = true;
                 }
