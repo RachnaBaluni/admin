@@ -491,3 +491,8 @@
 .deleteDayBtn:active {
   transform: scale(0.98);
 }
+.completedMatch {
+  background: #4caf50 !important;
+  border: 2px solid #2e7d32;
+  color: white;
+}

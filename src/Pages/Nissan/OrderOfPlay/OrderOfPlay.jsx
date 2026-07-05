@@ -37,6 +37,16 @@ const getPlayers = (m) => {
 /* ================= DRAG CARD ================= */
 
 function DraggableMatch({ match, time, allMatchesRef }) {
+  const completedMatches = JSON.parse(
+    sessionStorage.getItem("completedMatches") || "[]",
+  );
+
+  const isCompleted = completedMatches.includes(match._id);
+
+  console.log("Match ID:", match._id);
+  console.log("Completed Matches:", completedMatches);
+  console.log("Is Completed:", isCompleted);
+
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: match._id,
   });
@@ -131,9 +141,10 @@ function DraggableMatch({ match, time, allMatchesRef }) {
       {...listeners}
       {...attributes}
       style={style}
-      className={`${styles.matchCard} ${
-        match?.forcedPlacement ? styles.forcedMatch : ""
-      }`}
+      className={`${styles.matchCard}
+      ${match?.forcedPlacement ? styles.forcedMatch : ""}
+      ${isCompleted ? styles.completedMatch : ""}
+      `}
     >
       <div className={styles.category}>
         {match.category?.split("(")[0]?.trim()} - Match No: {match?.matchNo}

@@ -345,6 +345,22 @@ const ManageResultsTo = () => {
           updateData,
           { withCredentials: true },
         );
+
+        // Save newly completed match for Order Of Play highlight
+        if (updateData.Winner) {
+          const completedMatches = JSON.parse(
+            sessionStorage.getItem("completedMatches") || "[]",
+          );
+
+          if (!completedMatches.includes(matchId)) {
+            completedMatches.push(matchId);
+
+            sessionStorage.setItem(
+              "completedMatches",
+              JSON.stringify(completedMatches),
+            );
+          }
+        }
         toast.success("Match updated successfully!");
 
         if (shouldRefetch) {
