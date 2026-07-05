@@ -346,6 +346,8 @@ const ManageResultsTo = () => {
           { withCredentials: true },
         );
 
+        console.log("UPDATE API RESPONSE:", response.data.data);
+
         // Save newly completed match for Order Of Play highlight
         let completedMatches = JSON.parse(
           sessionStorage.getItem("completedMatches") || "[]",
