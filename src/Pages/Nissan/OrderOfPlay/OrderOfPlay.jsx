@@ -753,6 +753,17 @@ export default function OrderOfPlay() {
           }
 
           /* ✅ PLACE NORMAL MATCH */
+
+          console.log(
+            "NORMAL PLACED =>",
+            "Match:",
+            match.matchNo,
+            "Row:",
+            i,
+            "Court:",
+            j,
+          );
+
           temp[i][j].match = match;
 
           players.forEach((p) => {
@@ -776,6 +787,9 @@ export default function OrderOfPlay() {
         "HAD CONFLICT =",
         hadConflict,
       );
+      if (!placed) {
+        console.log("NORMAL FAILED =>", match.matchNo);
+      }
 
       /* ================= 🔥 FORCED PLACEMENT ================= */
       /* ================= RELAXED PASS ================= */
