@@ -360,6 +360,134 @@ export default function OrderOfPlay() {
     }
   };
 
+  const getMatches = async (categories, rounds) => {
+    const filteredEvents =
+      categories.length > 0
+        ? events.filter((ev) => categories.includes(ev.name))
+        : events;
+
+    const allResponses = await Promise.all(
+      filteredEvents.map((ev) =>
+        axios.get(
+          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
+          { withCredentials: true },
+        ),
+      ),
+    );
+
+    let allMatches = [];
+
+    const allowedRounds = rounds.map((r) => r.trim().toLowerCase());
+
+    // 🔥 MATCH BUILD
+    allResponses.forEach((res, index) => {
+      const ev = filteredEvents[index];
+      const matches = res.data.data || [];
+      //console.log("ALL MATCHES", matches);
+
+      const filteredMatches = matches.filter((m) => {
+        const isAllowedRound = allowedRounds.includes(
+          (m.Stage || "").trim().toLowerCase(),
+        );
+        if (m.Winner) return false;
+
+        return isAllowedRound;
+      });
+      const roundCounters = {};
+
+      const roundWiseMatches = {};
+
+      filteredMatches.forEach((m) => {
+        if (!roundWiseMatches[m.Stage]) {
+          roundWiseMatches[m.Stage] = [];
+        }
+
+        // Round 1 ke BYE matches skip
+        if (!(m.Stage === "Round 1" && (!m.Team1 || !m.Team2))) {
+          roundWiseMatches[m.Stage].push(m);
+        }
+      });
+
+      Object.keys(roundWiseMatches).forEach((stage) => {
+        roundWiseMatches[stage].sort((a, b) => a.Match_number - b.Match_number);
+      });
+
+      const matchesWithData = filteredMatches.map((m) => {
+        //console.log("FULL MATCH OBJECT:", m);
+        const stage = (m.Stage || "Round 1").trim();
+
+        if (!roundCounters[stage]) {
+          roundCounters[stage] = 1;
+        }
+
+        return {
+          ...m,
+          category: ev.name,
+          // matchNo: m.Match_number,
+          matchNo:
+            m.Stage === "Round 1" && (!m.Team1 || !m.Team2)
+              ? "-"
+              : roundWiseMatches[m.Stage].findIndex((x) => x._id === m._id) + 1,
+        };
+      });
+
+      allMatches.push(...matchesWithData);
+    });
+
+    //  SORT (important for proper scheduling)
+    const roundOrder = {
+      "Round 1": 1,
+      "Round 2": 2,
+      "Round 3": 3,
+      "Round 4": 4,
+      "Round 5": 5,
+      "Round 6": 6,
+    };
+
+    allMatches.sort((a, b) => {
+      // 🔥 1. forced matches ALWAYS last
+      const forceDiff =
+        (a.forcedPlacement === true) - (b.forcedPlacement === true);
+
+      if (forceDiff !== 0) return forceDiff;
+
+      // 🔥 2. round order
+      const rDiff = (roundOrder[a.Stage] || 99) - (roundOrder[b.Stage] || 99);
+
+      if (rDiff !== 0) return rDiff;
+
+      // 🔥 3. match number
+      return (a.matchNo || 0) - (b.matchNo || 0);
+    });
+
+    console.table(
+      allMatches.map((m) => ({
+        Stage: m.Stage,
+        Match: m.matchNo,
+        Winner: m.Winner
+          ? `${m.Winner.partner1?.name}${
+              m.Winner.partner2 ? " & " + m.Winner.partner2?.name : ""
+            }`
+          : "No Winner",
+      })),
+    );
+
+    console.log("FINAL MATCHES (AFTER SORT):", allMatches);
+
+    console.log("ALL MATCHES BEFORE GRID:", allMatches);
+    console.table(
+      allMatches
+        .filter((m) => m.category.includes("Cat.B"))
+        .map((m) => ({
+          Stage: m.Stage,
+          Match_number: m.Match_number,
+          matchNo: m.matchNo,
+          category: m.category,
+        })),
+    );
+    return allMatches;
+  };
+
   /* ================= FETCH DATA ================= */
 
   const fetchData = async () => {
@@ -370,135 +498,7 @@ export default function OrderOfPlay() {
     }
 
     try {
-      const filteredEvents =
-        selectedCategories.length > 0
-          ? events.filter((ev) => selectedCategories.includes(ev.name))
-          : events;
-
-      const allResponses = await Promise.all(
-        filteredEvents.map((ev) =>
-          axios.get(
-            `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/${ev._id}`,
-            { withCredentials: true },
-          ),
-        ),
-      );
-
-      let allMatches = [];
-
-      const allowedRounds = selectedRounds.map((r) => r.trim().toLowerCase());
-
-      // 🔥 MATCH BUILD
-      allResponses.forEach((res, index) => {
-        const ev = filteredEvents[index];
-        const matches = res.data.data || [];
-        //console.log("ALL MATCHES", matches);
-
-        const filteredMatches = matches.filter((m) => {
-          const isAllowedRound = allowedRounds.includes(
-            (m.Stage || "").trim().toLowerCase(),
-          );
-          if (m.Winner) return false;
-
-          return isAllowedRound;
-        });
-        const roundCounters = {};
-
-        const roundWiseMatches = {};
-
-        filteredMatches.forEach((m) => {
-          if (!roundWiseMatches[m.Stage]) {
-            roundWiseMatches[m.Stage] = [];
-          }
-
-          // Round 1 ke BYE matches skip
-          if (!(m.Stage === "Round 1" && (!m.Team1 || !m.Team2))) {
-            roundWiseMatches[m.Stage].push(m);
-          }
-        });
-
-        Object.keys(roundWiseMatches).forEach((stage) => {
-          roundWiseMatches[stage].sort(
-            (a, b) => a.Match_number - b.Match_number,
-          );
-        });
-
-        const matchesWithData = filteredMatches.map((m) => {
-          //console.log("FULL MATCH OBJECT:", m);
-          const stage = (m.Stage || "Round 1").trim();
-
-          if (!roundCounters[stage]) {
-            roundCounters[stage] = 1;
-          }
-
-          return {
-            ...m,
-            category: ev.name,
-            // matchNo: m.Match_number,
-            matchNo:
-              m.Stage === "Round 1" && (!m.Team1 || !m.Team2)
-                ? "-"
-                : roundWiseMatches[m.Stage].findIndex((x) => x._id === m._id) +
-                  1,
-          };
-        });
-
-        allMatches.push(...matchesWithData);
-      });
-
-      // 🔥 SORT (important for proper scheduling)
-      const roundOrder = {
-        "Round 1": 1,
-        "Round 2": 2,
-        "Round 3": 3,
-        "Round 4": 4,
-        "Round 5": 5,
-        "Round 6": 6,
-      };
-
-      allMatches.sort((a, b) => {
-        // 🔥 1. forced matches ALWAYS last
-        const forceDiff =
-          (a.forcedPlacement === true) - (b.forcedPlacement === true);
-
-        if (forceDiff !== 0) return forceDiff;
-
-        // 🔥 2. round order
-        const rDiff = (roundOrder[a.Stage] || 99) - (roundOrder[b.Stage] || 99);
-
-        if (rDiff !== 0) return rDiff;
-
-        // 🔥 3. match number
-        return (a.matchNo || 0) - (b.matchNo || 0);
-      });
-
-      console.table(
-        allMatches.map((m) => ({
-          Stage: m.Stage,
-          Match: m.matchNo,
-          Winner: m.Winner
-            ? `${m.Winner.partner1?.name}${
-                m.Winner.partner2 ? " & " + m.Winner.partner2?.name : ""
-              }`
-            : "No Winner",
-        })),
-      );
-
-      console.log("FINAL MATCHES (AFTER SORT):", allMatches);
-
-      console.log("ALL MATCHES BEFORE GRID:", allMatches);
-      console.table(
-        allMatches
-          .filter((m) => m.category.includes("Cat.B"))
-          .map((m) => ({
-            Stage: m.Stage,
-            Match_number: m.Match_number,
-            matchNo: m.matchNo,
-            category: m.category,
-          })),
-      );
-      allMatchesRef.current = allMatches;
-
+      const allMatches = await getMatches(selectedCategories, selectedRounds);
       /* ================= DAY LOGIC ================= */
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
 
@@ -521,58 +521,81 @@ export default function OrderOfPlay() {
   };
 
   /* ================= ADD Next DAY ================= */
-  const addNextDay = () => {
+  const addNextDay = async () => {
+    // Date validation
     if (!newDayDate) {
       toast.error("Select date");
       return;
     }
 
-    //  already nothing left
-    if (notPlacedMatches.length === 0) {
-      toast.success("All matches already scheduled ✅");
-      return;
+    try {
+      // Day 2 ke liye selected category + rounds ke matches lao
+      const allNewMatches = await getMatches(
+        newSelectedCategories,
+        newSelectedRounds,
+      );
+      // Already scheduled matches ki ids
+      const scheduledIds = new Set();
+
+      days.forEach((day) => {
+        day.grid.forEach((row) => {
+          row.forEach((cell) => {
+            if (cell?.match?._id) {
+              scheduledIds.add(cell.match._id);
+            }
+          });
+        });
+      });
+
+      // Sirf unscheduled matches rakho
+      const availableMatches = allNewMatches.filter(
+        (m) => !scheduledIds.has(m._id),
+      );
+
+      // Existing remaining matches + naye selected matches
+      const uniqueMap = new Map();
+
+      [...notPlacedMatches, ...availableMatches].forEach((m) => {
+        uniqueMap.set(m._id, m);
+      });
+
+      const newMatches = Array.from(uniqueMap.values());
+
+      // New day ka grid banao
+      const newDay = buildGrid(
+        newMatches,
+        newCourtCount,
+        newMatchesPerCourt,
+        days,
+      );
+
+      const updatedDays = [
+        ...days,
+        {
+          date: newDayDate,
+          courtCount: newCourtCount,
+          matchesPerCourt: newMatchesPerCourt,
+          grid: newDay.grid,
+          remaining: newDay.remainingMatches,
+        },
+      ];
+
+      // Validation
+      if (!validateAllDays(updatedDays)) {
+        toast.error("❌ Same player same time across days");
+        return;
+      }
+
+      // Update state
+      setDays(updatedDays);
+      setNotPlacedMatches(newDay.remainingMatches);
+      setNewDayDate("");
+
+      toast.success("Day added successfully ✅");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error adding next day");
     }
-
-    // 🔥 2. merge + remove duplicates safely
-    const uniqueMap = new Map();
-
-    [...notPlacedMatches].forEach((m) => {
-      uniqueMap.set(m._id, m);
-    });
-
-    const newMatches = Array.from(uniqueMap.values());
-
-    // 🔥 3. build grid for new day
-    const newDay = buildGrid(
-      newMatches,
-      newCourtCount,
-      newMatchesPerCourt,
-      days,
-    );
-
-    const updatedDays = [
-      ...days,
-      {
-        date: newDayDate,
-        courtCount: newCourtCount,
-        matchesPerCourt: newMatchesPerCourt,
-        grid: newDay.grid,
-        remaining: newDay.remainingMatches,
-      },
-    ];
-
-    // 🔥 4. validation
-    if (!validateAllDays(updatedDays)) {
-      toast.error("❌ Same player same time across days");
-      return;
-    }
-
-    // 🔥 5. APPLY STATE
-    setDays(updatedDays);
-    setNotPlacedMatches(newDay.remainingMatches);
-    setNewDayDate("");
-
-    toast.success("Day added successfully ✅");
   };
   /* ================= REMOVE NEXT DAY ================= */
 
