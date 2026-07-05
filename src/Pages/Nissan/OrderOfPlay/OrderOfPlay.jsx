@@ -248,7 +248,8 @@ export default function OrderOfPlay() {
     3: 4,
     4: 4,
   });
-
+  const [newSelectedCategories, setNewSelectedCategories] = useState([]);
+  const [newSelectedRounds, setNewSelectedRounds] = useState([]);
   const [hideGrid, setHideGrid] = useState(false);
 
   const [grid, setGrid] = useState([]);
@@ -1569,6 +1570,35 @@ if (sourceError !== true) {
                         className={styles.input}
                       />
                     </div>
+                  </div>
+
+                  <div style={{ marginTop: "20px" }}>
+                    <label>Categories</label>
+
+                    {events.map((ev) => (
+                      <label key={ev._id} className={styles.checkboxLabel}>
+                        <input
+                          type="checkbox"
+                          checked={newSelectedCategories.includes(ev.name)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setNewSelectedCategories([
+                                ...newSelectedCategories,
+                                ev.name,
+                              ]);
+                            } else {
+                              setNewSelectedCategories(
+                                newSelectedCategories.filter(
+                                  (c) => c !== ev.name,
+                                ),
+                              );
+                            }
+                          }}
+                        />
+
+                        {ev.name}
+                      </label>
+                    ))}
                   </div>
                   <div style={{ marginTop: "20px" }}>
                     <label>Matches Per Court</label>
