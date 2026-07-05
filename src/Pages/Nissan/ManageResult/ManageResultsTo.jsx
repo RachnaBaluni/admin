@@ -347,20 +347,24 @@ const ManageResultsTo = () => {
         );
 
         // Save newly completed match for Order Of Play highlight
-        if (updateData.Winner) {
-          const completedMatches = JSON.parse(
-            sessionStorage.getItem("completedMatches") || "[]",
-          );
+        let completedMatches = JSON.parse(
+          sessionStorage.getItem("completedMatches") || "[]",
+        );
 
+        if (updateData.Winner) {
+          // Winner selected → add match
           if (!completedMatches.includes(matchId)) {
             completedMatches.push(matchId);
-
-            sessionStorage.setItem(
-              "completedMatches",
-              JSON.stringify(completedMatches),
-            );
           }
+        } else {
+          // Winner removed → remove match
+          completedMatches = completedMatches.filter((id) => id !== matchId);
         }
+
+        sessionStorage.setItem(
+          "completedMatches",
+          JSON.stringify(completedMatches),
+        );
         toast.success("Match updated successfully!");
 
         if (shouldRefetch) {
