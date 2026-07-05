@@ -42,9 +42,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   );
 
   const isCompleted = completedMatches.includes(match._id);
-  console.log("Winner:", match.Winner);
-  console.log("Team1:", match.Team1);
-  console.log("Team2:", match.Team2);
+
   console.log("Match ID:", match._id);
   console.log("Completed Matches:", completedMatches);
   console.log("Is Completed:", isCompleted);
@@ -1467,63 +1465,6 @@ if (sourceError !== true) {
           </div>
         </div>
       )}
-      {/* ADD NEXT DAY */}
-      {showFilters && (
-        <div className={styles.addDayBox}>
-          <h3 className={styles.addDayTitle}>📅 Add Next Day</h3>
-
-          <div className={styles.addDayRow}>
-            <div>
-              <label>Next Day Date</label>
-
-              <input
-                type="date"
-                value={newDayDate}
-                onChange={(e) => setNewDayDate(e.target.value)}
-                className={styles.input}
-              />
-            </div>
-
-            <div>
-              <label>Number Of Courts</label>
-
-              <input
-                type="number"
-                value={newCourtCount}
-                onChange={(e) => setNewCourtCount(Number(e.target.value))}
-                className={styles.input}
-              />
-            </div>
-          </div>
-          <div style={{ marginTop: "20px" }}>
-            <label>Matches Per Court</label>
-            <div className={styles.courtInputs}>
-              {Array.from({ length: newCourtCount }).map((_, i) => (
-                <div key={i}>
-                  <p>Court {i + 1}</p>
-
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={newMatchesPerCourt[i + 1] || 4}
-                    onChange={(e) =>
-                      setNewMatchesPerCourt({
-                        ...newMatchesPerCourt,
-                        [i + 1]: Number(e.target.value),
-                      })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          <button onClick={addNextDay} className={styles.addBtn}>
-            + Add Day
-          </button>
-        </div>
-      )}
 
       {/* GRID */}
 
@@ -1598,6 +1539,66 @@ if (sourceError !== true) {
                   </div>
                 ))}
               </DndContext>
+
+              {/* ADD NEXT DAY */}
+              {showFilters && dayIndex === days.length - 1 && (
+                <div className={styles.addDayBox}>
+                  <h3 className={styles.addDayTitle}>📅 Add Next Day</h3>
+
+                  <div className={styles.addDayRow}>
+                    <div>
+                      <label>Next Day Date</label>
+
+                      <input
+                        type="date"
+                        value={newDayDate}
+                        onChange={(e) => setNewDayDate(e.target.value)}
+                        className={styles.input}
+                      />
+                    </div>
+
+                    <div>
+                      <label>Number Of Courts</label>
+
+                      <input
+                        type="number"
+                        value={newCourtCount}
+                        onChange={(e) =>
+                          setNewCourtCount(Number(e.target.value))
+                        }
+                        className={styles.input}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ marginTop: "20px" }}>
+                    <label>Matches Per Court</label>
+                    <div className={styles.courtInputs}>
+                      {Array.from({ length: newCourtCount }).map((_, i) => (
+                        <div key={i}>
+                          <p>Court {i + 1}</p>
+
+                          <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            value={newMatchesPerCourt[i + 1] || 4}
+                            onChange={(e) =>
+                              setNewMatchesPerCourt({
+                                ...newMatchesPerCourt,
+                                [i + 1]: Number(e.target.value),
+                              })
+                            }
+                            className={styles.input}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <button onClick={addNextDay} className={styles.addBtn}>
+                    + Add Day
+                  </button>
+                </div>
+              )}
             </div>
           ))}
 
