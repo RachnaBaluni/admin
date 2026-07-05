@@ -279,7 +279,7 @@ export default function OrderOfPlay() {
       sessionStorage.setItem("selectedDate", selectedDate);
     }
   }, [selectedDate]);
-
+  /*
   useEffect(() => {
     if (!selectedDate || events.length === 0) return;
 
