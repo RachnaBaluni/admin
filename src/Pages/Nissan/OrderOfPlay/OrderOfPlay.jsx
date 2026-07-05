@@ -534,6 +534,7 @@ export default function OrderOfPlay() {
         newSelectedCategories,
         newSelectedRounds,
       );
+      console.log(allNewMatches[0]);
       // Already scheduled matches ki ids
       const scheduledIds = new Set();
 
@@ -552,10 +553,14 @@ export default function OrderOfPlay() {
         (m) => !scheduledIds.has(m._id),
       );
 
-      // Existing remaining matches + naye selected matches
+      // Sirf selected categories ke remaining matches
+      const filteredRemaining = notPlacedMatches.filter((m) =>
+        newSelectedCategories.includes(m.category),
+      );
+
       const uniqueMap = new Map();
 
-      [...notPlacedMatches, ...availableMatches].forEach((m) => {
+      [...filteredRemaining, ...availableMatches].forEach((m) => {
         uniqueMap.set(m._id, m);
       });
 
