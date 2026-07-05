@@ -1601,6 +1601,37 @@ if (sourceError !== true) {
                     ))}
                   </div>
                   <div style={{ marginTop: "20px" }}>
+                    <label>Rounds</label>
+
+                    <div className={styles.roundButtons}>
+                      {roundsList.map((round) => (
+                        <button
+                          key={round}
+                          type="button"
+                          onClick={() => {
+                            if (newSelectedRounds.includes(round)) {
+                              setNewSelectedRounds(
+                                newSelectedRounds.filter((r) => r !== round),
+                              );
+                            } else {
+                              setNewSelectedRounds([
+                                ...newSelectedRounds,
+                                round,
+                              ]);
+                            }
+                          }}
+                          className={
+                            newSelectedRounds.includes(round)
+                              ? styles.activeRoundBtn
+                              : styles.roundBtn
+                          }
+                        >
+                          {round}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ marginTop: "20px" }}>
                     <label>Matches Per Court</label>
                     <div className={styles.courtInputs}>
                       {Array.from({ length: newCourtCount }).map((_, i) => (
