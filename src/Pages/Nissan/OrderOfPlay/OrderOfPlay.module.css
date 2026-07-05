@@ -496,3 +496,7 @@
   border: 2px solid #a3e8a7;
   color: white;
 }
+.winnerTeam {
+  font-weight: 800;
+  color: #0f5132;
+}
