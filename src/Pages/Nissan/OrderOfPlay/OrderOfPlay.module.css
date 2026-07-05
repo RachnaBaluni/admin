@@ -492,11 +492,11 @@
   transform: scale(0.98);
 }
 .completedMatch {
-  background: #16a34a !important;
-  border: 2px solid #a3e8a7;
-  color: white;
+  background: #e6ffe6 !important;
+  border: 1px solid #b7ddb7;
+  color: #000;
 }
 .winnerTeam {
-  font-weight: 800;
-  color: #0f5132;
+  font-weight: 900;
+  color: #14532d;
 }
