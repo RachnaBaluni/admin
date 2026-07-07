@@ -467,7 +467,10 @@ export default function OrderOfPlay() {
       // 🔥 3. match number
       return (a.matchNo || 0) - (b.matchNo || 0);
     });
-
+    console.log(
+      "Completed Matches:",
+      allMatches.filter((m) => m.Status === "Completed"),
+    );
     console.table(
       allMatches.map((m) => ({
         Stage: m.Stage,
