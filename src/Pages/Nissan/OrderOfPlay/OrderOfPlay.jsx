@@ -469,7 +469,7 @@ export default function OrderOfPlay() {
     });
     console.log(
       "Completed Matches:",
-      allMatches.filter((m) => m.Status === "Completed"),
+      allMatches.filter((m) => m.Status === "Completed")[0],
     );
     console.table(
       allMatches.map((m) => ({
