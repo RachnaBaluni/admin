@@ -161,8 +161,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
       <div
         className={`${styles.team} ${
-          match.Winner &&
-          (match.Winner._id || match.Winner) === match.Team1?._id
+          String(match.Winner?._id || match.Winner) === String(match.Team1?._id)
             ? styles.winnerTeam
             : ""
         }`}
@@ -174,8 +173,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
       <div
         className={`${styles.team} ${
-          match.Winner &&
-          (match.Winner._id || match.Winner) === match.Team2?._id
+          String(match.Winner?._id || match.Winner) === String(match.Team2?._id)
             ? styles.winnerTeam
             : ""
         }`}
