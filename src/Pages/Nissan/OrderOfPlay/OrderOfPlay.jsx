@@ -65,7 +65,10 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   const getTeamName = (team, side) => {
     //console.log("MATCH DATA:", match);
     //console.log("WINNER CHECK:", match.Winner);
-
+    console.log("Winner:", match.Winner);
+    console.log("Winner ID:", match.Winner?._id);
+    console.log("Team1 ID:", match.Team1?._id);
+    console.log("Team2 ID:", match.Team2?._id);
     if (team?.partner1?.name) {
       return `${team.partner1?.name || ""}${
         team.partner2 ? " & " + team.partner2?.name : ""
