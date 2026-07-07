@@ -110,7 +110,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
       return null;
     };
-    console.log("MATCH =", match);
+    console.log(JSON.stringify(match, null, 2));
     console.log("WINNER =", match.Winner);
     console.log("TEAM1 =", match.Team1);
     console.log("TEAM2 =", match.Team2);
