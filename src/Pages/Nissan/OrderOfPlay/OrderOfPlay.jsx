@@ -49,13 +49,18 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: match._id,
+    disabled: isCompleted,
   });
 
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined;
+  const style = {
+    ...(transform
+      ? {
+          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        }
+      : {}),
+    cursor: isCompleted ? "not-allowed" : "grab",
+    opacity: isCompleted ? 0.8 : 1,
+  };
 
   const getTeamName = (team, side) => {
     //console.log("MATCH DATA:", match);
@@ -1160,6 +1165,14 @@ if (
     const newDays = JSON.parse(JSON.stringify(days));
 
     const dragged = newDays[sourceDay].grid[activePos.i][activePos.j];
+    const completedMatches = JSON.parse(
+      sessionStorage.getItem("completedMatches") || "[]",
+    );
+
+    if (completedMatches.includes(dragged?.match?._id)) {
+      toast.error("Completed matches cannot be moved.");
+      return;
+    }
 
     const target = newDays[targetDay].grid[overPos.i][overPos.j];
 
