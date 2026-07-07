@@ -1170,6 +1170,10 @@ if (
     const completedMatches = JSON.parse(
       sessionStorage.getItem("completedMatches") || "[]",
     );
+    console.log("completedMatches =", completedMatches);
+    completedMatches.forEach((item, i) => {
+      console.log(i, item, typeof item);
+    });
 
     if (completedMatches.includes(dragged?.match?._id)) {
       toast.error("Completed matches cannot be moved.");
