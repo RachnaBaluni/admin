@@ -113,10 +113,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
       return null;
     };
-    console.log(JSON.stringify(match, null, 2));
-    console.log("WINNER =", match.Winner);
-    console.log("TEAM1 =", match.Team1);
-    console.log("TEAM2 =", match.Team2);
+    // console.log(JSON.stringify(match, null, 2));
 
     const leftPrevMatch = allMatchesRef.current.find(
       (m) =>
