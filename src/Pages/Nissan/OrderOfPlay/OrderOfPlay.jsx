@@ -113,7 +113,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
       return null;
     };
-    // console.log(JSON.stringify(match, null, 2));
+    console.log(JSON.stringify(match, null, 2));
 
     const leftPrevMatch = allMatchesRef.current.find(
       (m) =>
