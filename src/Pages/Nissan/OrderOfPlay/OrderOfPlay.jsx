@@ -399,12 +399,8 @@ export default function OrderOfPlay() {
         const isAllowedRound = allowedRounds.includes(
           (m.Stage || "").trim().toLowerCase(),
         );
-        const orderPlayGenerated =
-          sessionStorage.getItem("orderPlayGenerated") === "true";
+        if (m.Winner) return false;
 
-        if (m.Winner && !orderPlayGenerated) {
-          return false;
-        }
         return isAllowedRound;
       });
       const roundCounters = {};
@@ -518,7 +514,6 @@ export default function OrderOfPlay() {
       const allMatches = await getMatches(selectedCategories, selectedRounds);
       /* ================= DAY LOGIC ================= */
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
-      sessionStorage.setItem("orderPlayGenerated", "true");
       setDays([
         {
           date: selectedDate,
