@@ -397,7 +397,7 @@ export default function OrderOfPlay() {
         const isAllowedRound = allowedRounds.includes(
           (m.Stage || "").trim().toLowerCase(),
         );
-        if (m.Winner) return false;
+        //  if (m.Winner) return false;
 
         return isAllowedRound;
       });
