@@ -512,6 +512,8 @@ export default function OrderOfPlay() {
 
     try {
       const allMatches = await getMatches(selectedCategories, selectedRounds);
+      allMatchesRef.current = allMatches;
+      console.log("ALL MATCHES REF", allMatchesRef.current);
       /* ================= DAY LOGIC ================= */
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
       setDays([
