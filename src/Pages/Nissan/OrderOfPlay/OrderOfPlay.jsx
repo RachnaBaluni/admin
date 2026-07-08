@@ -48,6 +48,9 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   console.log("Match ID:", match._id);
   console.log("Completed Matches:", completedMatches);
   console.log("Is Completed:", isCompleted);
+  console.log("WINNER", match.Winner);
+  console.log("TEAM1", match.Team1);
+  console.log("TEAM2", match.Team2);
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: match._id,
@@ -165,25 +168,13 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
       <div className={styles.round}>{match.Stage}</div>
 
-      <div
-        className={`${styles.team} ${
-          String(match.Winner) === String(match.Team1?._id)
-            ? styles.winnerTeam
-            : ""
-        }`}
-      >
+      <div className={`${styles.team} ${styles.winnerTeam}`}>
         {getTeamName(match.Team1, 1)}
       </div>
 
       <div className={styles.vs}>VS</div>
 
-      <div
-        className={`${styles.team} ${
-          String(match.Winner) === String(match.Team2?._id)
-            ? styles.winnerTeam
-            : ""
-        }`}
-      >
+      <div className={`${styles.team} ${styles.winnerTeam}`}>
         {getTeamName(match.Team2, 2)}
       </div>
     </div>
