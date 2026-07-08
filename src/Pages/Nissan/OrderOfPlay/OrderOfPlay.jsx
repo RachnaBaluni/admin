@@ -503,6 +503,12 @@ export default function OrderOfPlay() {
 
     try {
       const allMatches = await getMatches(selectedCategories, selectedRounds);
+
+      console.log(
+        "GET MATCHES WINNER CHECK",
+        allMatches.filter((m) => m.Status === "Completed"),
+      );
+
       allMatchesRef.current = allMatches;
       console.log("ALL MATCHES REF", allMatchesRef.current);
       /* ================= DAY LOGIC ================= */
