@@ -497,5 +497,6 @@
   color: #000;
 }
 .winnerTeam {
-  font-weight: bold;
+  color: green;
+  font-weight: 900 !important;
 }
