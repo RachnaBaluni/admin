@@ -399,6 +399,14 @@ export default function OrderOfPlay() {
         "Completed Matches",
         matches.filter((m) => m.Status === "Completed"),
       );
+      console.table(
+        allMatches.map((m) => ({
+          Match: m.matchNo,
+          Status: m.Status,
+          Winner: m.Winner,
+          WinnerId: m.Winner?._id,
+        })),
+      );
       //console.log("ALL MATCHES", matches);
       console.log("API MATCHES", JSON.stringify(matches, null, 2));
 
