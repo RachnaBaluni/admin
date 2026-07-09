@@ -37,7 +37,6 @@ const getPlayers = (m) => {
 /* ================= DRAG CARD ================= */
 
 function DraggableMatch({ match, time, allMatchesRef }) {
-  console.log("MATCH =", match);
   const completedMatches = JSON.parse(
     sessionStorage.getItem("completedMatches") || "[]",
   );
@@ -177,7 +176,14 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
       <div className={styles.round}>{match.Stage}</div>
 
-      <div className={`${styles.team} ${styles.winnerTeam}`}>
+      <div
+        className={`${styles.team} ${
+          String(match.Winner) === String(match.Team1?._id)
+            ? styles.winnerTeam
+            : ""
+        }`}
+      >
+        {" "}
         {getTeamName(match.Team1, 1)}
       </div>
 
