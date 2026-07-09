@@ -37,6 +37,7 @@ const getPlayers = (m) => {
 /* ================= DRAG CARD ================= */
 
 function DraggableMatch({ match, time, allMatchesRef }) {
+  console.log("MATCH =", match);
   const completedMatches = JSON.parse(
     sessionStorage.getItem("completedMatches") || "[]",
   );
