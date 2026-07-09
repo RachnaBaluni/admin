@@ -395,6 +395,10 @@ export default function OrderOfPlay() {
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
+      console.log(
+        "Completed Matches",
+        matches.filter((m) => m.Status === "Completed"),
+      );
       //console.log("ALL MATCHES", matches);
       console.log("API MATCHES", JSON.stringify(matches, null, 2));
 
