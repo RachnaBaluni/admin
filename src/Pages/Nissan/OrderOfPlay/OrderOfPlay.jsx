@@ -154,6 +154,8 @@ function DraggableMatch({ match, time, allMatchesRef }) {
     "Comparison =",
     String(match.Winner?._id) === String(match.Team1?._id),
   );
+  console.log("styles.team =", styles.team);
+  console.log("styles.winnerTeam =", styles.winnerTeam);
   return (
     <div
       ref={setNodeRef}
