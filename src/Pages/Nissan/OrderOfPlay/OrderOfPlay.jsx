@@ -148,7 +148,12 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
   //console.log(  "CARD",match.matchNo,  match.forcedPlacement);
   //console.log("MATCH OBJECT", match);
-
+  console.log("Winner._id =", match.Winner?._id);
+  console.log("Team1._id =", match.Team1?._id);
+  console.log(
+    "Comparison =",
+    String(match.Winner?._id) === String(match.Team1?._id),
+  );
   return (
     <div
       ref={setNodeRef}
