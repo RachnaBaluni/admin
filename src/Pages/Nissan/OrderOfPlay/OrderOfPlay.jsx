@@ -411,7 +411,7 @@ export default function OrderOfPlay() {
       );
       //console.log("ALL MATCHES", matches);
       console.log("API MATCHES", JSON.stringify(matches, null, 2));
-
+      console.log(matches.filter((m) => m.Status === "Completed"));
       const filteredMatches = matches.filter((m) => {
         const isAllowedRound = allowedRounds.includes(
           (m.Stage || "").trim().toLowerCase(),
