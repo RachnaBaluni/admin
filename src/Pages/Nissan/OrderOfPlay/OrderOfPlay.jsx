@@ -156,6 +156,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   );
   console.log("styles.team =", styles.team);
   console.log("styles.winnerTeam =", styles.winnerTeam);
+  console.log("Winner object =", match.Winner);
   return (
     <div
       ref={setNodeRef}
