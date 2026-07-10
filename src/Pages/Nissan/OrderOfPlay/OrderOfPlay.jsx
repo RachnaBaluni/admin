@@ -477,10 +477,7 @@ export default function OrderOfPlay() {
           ...m,
           category: ev.name,
           // matchNo: m.Match_number,
-          matchNo:
-            m.Stage === "Round 1" && (!m.Team1 || !m.Team2)
-              ? "-"
-              : roundWiseMatches[m.Stage].findIndex((x) => x._id === m._id) + 1,
+          matchNo: m.Match_number,
         };
       });
 
