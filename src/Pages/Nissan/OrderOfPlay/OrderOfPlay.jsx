@@ -52,7 +52,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   console.log("WINNER", match.Winner);
   console.log("TEAM1", match.Team1);
   console.log("TEAM2", match.Team2);
-
+  console.log("All Matches:", matches);
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: match._id,
     disabled: isCompleted,
@@ -477,7 +477,10 @@ export default function OrderOfPlay() {
           ...m,
           category: ev.name,
           // matchNo: m.Match_number,
-          matchNo: m.Match_number,
+          matchNo:
+            m.Stage === "Round 1" && (!m.Team1 || !m.Team2)
+              ? "-"
+              : roundWiseMatches[m.Stage].findIndex((x) => x._id === m._id) + 1,
         };
       });
 
@@ -957,16 +960,6 @@ export default function OrderOfPlay() {
     temp.forEach((row, idx) => {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
     });
-
-    console.log(
-      temp.map((row, i) => ({
-        row: i,
-        court1: row[0]?.match?.matchNo || null,
-        court2: row[1]?.match?.matchNo || null,
-        court3: row[2]?.match?.matchNo || null,
-        court4: row[3]?.match?.matchNo || null,
-      })),
-    );
 
     return {
       grid: temp,
