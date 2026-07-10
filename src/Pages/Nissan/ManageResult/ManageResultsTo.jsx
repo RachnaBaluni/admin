@@ -311,12 +311,23 @@ const ManageResultsTo = () => {
         console.log("Events:", res.data.data);
 
         // Sort events alphabetically by name
-        const sortedEvents = [...res.data.data].sort((a, b) =>
-          a.name.localeCompare(b.name, undefined, {
-            sensitivity: "base",
-          }),
-        );
+        const categoryOrder = {
+          "Cat.A": 1,
+          "Cat.B": 2,
+          "Cat.C": 3,
+          "Cat.D": 4,
+        };
 
+        const sortedEvents = [...res.data.data].sort((a, b) => {
+          const aKey = Object.keys(categoryOrder).find((k) =>
+            a.name.startsWith(k),
+          );
+          const bKey = Object.keys(categoryOrder).find((k) =>
+            b.name.startsWith(k),
+          );
+
+          return (categoryOrder[aKey] || 999) - (categoryOrder[bKey] || 999);
+        });
         setEvents(sortedEvents);
 
         if (sortedEvents.length > 0) {
