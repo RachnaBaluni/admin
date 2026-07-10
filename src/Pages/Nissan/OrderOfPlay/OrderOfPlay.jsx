@@ -52,7 +52,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   console.log("WINNER", match.Winner);
   console.log("TEAM1", match.Team1);
   console.log("TEAM2", match.Team2);
-
+  console.log("All Matches:", matches);
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: match._id,
     disabled: isCompleted,
@@ -960,19 +960,6 @@ export default function OrderOfPlay() {
     temp.forEach((row, idx) => {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
     });
-    for (let c = 0; c < courtCount; c++) {
-      let writeRow = 0;
-
-      for (let r = 0; r < maxRows; r++) {
-        if (temp[r][c].match) {
-          if (writeRow !== r) {
-            temp[writeRow][c].match = temp[r][c].match;
-            temp[r][c].match = null;
-          }
-          writeRow++;
-        }
-      }
-    }
 
     return {
       grid: temp,
