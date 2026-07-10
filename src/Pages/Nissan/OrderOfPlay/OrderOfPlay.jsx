@@ -52,7 +52,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   console.log("WINNER", match.Winner);
   console.log("TEAM1", match.Team1);
   console.log("TEAM2", match.Team2);
-  console.log("All Matches:", matches);
+
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: match._id,
     disabled: isCompleted,
