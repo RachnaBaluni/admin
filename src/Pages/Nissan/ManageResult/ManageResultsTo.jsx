@@ -338,6 +338,8 @@ const ManageResultsTo = () => {
   const handleUpdateMatch = useCallback(
     async (matchId, updateData, shouldRefetch = true) => {
       // Added shouldRefetch
+      console.log("HANDLE UPDATE CALLED", matchId, updateData);
+
       try {
         const response = await api.put(
           // Capture response to get updated data
