@@ -448,7 +448,7 @@ const ManageResultsTo = () => {
             }`}
             onClick={() => setSelectedEvent(event._id)}
           >
-            {event.name}
+            {event.name.split("(")[0].replace(".", " ").trim()}
           </button>
         ))}
       </div>
