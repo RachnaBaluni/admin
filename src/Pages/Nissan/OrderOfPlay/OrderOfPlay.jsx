@@ -367,7 +367,25 @@ export default function OrderOfPlay() {
 
       const allEvents = res.data.data;
 
-      setEvents(allEvents);
+      const categoryOrder = {
+        "Cat.A": 1,
+        "Cat.B": 2,
+        "Cat.C": 3,
+        "Cat.D": 4,
+      };
+
+      const sortedEvents = [...allEvents].sort((a, b) => {
+        const aKey = Object.keys(categoryOrder).find((k) =>
+          a.name.startsWith(k),
+        );
+        const bKey = Object.keys(categoryOrder).find((k) =>
+          b.name.startsWith(k),
+        );
+
+        return (categoryOrder[aKey] || 999) - (categoryOrder[bKey] || 999);
+      });
+
+      setEvents(sortedEvents);
       const savedDate = localStorage.getItem("selectedDate");
 
       if (savedDate) {
@@ -375,7 +393,7 @@ export default function OrderOfPlay() {
       } else {
         setSelectedDate(new Date().toISOString().split("T")[0]);
       }
-      setSelectedEventId(allEvents[0]?._id);
+      setSelectedEventId(sortedEvents[0]?._id);
     } catch (err) {
       console.error(err);
     }
