@@ -958,6 +958,16 @@ export default function OrderOfPlay() {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
     });
 
+    console.log(
+      temp.map((row, i) => ({
+        row: i,
+        court1: row[0]?.match?.matchNo || null,
+        court2: row[1]?.match?.matchNo || null,
+        court3: row[2]?.match?.matchNo || null,
+        court4: row[3]?.match?.matchNo || null,
+      })),
+    );
+
     return {
       grid: temp,
       remainingMatches: notPlacedMatches,
