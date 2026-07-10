@@ -633,7 +633,7 @@ export default function OrderOfPlay() {
         newMatches,
         newCourtCount,
         newMatchesPerCourt,
-        days,
+        [],
       );
 
       const updatedDays = [
@@ -648,11 +648,10 @@ export default function OrderOfPlay() {
       ];
 
       // Validation
-      if (!validateAllDays(updatedDays)) {
-        toast.error("❌ Same player same time across days");
+      if (!validateAllDays([updatedDays[updatedDays.length - 1]])) {
+        toast.error("❌ Same player same time");
         return;
       }
-
       // Update state
       setDays(updatedDays);
       setNotPlacedMatches(newDay.remainingMatches);
