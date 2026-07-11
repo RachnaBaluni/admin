@@ -517,7 +517,7 @@ export default function OrderOfPlay() {
       if (rDiff !== 0) return rDiff;
 
       // 🔥 3. match number
-      return (a.matchNo || 0) - (b.matchNo || 0);
+      return (a.Match_number || 0) - (b.Match_number || 0);
     });
     console.log(
       "Completed Matches:",
