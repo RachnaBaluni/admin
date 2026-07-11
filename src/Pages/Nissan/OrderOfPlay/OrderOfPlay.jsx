@@ -417,8 +417,6 @@ export default function OrderOfPlay() {
   };
 
   const getMatches = async (categories, rounds) => {
-    
-
     const filteredEvents =
       categories.length > 0
         ? events.filter((ev) => categories.includes(ev.name))
@@ -436,22 +434,20 @@ export default function OrderOfPlay() {
     let allMatches = [];
 
     const allowedRounds = rounds.map((r) => r.trim().toLowerCase());
-console.log("Selected Rounds:", allowedRounds);
+    console.log("Selected Rounds:", allowedRounds);
     // 🔥 MATCH BUILD
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
 
       console.table(
-       console.table(
-  matches.map((m) => ({
-    Stage: m.Stage,
-    Match: m.Match_number,
-    Winner: !!m.Winner,
-  }))
-);
+        matches.map((m) => ({
+          Stage: m.Stage,
+          Match: m.Match_number,
+          Winner: !!m.Winner,
+        })),
+      );
 
-      
       const filteredMatches = matches.filter((m) => {
         const isAllowedRound = allowedRounds.includes(
           (m.Stage || "").trim().toLowerCase(),
@@ -460,13 +456,14 @@ console.log("Selected Rounds:", allowedRounds);
 
         return isAllowedRound;
       });
-console.table(
-  filteredMatches.map((m) => ({
-    Stage: m.Stage,
-    Match: m.Match_number,
-  }))
-);
-      
+
+      console.table(
+        filteredMatches.map((m) => ({
+          Stage: m.Stage,
+          Match: m.Match_number,
+        })),
+      );
+
       const roundWiseMatches = {};
 
       filteredMatches.forEach((m) => {
@@ -499,7 +496,7 @@ console.table(
           category: ev.name,
           matchNo: m.Match_number,
         }));
-      
+
       allMatches.push(...matchesWithData);
     });
 
