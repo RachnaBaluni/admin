@@ -69,12 +69,6 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   };
 
   const getTeamName = (team, side) => {
-    //console.log("MATCH DATA:", match);
-    //console.log("WINNER CHECK:", match.Winner);
-    console.log("Winner:", match.Winner);
-    console.log("Winner ID:", match.Winner?._id);
-    console.log("Team1 ID:", match.Team1?._id);
-    console.log("Team2 ID:", match.Team2?._id);
     if (team?.partner1?.name) {
       return `${team.partner1?.name || ""}${
         team.partner2 ? " & " + team.partner2?.name : ""
@@ -147,17 +141,6 @@ function DraggableMatch({ match, time, allMatchesRef }) {
     return `R${prevRound} M${rightMatch} Winner`;
   };
 
-  //console.log(  "CARD",match.matchNo,  match.forcedPlacement);
-  //console.log("MATCH OBJECT", match);
-  console.log("Winner._id =", match.Winner?._id);
-  console.log("Team1._id =", match.Team1?._id);
-  console.log(
-    "Comparison =",
-    String(match.Winner?._id) === String(match.Team1?._id),
-  );
-  console.log("styles.team =", styles.team);
-  console.log("styles.winnerTeam =", styles.winnerTeam);
-  console.log("Winner object =", match.Winner);
   return (
     <div
       ref={setNodeRef}
@@ -484,8 +467,12 @@ export default function OrderOfPlay() {
       const visibleMatchMap = {};
 
       Object.keys(roundWiseMatches).forEach((stage) => {
-        roundWiseMatches[stage].forEach((match, index) => {
-          visibleMatchMap[match._id] = index + 1;
+        let visibleNo = 1;
+
+        roundWiseMatches[stage].forEach((match) => {
+          if (!match.Winner) {
+            visibleMatchMap[match._id] = visibleNo++;
+          }
         });
       });
 
