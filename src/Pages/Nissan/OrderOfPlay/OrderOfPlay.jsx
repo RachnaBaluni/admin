@@ -458,6 +458,15 @@ export default function OrderOfPlay() {
         return isAllowedRound;
       });
 
+      console.table(
+        filteredMatches.map((m) => ({
+          Match_number: m.Match_number,
+          Stage: m.Stage,
+          Team1: !!m.Team1,
+          Team2: !!m.Team2,
+        })),
+      );
+
       const roundWiseMatches = {};
 
       filteredMatches.forEach((m) => {
