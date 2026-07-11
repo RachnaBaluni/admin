@@ -439,14 +439,7 @@ export default function OrderOfPlay() {
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
-      console.log(
-        "Completed from API:",
-        matches.filter((m) => m.Status === "Completed"),
-      );
-      console.log(
-        "Completed Matches",
-        matches.filter((m) => m.Status === "Completed"),
-      );
+
       console.table(
         allMatches.map((m) => ({
           Match: m.matchNo,
@@ -500,7 +493,7 @@ export default function OrderOfPlay() {
           matchNo:
             m.Stage === "Round 1" && (!m.Team1 || !m.Team2)
               ? "-"
-              : roundWiseMatches[m.Stage].findIndex((x) => x._id === m._id) + 1,
+              : m.Match_number,
         };
       });
 
