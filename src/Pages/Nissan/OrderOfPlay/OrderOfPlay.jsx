@@ -502,7 +502,15 @@ export default function OrderOfPlay() {
           category: ev.name,
           matchNo: visibleMatchMap[m._id],
         }));
-
+      console.table(
+        matchesWithData.map((m) => ({
+          Stage: m.Stage,
+          DB_Number: m.Match_number,
+          Display_Number: m.matchNo,
+          Team1: !!m.Team1,
+          Team2: !!m.Team2,
+        })),
+      );
       allMatches.push(...matchesWithData);
     });
 
