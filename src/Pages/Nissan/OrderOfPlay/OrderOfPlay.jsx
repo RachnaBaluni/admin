@@ -458,15 +458,15 @@ export default function OrderOfPlay() {
         return isAllowedRound;
       });
 
-      console.table(
-        filteredMatches
-          .filter((m) => ev.name.includes("Cat.B") && m.Stage === "Round 1")
-          .map((m) => ({
-            Match_number: m.Match_number,
-            Team1: !!m.Team1,
-            Team2: !!m.Team2,
-            matchNo: m.matchNo,
-          })),
+      console.log(
+        "MATCH DATA",
+        filteredMatches.map((m) => ({
+          _id: m._id,
+          Match_number: m.Match_number,
+          matchNo: m.matchNo,
+          Stage: m.Stage,
+          Winner: m.Winner,
+        })),
       );
       const roundWiseMatches = {};
 
@@ -488,10 +488,8 @@ export default function OrderOfPlay() {
       const visibleMatchMap = {};
 
       Object.keys(roundWiseMatches).forEach((stage) => {
-        let count = 1;
-
-        roundWiseMatches[stage].forEach((match) => {
-          visibleMatchMap[match._id] = count++;
+        roundWiseMatches[stage].forEach((match, index) => {
+          visibleMatchMap[match._id] = index + 1;
         });
       });
 
@@ -500,7 +498,7 @@ export default function OrderOfPlay() {
         .map((m) => ({
           ...m,
           category: ev.name,
-          matchNo: visibleMatchMap[m._id],
+          matchNo: m.Match_number,
         }));
       console.table(
         matchesWithData.map((m) => ({
