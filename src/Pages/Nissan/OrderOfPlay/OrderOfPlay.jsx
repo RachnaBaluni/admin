@@ -459,14 +459,15 @@ export default function OrderOfPlay() {
       });
 
       console.table(
-        filteredMatches.map((m) => ({
-          Match_number: m.Match_number,
-          Stage: m.Stage,
-          Team1: !!m.Team1,
-          Team2: !!m.Team2,
-        })),
+        filteredMatches
+          .filter((m) => ev.name.includes("Cat.B") && m.Stage === "Round 1")
+          .map((m) => ({
+            Match_number: m.Match_number,
+            Team1: !!m.Team1,
+            Team2: !!m.Team2,
+            matchNo: m.matchNo,
+          })),
       );
-
       const roundWiseMatches = {};
 
       filteredMatches.forEach((m) => {
