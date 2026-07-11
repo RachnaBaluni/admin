@@ -416,6 +416,9 @@ export default function OrderOfPlay() {
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
+      const completedMatches = JSON.parse(
+        sessionStorage.getItem("completedMatches") || "[]",
+      );
 
       console.log("MATCHES API DATA", matches);
 
