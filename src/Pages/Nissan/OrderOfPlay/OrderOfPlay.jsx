@@ -419,9 +419,9 @@ export default function OrderOfPlay() {
 
       console.table(
         matches.map((m) => ({
-          Stage: m.Stage,
           Match: m.Match_number,
-          Winner: !!m.Winner,
+          Winner: m.Winner,
+          Status: m.Status,
         })),
       );
 
