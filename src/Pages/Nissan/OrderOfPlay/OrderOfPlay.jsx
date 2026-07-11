@@ -461,8 +461,6 @@ export default function OrderOfPlay() {
       });
       const roundCounters = {};
 
-      const roundWiseMatches = {};
-
       filteredMatches.forEach((m) => {
         if (!roundWiseMatches[m.Stage]) {
           roundWiseMatches[m.Stage] = [];
@@ -489,11 +487,7 @@ export default function OrderOfPlay() {
         return {
           ...m,
           category: ev.name,
-          // matchNo: m.Match_number,
-          matchNo:
-            m.Stage === "Round 1" && (!m.Team1 || !m.Team2)
-              ? "-"
-              : m.Match_number,
+          matchNo: m.Match_number,
         };
       });
 
