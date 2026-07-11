@@ -448,9 +448,7 @@ export default function OrderOfPlay() {
           WinnerId: m.Winner?._id,
         })),
       );
-      //console.log("ALL MATCHES", matches);
-      console.log("API MATCHES", JSON.stringify(matches, null, 2));
-      console.log(matches.filter((m) => m.Status === "Completed"));
+
       const filteredMatches = matches.filter((m) => {
         const isAllowedRound = allowedRounds.includes(
           (m.Stage || "").trim().toLowerCase(),
@@ -459,15 +457,26 @@ export default function OrderOfPlay() {
 
         return isAllowedRound;
       });
-      const roundCounters = {};
+
+      const roundWiseMatches = {};
+
+      filteredMatches.forEach((m) => {
+        if (!roundWiseMatches[m.Stage]) {
+          roundWiseMatches[m.Stage] = [];
+        }
+
+        // Round 1 ke BYE matches skip
+        if (!(m.Stage === "Round 1" && (!m.Team1 || !m.Team2))) {
+          roundWiseMatches[m.Stage].push(m);
+        }
+      });
+
+      Object.keys(roundWiseMatches).forEach((stage) => {
+        roundWiseMatches[stage].sort((a, b) => a.Match_number - b.Match_number);
+      });
 
       const matchesWithData = filteredMatches.map((m) => {
-        //console.log("FULL MATCH OBJECT:", m);
-        const stage = (m.Stage || "Round 1").trim();
-
-        if (!roundCounters[stage]) {
-          roundCounters[stage] = 1;
-        }
+        const isByeMatch = m.Stage === "Round 1" && (!m.Team1 || !m.Team2);
 
         return {
           ...m,
