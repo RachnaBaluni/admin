@@ -242,7 +242,7 @@ export default function OrderOfPlay() {
   const [showRemainingOnly, setShowRemainingOnly] = useState(false);
 
   const [selectedCategories, setSelectedCategories] = useState([
-    "Cat.B(85+ combined)",
+    "Cat.A(65+ combined)",
   ]);
 
   const [selectedRounds, setSelectedRounds] = useState(["Round 1", "Round 2"]);
