@@ -380,6 +380,7 @@ export default function OrderOfPlay() {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
         { withCredentials: true },
       );
+      console.log(res.data);
 
       const allEvents = res.data.data;
 
@@ -438,6 +439,10 @@ export default function OrderOfPlay() {
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
+      console.log(
+        "Completed from API:",
+        matches.filter((m) => m.Status === "Completed"),
+      );
       console.log(
         "Completed Matches",
         matches.filter((m) => m.Status === "Completed"),
