@@ -45,18 +45,27 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   if (isCompleted) {
     console.log("GREEN MATCH =>", match);
   }
-  console.log("Match ID:", match._id);
-  console.log("Completed Matches:", completedMatches);
-
-  console.log("Is Completed:", isCompleted);
-  console.log("WINNER", match.Winner);
-  console.log("TEAM1", match.Team1);
-  console.log("TEAM2", match.Team2);
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: match._id,
     disabled: isCompleted,
   });
+
+  console.log("========== MATCH ==========");
+  console.log("FULL MATCH OBJECT", match);
+  console.log("Match No:", match.matchNo);
+  console.log("Winner:", match.Winner);
+  console.log("Winner ID:", match.Winner?._id || match.Winner);
+  console.log("Team1 ID:", match.Team1?._id);
+  console.log("Team2 ID:", match.Team2?._id);
+  console.log(
+    "Team1 Winner:",
+    String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
+  );
+  console.log(
+    "Team2 Winner:",
+    String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
+  );
 
   const style = {
     ...(transform
@@ -141,10 +150,6 @@ function DraggableMatch({ match, time, allMatchesRef }) {
     return `R${prevRound} M${rightMatch} Winner`;
   };
 
-  console.log("FULL WINNER =", match.Winner);
-  console.log("FULL TEAM1 =", match.Team1);
-  console.log("FULL TEAM2 =", match.Team2);
-
   return (
     <div
       ref={setNodeRef}
@@ -163,21 +168,6 @@ function DraggableMatch({ match, time, allMatchesRef }) {
       <div className={styles.time}>{time}</div>
 
       <div className={styles.round}>{match.Stage}</div>
-
-      {console.log(
-        "Winner:",
-        match.Winner,
-        "Team1:",
-        match.Team1?._id,
-        "Equal:",
-        String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
-      )}
-
-      {console.log({
-        winner: match.Winner,
-        team1: match.Team1?._id,
-        team2: match.Team2?._id,
-      })}
 
       <div
         className={`${styles.team} ${
