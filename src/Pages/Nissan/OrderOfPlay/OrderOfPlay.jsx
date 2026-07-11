@@ -141,6 +141,10 @@ function DraggableMatch({ match, time, allMatchesRef }) {
     return `R${prevRound} M${rightMatch} Winner`;
   };
 
+  console.log("FULL WINNER =", match.Winner);
+  console.log("FULL TEAM1 =", match.Team1);
+  console.log("FULL TEAM2 =", match.Team2);
+
   return (
     <div
       ref={setNodeRef}
