@@ -417,6 +417,16 @@ export default function OrderOfPlay() {
   };
 
   const getMatches = async (categories, rounds) => {
+    console.log("Selected Rounds:", allowedRounds);
+
+    console.table(
+      matches.map((m) => ({
+        Stage: m.Stage,
+        Match: m.Match_number,
+        Winner: !!m.Winner,
+      })),
+    );
+
     const filteredEvents =
       categories.length > 0
         ? events.filter((ev) => categories.includes(ev.name))
@@ -446,6 +456,13 @@ export default function OrderOfPlay() {
           Status: m.Status,
           Winner: m.Winner,
           WinnerId: m.Winner?._id,
+        })),
+      );
+
+      console.table(
+        filteredMatches.map((m) => ({
+          Stage: m.Stage,
+          Match: m.Match_number,
         })),
       );
 
