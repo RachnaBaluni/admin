@@ -485,15 +485,23 @@ export default function OrderOfPlay() {
         roundWiseMatches[stage].sort((a, b) => a.Match_number - b.Match_number);
       });
 
-      const matchesWithData = filteredMatches.map((m) => {
-        const isByeMatch = m.Stage === "Round 1" && (!m.Team1 || !m.Team2);
+      const visibleMatchMap = {};
 
-        return {
+      Object.keys(roundWiseMatches).forEach((stage) => {
+        let count = 1;
+
+        roundWiseMatches[stage].forEach((match) => {
+          visibleMatchMap[match._id] = count++;
+        });
+      });
+
+      const matchesWithData = filteredMatches
+        .filter((m) => !(m.Stage === "Round 1" && (!m.Team1 || !m.Team2)))
+        .map((m) => ({
           ...m,
           category: ev.name,
-          matchNo: m.Match_number,
-        };
-      });
+          matchNo: visibleMatchMap[m._id],
+        }));
 
       allMatches.push(...matchesWithData);
     });
