@@ -417,15 +417,7 @@ export default function OrderOfPlay() {
   };
 
   const getMatches = async (categories, rounds) => {
-    console.log("Selected Rounds:", allowedRounds);
-
-    console.table(
-      matches.map((m) => ({
-        Stage: m.Stage,
-        Match: m.Match_number,
-        Winner: !!m.Winner,
-      })),
-    );
+    
 
     const filteredEvents =
       categories.length > 0
@@ -444,28 +436,22 @@ export default function OrderOfPlay() {
     let allMatches = [];
 
     const allowedRounds = rounds.map((r) => r.trim().toLowerCase());
-
+console.log("Selected Rounds:", allowedRounds);
     // 🔥 MATCH BUILD
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
 
       console.table(
-        allMatches.map((m) => ({
-          Match: m.matchNo,
-          Status: m.Status,
-          Winner: m.Winner,
-          WinnerId: m.Winner?._id,
-        })),
-      );
+       console.table(
+  matches.map((m) => ({
+    Stage: m.Stage,
+    Match: m.Match_number,
+    Winner: !!m.Winner,
+  }))
+);
 
-      console.table(
-        filteredMatches.map((m) => ({
-          Stage: m.Stage,
-          Match: m.Match_number,
-        })),
-      );
-
+      
       const filteredMatches = matches.filter((m) => {
         const isAllowedRound = allowedRounds.includes(
           (m.Stage || "").trim().toLowerCase(),
@@ -474,17 +460,13 @@ export default function OrderOfPlay() {
 
         return isAllowedRound;
       });
-
-      console.log(
-        "MATCH DATA",
-        filteredMatches.map((m) => ({
-          _id: m._id,
-          Match_number: m.Match_number,
-          matchNo: m.matchNo,
-          Stage: m.Stage,
-          Winner: m.Winner,
-        })),
-      );
+console.table(
+  filteredMatches.map((m) => ({
+    Stage: m.Stage,
+    Match: m.Match_number,
+  }))
+);
+      
       const roundWiseMatches = {};
 
       filteredMatches.forEach((m) => {
@@ -517,15 +499,7 @@ export default function OrderOfPlay() {
           category: ev.name,
           matchNo: m.Match_number,
         }));
-      console.table(
-        matchesWithData.map((m) => ({
-          Stage: m.Stage,
-          DB_Number: m.Match_number,
-          Display_Number: m.matchNo,
-          Team1: !!m.Team1,
-          Team2: !!m.Team2,
-        })),
-      );
+      
       allMatches.push(...matchesWithData);
     });
 
