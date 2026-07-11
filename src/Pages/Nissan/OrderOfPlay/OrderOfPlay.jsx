@@ -417,13 +417,7 @@ export default function OrderOfPlay() {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
 
-      console.table(
-        matches.map((m) => ({
-          Match: m.Match_number,
-          Winner: m.Winner,
-          Status: m.Status,
-        })),
-      );
+      console.log("MATCHES API DATA", matches);
 
       const filteredMatches = matches.filter((m) => {
         const isAllowedRound = allowedRounds.includes(
