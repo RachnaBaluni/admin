@@ -461,21 +461,6 @@ export default function OrderOfPlay() {
       });
       const roundCounters = {};
 
-      filteredMatches.forEach((m) => {
-        if (!roundWiseMatches[m.Stage]) {
-          roundWiseMatches[m.Stage] = [];
-        }
-
-        // Round 1 ke BYE matches skip
-        if (!(m.Stage === "Round 1" && (!m.Team1 || !m.Team2))) {
-          roundWiseMatches[m.Stage].push(m);
-        }
-      });
-
-      Object.keys(roundWiseMatches).forEach((stage) => {
-        roundWiseMatches[stage].sort((a, b) => a.Match_number - b.Match_number);
-      });
-
       const matchesWithData = filteredMatches.map((m) => {
         //console.log("FULL MATCH OBJECT:", m);
         const stage = (m.Stage || "Round 1").trim();
