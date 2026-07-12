@@ -75,8 +75,8 @@ const Match = ({
       className={`${styles.matchSlot} ${isDragging ? styles.dragging : ""} ${
         isOver ? styles.over : ""
       } ${isDraggable ? styles.draggableSlot : ""}`} // Add new class for draggable slots
-      // {...listeners}
-      // {...attributes}
+      {...listeners}
+      {...attributes}
     >
       <div className={styles.teamName}>{teamDisplayName}</div>
       {isDraggable && <span className={styles.dragHandle}>⠿</span>}{" "}
