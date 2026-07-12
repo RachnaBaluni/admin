@@ -412,13 +412,14 @@ export default function OrderOfPlay() {
 
     const allowedRounds = rounds.map((r) => r.trim().toLowerCase());
     console.log("Selected Rounds:", allowedRounds);
-    // 🔥 MATCH BUILD
+    const completedMatches = JSON.parse(
+      sessionStorage.getItem("completedMatches") || "[]",
+    );
+
+    console.log("SESSION COMPLETED:", completedMatches);
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
-      const completedMatches = JSON.parse(
-        sessionStorage.getItem("completedMatches") || "[]",
-      );
 
       console.log("MATCHES API DATA", matches);
 
@@ -426,6 +427,7 @@ export default function OrderOfPlay() {
         const isAllowedRound = allowedRounds.includes(
           (m.Stage || "").trim().toLowerCase(),
         );
+
         if (m.Winner) return false;
 
         return isAllowedRound;
