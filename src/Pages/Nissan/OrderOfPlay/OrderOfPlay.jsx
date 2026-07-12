@@ -42,6 +42,14 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   );
 
   const isCompleted = completedMatches.includes(match._id);
+  console.log(
+    "Match ID:",
+    match._id,
+    "Completed:",
+    isCompleted,
+    "Winner:",
+    match.Winner,
+  );
   if (isCompleted) {
     console.log("GREEN MATCH =>", match);
   }
