@@ -18,6 +18,7 @@ const Match = ({
   roundIndex,
   matchId,
   slotType,
+  onByeClick,
 }) => {
   let teamDisplayName;
   if (isWinnerSlot) {
@@ -58,6 +59,11 @@ const Match = ({
         setNodeRef(node);
         setDroppableNodeRef(node);
       }}
+      onClick={() => {
+        if (!team && roundIndex === 0) {
+          onByeClick(matchId, slotType);
+        }
+      }}
       style={style}
       className={`${styles.matchSlot} ${isDragging ? styles.dragging : ""} ${
         isOver ? styles.over : ""
@@ -79,6 +85,7 @@ const Round = ({
   totalRounds,
   onUpdateTime,
   onUpdateCourt,
+  onByeClick,
 }) => {
   const isLastRound = roundIndex === totalRounds - 1;
 
@@ -132,12 +139,14 @@ const Round = ({
                   roundIndex={roundIndex}
                   matchId={match._id}
                   slotType="Team1"
+                  onByeClick={onByeClick}
                 />
                 <Match
                   team={match.Team2}
                   roundIndex={roundIndex}
                   matchId={match._id}
                   slotType="Team2"
+                  onByeClick={onByeClick}
                 />
               </div>
               {!isLastRound && <div className={styles.connectorLine}></div>}
@@ -154,6 +163,9 @@ const ManageDraw = () => {
   const [selectedEvent, setSelectedEvent] = useState("");
   const [draws, setDraws] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [availableTeams, setAvailableTeams] = useState([]);
+  const [selectedBye, setSelectedBye] = useState(null);
+  const [showTeamPopup, setShowTeamPopup] = useState(false);
 
   const fetchDraws = async () => {
     console.log("fetchDraws CALLED");
@@ -296,6 +308,32 @@ const ManageDraw = () => {
         console.error("Error deleting draws:", error);
       }
       setLoading(false);
+    }
+  };
+
+  const handleByeClick = async (matchId, slotType) => {
+    try {
+      const res = await api.get(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/team/unassigned`,
+        {
+          params: {
+            eventId: selectedEvent,
+          },
+          withCredentials: true,
+        },
+      );
+      console.log("Available Teams:", res.data.data);
+
+      setAvailableTeams(res.data.data);
+      setSelectedBye({ matchId, slotType });
+      setShowTeamPopup(true);
+
+      console.log("Selected Bye:", {
+        matchId,
+        slotType,
+      });
+    } catch (error) {
+      toast.error("Failed to load additional teams");
     }
   };
 
@@ -473,6 +511,7 @@ const ManageDraw = () => {
                 totalRounds={totalRounds}
                 onUpdateTime={updateMatchTime}
                 onUpdateCourt={updateMatchCourt}
+                onByeClick={handleByeClick}
               />
             ))}
           </div>
