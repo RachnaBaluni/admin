@@ -418,6 +418,20 @@ export default function OrderOfPlay() {
         ),
       ),
     );
+    allResponses.forEach((response) => {
+      console.log("DRAWS API");
+
+      response.data.data.forEach((m) => {
+        console.log(
+          "Match ID:",
+          m._id,
+          "Winner:",
+          m.Winner,
+          "Status:",
+          m.Status,
+        );
+      });
+    });
 
     let allMatches = [];
 
