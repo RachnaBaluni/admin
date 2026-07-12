@@ -349,7 +349,8 @@ const ManageResultsTo = () => {
         );
 
         console.log("UPDATE API RESPONSE:", response.data.data);
-
+        console.log("Winner:", response.data.data.Winner);
+        console.log("Status:", response.data.data.Status);
         // Save newly completed match for Order Of Play highlight
         let completedMatches = JSON.parse(
           sessionStorage.getItem("completedMatches") || "[]",
