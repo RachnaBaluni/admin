@@ -517,6 +517,26 @@ const ManageDraw = () => {
           </div>
         </DndContext>
       )}
+      {showTeamPopup && (
+        <div className={styles.popupOverlay}>
+          <div className={styles.popup}>
+            <h3>Select Additional Team</h3>
+
+            {availableTeams.length === 0 ? (
+              <p>No additional teams found.</p>
+            ) : (
+              availableTeams.map((team) => (
+                <button key={team._id} onClick={() => console.log(team)}>
+                  {team.partner1?.name}
+                  {team.partner2 ? ` & ${team.partner2?.name}` : ""}
+                </button>
+              ))
+            )}
+
+            <button onClick={() => setShowTeamPopup(false)}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
