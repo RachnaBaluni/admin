@@ -60,7 +60,15 @@ const Match = ({
         setDroppableNodeRef(node);
       }}
       onClick={() => {
+        console.log("CLICKED MATCH", {
+          team,
+          roundIndex,
+          matchId,
+          slotType,
+        });
+
         if (!team && roundIndex === 0) {
+          console.log("BYE CLICKED");
           onByeClick(matchId, slotType);
         }
       }}
