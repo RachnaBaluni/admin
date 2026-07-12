@@ -370,6 +370,10 @@ const ManageResultsTo = () => {
           "completedMatches",
           JSON.stringify(completedMatches),
         );
+        console.log(
+          "Completed Matches:",
+          JSON.parse(sessionStorage.getItem("completedMatches") || "[]"),
+        );
         toast.success("Match updated successfully!");
 
         if (shouldRefetch) {
