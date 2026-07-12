@@ -394,6 +394,8 @@ export default function OrderOfPlay() {
   };
 
   const getMatches = async (categories, rounds) => {
+    console.log("GET MATCHES RUNNING");
+
     const filteredEvents =
       categories.length > 0
         ? events.filter((ev) => categories.includes(ev.name))
