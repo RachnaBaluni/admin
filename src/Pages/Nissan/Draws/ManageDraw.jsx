@@ -61,16 +61,13 @@ const Match = ({
         setNodeRef(node);
         setDroppableNodeRef(node);
       }}
-      onClick={() => {
-        console.log("CLICKED MATCH", {
-          team,
-          roundIndex,
-          matchId,
-          slotType,
-        });
+      onClick={(e) => {
+        e.stopPropagation();
+
+        console.log("CLICKED SLOT");
 
         if (!team && roundIndex === 0) {
-          console.log("BYE CLICKED");
+          console.log("OPEN BYE POPUP");
           onByeClick(matchId, slotType);
         }
       }}
