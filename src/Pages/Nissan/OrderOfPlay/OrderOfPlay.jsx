@@ -411,12 +411,14 @@ export default function OrderOfPlay() {
     let allMatches = [];
 
     const allowedRounds = rounds.map((r) => r.trim().toLowerCase());
+
     console.log("Selected Rounds:", allowedRounds);
     const completedMatches = JSON.parse(
       sessionStorage.getItem("completedMatches") || "[]",
     );
 
     console.log("SESSION COMPLETED:", completedMatches);
+
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
@@ -428,15 +430,21 @@ export default function OrderOfPlay() {
           (m.Stage || "").trim().toLowerCase(),
         );
 
-        if (m.Winner) return false;
+        if (!isAllowedRound) return false;
 
-        return isAllowedRound;
+        if (m.Winner) {
+          return completedMatches.includes(String(m._id));
+        }
+
+        return true;
       });
 
       console.table(
-        filteredMatches.map((m) => ({
-          Stage: m.Stage,
-          Match: m.Match_number,
+        matches.map((m) => ({
+          id: String(m._id),
+          winner: !!m.Winner,
+          inSession: completedMatches.includes(String(m._id)),
+          stage: m.Stage,
         })),
       );
 
