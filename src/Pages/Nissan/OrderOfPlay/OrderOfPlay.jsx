@@ -367,8 +367,7 @@ export default function OrderOfPlay() {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
         { withCredentials: true },
       );
-      console.log(res.data);
-
+      console.log("ORDER OF PLAY API:", res.data);
       const allEvents = res.data.data;
 
       const categoryOrder = {
