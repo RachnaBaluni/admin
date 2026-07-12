@@ -132,7 +132,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
       return null;
     };
-    console.log(JSON.stringify(match, null, 2));
+    //console.log(JSON.stringify(match, null, 2));
 
     const leftPrevMatch = allMatchesRef.current.find(
       (m) =>
@@ -353,7 +353,6 @@ export default function OrderOfPlay() {
 
     if (savedDays) {
       setDays(JSON.parse(savedDays));
-      return;
     }
 
     if (events.length > 0 && selectedDate) {
@@ -367,7 +366,6 @@ export default function OrderOfPlay() {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
         { withCredentials: true },
       );
-      console.log("ORDER OF PLAY API:", res.data);
       const allEvents = res.data.data;
 
       const categoryOrder = {
@@ -403,8 +401,6 @@ export default function OrderOfPlay() {
   };
 
   const getMatches = async (categories, rounds) => {
-    console.log("GET MATCHES RUNNING");
-
     const filteredEvents =
       categories.length > 0
         ? events.filter((ev) => categories.includes(ev.name))
@@ -429,7 +425,6 @@ export default function OrderOfPlay() {
 
     const allowedRounds = rounds.map((r) => r.trim().toLowerCase());
 
-    console.log("Selected Rounds:", allowedRounds);
     const completedMatches = JSON.parse(
       sessionStorage.getItem("completedMatches") || "[]",
     );
@@ -442,7 +437,6 @@ export default function OrderOfPlay() {
       console.log("MATCHES API DATA", matches);
       const completed = matches.find((m) => m.Winner);
 
-      console.log("COMPLETED MATCH =", completed);
       const filteredMatches = matches.filter((m) => {
         const isAllowedRound = allowedRounds.includes(
           (m.Stage || "").trim().toLowerCase(),
