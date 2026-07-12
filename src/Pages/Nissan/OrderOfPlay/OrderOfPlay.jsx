@@ -418,18 +418,10 @@ export default function OrderOfPlay() {
         ),
       ),
     );
-    allResponses.forEach((response) => {
-      console.log("DRAWS API");
-
-      response.data.data.forEach((m) => {
-        console.log(
-          "Match ID:",
-          m._id,
-          "Winner:",
-          m.Winner,
-          "Status:",
-          m.Status,
-        );
+    allResponses.forEach((res) => {
+      console.log("DRAW RESPONSE");
+      res.data.data.forEach((m) => {
+        console.log(m._id, "Winner:", m.Winner, "Status:", m.Status);
       });
     });
 
