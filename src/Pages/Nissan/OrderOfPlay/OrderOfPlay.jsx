@@ -171,13 +171,26 @@ function DraggableMatch({ match, time, allMatchesRef }) {
 
       <div className={styles.round}>{match.Stage}</div>
 
-      <div className={`${styles.team} ${styles.winnerTeam}`}>
+      <div
+        className={`${styles.team} ${
+          String(match.Winner?._id || match.Winner) === String(match.Team1?._id)
+            ? styles.winnerTeam
+            : ""
+        }`}
+      >
+        {" "}
         {getTeamName(match.Team1, 1)}
       </div>
 
       <div className={styles.vs}>VS</div>
 
-      <div className={`${styles.team} ${styles.winnerTeam}`}>
+      <div
+        className={`${styles.team} ${
+          String(match.Winner?._id || match.Winner) === String(match.Team2?._id)
+            ? styles.winnerTeam
+            : ""
+        }`}
+      >
         {getTeamName(match.Team2, 2)}
       </div>
     </div>
