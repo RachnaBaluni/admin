@@ -20,6 +20,8 @@ const Match = ({
   slotType,
   onByeClick,
 }) => {
+  console.log("TEAM CHECK:", team, roundIndex, matchId, slotType);
+
   let teamDisplayName;
   if (isWinnerSlot) {
     teamDisplayName = "Winner";
