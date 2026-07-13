@@ -173,7 +173,9 @@ const ManageDraw = () => {
   const [availableTeams, setAvailableTeams] = useState([]);
   const [selectedBye, setSelectedBye] = useState(null);
   const [showTeamPopup, setShowTeamPopup] = useState(false);
-
+  const handleSelectAdditionalTeam = async (team) => {
+    console.log("Selected Team:", team);
+  };
   const fetchDraws = async () => {
     console.log("fetchDraws CALLED");
     console.log("SELECTED EVENT:", selectedEvent);
@@ -524,6 +526,7 @@ const ManageDraw = () => {
           </div>
         </DndContext>
       )}
+
       {showTeamPopup && (
         <div className={styles.popupOverlay}>
           <div className={styles.popup}>
@@ -533,7 +536,11 @@ const ManageDraw = () => {
               <p>No additional teams found.</p>
             ) : (
               availableTeams.map((team) => (
-                <button key={team._id} onClick={() => console.log(team)}>
+                <button
+                  key={team._id}
+                  onClick={() => handleSelectAdditionalTeam(team)}
+                >
+                  {" "}
                   {team.partner1?.name}
                   {team.partner2 ? ` & ${team.partner2?.name}` : ""}
                 </button>
