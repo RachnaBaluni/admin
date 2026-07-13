@@ -79,7 +79,11 @@ const Match = ({
       // {...attributes}
     >
       <div className={styles.teamName}>{teamDisplayName}</div>
-      {isDraggable && <span className={styles.dragHandle}>⠿</span>}{" "}
+      {isDraggable && (
+        <span className={styles.dragHandle} {...listeners} {...attributes}>
+          ⠿
+        </span>
+      )}{" "}
       {/* Drag icon */}
     </div>
   );
