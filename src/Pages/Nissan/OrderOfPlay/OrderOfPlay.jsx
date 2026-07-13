@@ -429,7 +429,7 @@ export default function OrderOfPlay() {
       sessionStorage.getItem("completedMatches") || "[]",
     );
 
-    alert("SESSION COMPLETED: " + JSON.stringify(completedMatches));
+    // alert("SESSION COMPLETED: " + JSON.stringify(completedMatches));
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
