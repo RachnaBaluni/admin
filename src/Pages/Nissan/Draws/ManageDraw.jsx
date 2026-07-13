@@ -178,7 +178,25 @@ const ManageDraw = () => {
   const [selectedBye, setSelectedBye] = useState(null);
   const [showTeamPopup, setShowTeamPopup] = useState(false);
   const handleSelectAdditionalTeam = async (team) => {
-    console.log("Selected Team:", team);
+    try {
+      await api.put(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/replace-bye`,
+        {
+          matchId: selectedBye.matchId,
+          teamField: selectedBye.slotType,
+          teamId: team._id,
+        },
+        { withCredentials: true },
+      );
+
+      toast.success("BYE replaced successfully");
+
+      setShowTeamPopup(false);
+
+      fetchDraws();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to replace BYE");
+    }
   };
   const fetchDraws = async () => {
     console.log("fetchDraws CALLED");
@@ -543,7 +561,7 @@ const ManageDraw = () => {
                 <button
                   type="button"
                   key={team._id}
-                  onClick={() => alert("Button Clicked")}
+                  onClick={() => handleSelectAdditionalTeam(team)}
                 >
                   {" "}
                   {team.partner1?.name}
