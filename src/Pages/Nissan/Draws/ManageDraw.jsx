@@ -537,8 +537,9 @@ const ManageDraw = () => {
             ) : (
               availableTeams.map((team) => (
                 <button
+                  type="button"
                   key={team._id}
-                  onClick={() => handleSelectAdditionalTeam(team)}
+                  onClick={() => alert("Button Clicked")}
                 >
                   {" "}
                   {team.partner1?.name}
