@@ -39,7 +39,7 @@ const Match = ({
     useDraggable({
       id: id,
       data: { team, matchId, roundIndex, slotType },
-      disabled: !team && roundIndex !== 0, // Disable dragging for TBD slots (except BYE in Stage 1)
+      disabled: !team, // Disable dragging for TBD slots (except BYE in Stage 1)
     });
 
   const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
