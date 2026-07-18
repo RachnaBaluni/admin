@@ -1202,7 +1202,44 @@ export default function OrderOfPlay() {
     const isRemainingMatch = String(activeId).startsWith("remaining-");
 
     if (isRemainingMatch) {
-      console.log("Remaining Match Dragged:", activeId);
+      const remainingMatch = activePos.match;
+
+      if (!remainingMatch) return;
+
+      const newDays = JSON.parse(JSON.stringify(days));
+
+      const targetCell = newDays[overDayIndex].grid[overPos.i][overPos.j];
+
+      // sirf occupied slot par swap hoga
+      if (!targetCell.match) {
+        toast.error("Empty slot par remaining match nahi laga sakte");
+        return;
+      }
+
+      const oldMatch = targetCell.match;
+
+      // swap
+      targetCell.match = remainingMatch;
+
+      // validation check
+      const error = validateDay(newDays[overDayIndex].grid);
+
+      if (error !== true) {
+        toast.error(error);
+        return;
+      }
+
+      // remaining update
+      setNotPlacedMatches((prev) => [
+        ...prev.filter((m) => m._id !== remainingMatch._id),
+        oldMatch,
+      ]);
+
+      setDays(newDays);
+
+      toast.success("Remaining match swapped ✅");
+
+      return;
     }
     // 🔍 Find positions
     days.forEach((day, dIndex) => {
