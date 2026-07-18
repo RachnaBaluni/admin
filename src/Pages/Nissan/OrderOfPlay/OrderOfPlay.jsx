@@ -1262,6 +1262,7 @@ export default function OrderOfPlay() {
       const matchId = activeId.replace("remaining-", "");
 
       const draggedMatch = notPlacedMatches.find((m) => m._id === matchId);
+      console.log("DRAGGED REMAINING MATCH =", draggedMatch);
 
       activePos = {
         remaining: true,
