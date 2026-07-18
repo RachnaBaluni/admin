@@ -726,6 +726,7 @@ export default function OrderOfPlay() {
 
     let notPlacedMatches = [];
     let forcedMatches = []; // ✅ added
+    let pendingMatches = [];
 
     /* ================= GRID CREATE ================= */
 
@@ -1681,34 +1682,35 @@ if (sourceError !== true) {
                     ))}
                   </div>
                 ))}
+
+                {/* REMAINING MATCHES CARDS */}
+                {dayIndex === days.length - 1 &&
+                  notPlacedMatches.length > 0 && (
+                    <>
+                      <h3 style={{ marginTop: "30px" }}>
+                        Remaining Matches ({notPlacedMatches.length})
+                      </h3>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: `repeat(${day.courtCount}, 1fr)`,
+                          gap: "20px",
+                          marginBottom: "30px",
+                        }}
+                      >
+                        {notPlacedMatches.map((match) => (
+                          <DraggableMatch
+                            key={match._id}
+                            match={match}
+                            time={"Not Scheduled"}
+                            allMatchesRef={allMatchesRef}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
               </DndContext>
-
-              {/* REMAINING MATCHES CARDS */}
-              {dayIndex === days.length - 1 && notPlacedMatches.length > 0 && (
-                <>
-                  <h3 style={{ marginTop: "30px" }}>
-                    Remaining Matches ({notPlacedMatches.length})
-                  </h3>
-
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: `repeat(${day.courtCount}, 1fr)`,
-                      gap: "20px",
-                      marginBottom: "30px",
-                    }}
-                  >
-                    {notPlacedMatches.map((match) => (
-                      <DraggableMatch
-                        key={match._id}
-                        match={match}
-                        time={"Not Scheduled"}
-                        allMatchesRef={allMatchesRef}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
 
               {/* ADD NEXT DAY */}
               {showFilters && dayIndex === days.length - 1 && (
