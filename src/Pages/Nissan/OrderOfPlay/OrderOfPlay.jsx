@@ -1885,8 +1885,6 @@ if (sourceError !== true) {
 
           {showFilters && (
             <div style={{ marginTop: "30px" }}>
-              <h3>Remaining Matches: {notPlacedMatches.length}</h3>
-
               {/* ✅ SUCCESS MESSAGE */}
               {notPlacedMatches.length === 0 && (
                 <p
