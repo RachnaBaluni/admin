@@ -36,7 +36,7 @@ const getPlayers = (m) => {
 
 /* ================= DRAG CARD ================= */
 
-function DraggableMatch({ match, time, allMatchesRef }) {
+function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
   const completedMatches = JSON.parse(
     sessionStorage.getItem("completedMatches") || "[]",
   );
@@ -55,7 +55,7 @@ function DraggableMatch({ match, time, allMatchesRef }) {
   }
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: match._id,
+    id: isRemaining ? `remaining-${match._id}` : match._id,
     disabled: isCompleted,
   });
 
@@ -1199,7 +1199,11 @@ export default function OrderOfPlay() {
     let overPos = null;
     let activeDayIndex = null;
     let overDayIndex = null;
+    const isRemainingMatch = String(activeId).startsWith("remaining-");
 
+    if (isRemainingMatch) {
+      console.log("Remaining Match Dragged:", activeId);
+    }
     // 🔍 Find positions
     days.forEach((day, dIndex) => {
       day.grid.forEach((row, i) => {
@@ -1705,6 +1709,7 @@ if (sourceError !== true) {
                             match={match}
                             time={"Not Scheduled"}
                             allMatchesRef={allMatchesRef}
+                            isRemaining={true}
                           />
                         ))}
                       </div>
