@@ -1221,6 +1221,19 @@ export default function OrderOfPlay() {
       });
     });
 
+    if (isRemainingMatch) {
+      const matchId = activeId.replace("remaining-", "");
+
+      const draggedMatch = notPlacedMatches.find((m) => m._id === matchId);
+
+      activePos = {
+        remaining: true,
+        match: draggedMatch,
+      };
+    }
+
+    console.log("ACTIVE POS =", activePos);
+
     if (!activePos || !overPos) return;
     /*
 if (
