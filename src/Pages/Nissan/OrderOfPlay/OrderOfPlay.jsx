@@ -1232,9 +1232,14 @@ export default function OrderOfPlay() {
       };
     }
 
-    console.log("ACTIVE POS =", activePos);
-
+    console.log("ACTIVE POS", activePos);
+    console.log("OVER POS", overPos);
     if (!activePos || !overPos) return;
+
+    if (isRemainingMatch) {
+      console.log("Remaining match drop logic");
+      return;
+    }
     /*
 if (
   sourceDay === targetDay &&
@@ -1702,6 +1707,7 @@ if (sourceError !== true) {
 
                 {/* REMAINING MATCHES CARDS */}
                 {dayIndex === days.length - 1 &&
+                  showRemainingOnly &&
                   notPlacedMatches.length > 0 && (
                     <>
                       <h3 style={{ marginTop: "30px" }}>
@@ -1876,40 +1882,6 @@ if (sourceError !== true) {
               )}
             </div>
           ))}
-
-          {showRemainingOnly && (
-            <div className={styles.remainingBox}>
-              <h3>Remaining Matches</h3>
-
-              {notPlacedMatches.length === 0 ? (
-                <p style={{ color: "green", fontWeight: "bold" }}>
-                  🎉 All matches scheduled successfully!
-                </p>
-              ) : (
-                notPlacedMatches.map((m, idx) => (
-                  <div key={m._id || idx} className={styles.remainingItem}>
-                    <p>
-                      <b>Category:</b> {m.category}
-                    </p>
-                    <p>
-                      <b>Round:</b> {m.Stage}
-                    </p>
-                    <p>
-                      <b>Match:</b> {getRemainingMatchDisplay(m)}
-                    </p>
-                  </div>
-                ))
-              )}
-
-              <button
-                className={styles.printBtn}
-                onClick={() => setShowRemainingOnly(false)}
-                style={{ marginTop: "10px" }}
-              >
-                Close
-              </button>
-            </div>
-          )}
 
           {showFilters && (
             <div style={{ marginTop: "30px" }}>
