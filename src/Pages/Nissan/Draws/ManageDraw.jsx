@@ -300,26 +300,41 @@ const ManageDraw = () => {
   }, [selectedEvent]);
 
   const handleCreateDraws = async () => {
-    if (selectedEvent) {
-      setLoading(true);
-      try {
-        await api.post(
-          `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/`,
-          { eventId: selectedEvent },
-          { withCredentials: true },
-        );
-        toast.success("Draws created/reset successfully!");
-        fetchDraws();
-      } catch (error) {
-        toast.error(
-          error.response?.data?.message || "Failed to create/reset draws.",
-        );
-        console.error("Error creating draws:", error);
-      }
+    if (!selectedEvent) return;
+
+    setLoading(true);
+
+    try {
+      const url =
+        draws.length > 0
+          ? `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/reset`
+          : `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/`;
+
+      await api.post(
+        url,
+        { eventId: selectedEvent },
+        { withCredentials: true },
+      );
+
+      toast.success(
+        draws.length > 0
+          ? "Draws reset successfully!"
+          : "Draws created successfully!",
+      );
+
+      fetchDraws();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          (draws.length > 0
+            ? "Failed to reset draws."
+            : "Failed to create draws."),
+      );
+      console.error(error);
+    } finally {
       setLoading(false);
     }
   };
-
   const handleDeleteDraws = async () => {
     if (selectedEvent && draws.length > 0) {
       setLoading(true);
