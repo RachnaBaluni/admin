@@ -1202,45 +1202,51 @@ export default function OrderOfPlay() {
     const isRemainingMatch = String(activeId).startsWith("remaining-");
 
     if (isRemainingMatch) {
-      const remainingMatch = activePos.match;
-
-      if (!remainingMatch) return;
+      // SAME DAY SWAP ONLY
+      if (remainingDayIndex !== overDayIndex) {
+        toast.error("Remaining match can only be swapped within the same day.");
+        return;
+      }
 
       const newDays = JSON.parse(JSON.stringify(days));
 
+      const draggedMatch = newDays[remainingDayIndex].remaining[remainingIndex];
+
       const targetCell = newDays[overDayIndex].grid[overPos.i][overPos.j];
 
-      // sirf occupied slot par swap hoga
       if (!targetCell.match) {
-        toast.error("Empty slot par remaining match nahi laga sakte");
+        toast.error("Drop on a scheduled match only.");
         return;
       }
 
-      const oldMatch = targetCell.match;
+      // Completed match WILL NOT BE MOVED
+      const completedMatches = JSON.parse(
+        sessionStorage.getItem("completedMatches") || "[]",
+      );
 
-      // swap
-      targetCell.match = remainingMatch;
-
-      // validation check
-      const error = validateDay(newDays[overDayIndex].grid);
-
-      if (error !== true) {
-        toast.error(error);
+      if (completedMatches.includes(targetCell.match._id)) {
+        toast.error("Completed match cannot be moved.");
         return;
       }
 
-      // remaining update
-      setNotPlacedMatches((prev) => [
-        ...prev.filter((m) => m._id !== remainingMatch._id),
-        oldMatch,
-      ]);
+      // Swap
+      const scheduledMatch = targetCell.match;
 
+      targetCell.match = draggedMatch;
+
+      newDays[remainingDayIndex].remaining[remainingIndex] = scheduledMatch;
+
+      // also validate the day after swap
       setDays(newDays);
 
-      toast.success("Remaining match swapped ✅");
+      toast.success("Match swapped successfully");
 
       return;
     }
+
+    let remainingDayIndex = null;
+    let remainingIndex = null;
+
     // 🔍 Find positions
     days.forEach((day, dIndex) => {
       day.grid.forEach((row, i) => {
@@ -1261,13 +1267,19 @@ export default function OrderOfPlay() {
     if (isRemainingMatch) {
       const matchId = activeId.replace("remaining-", "");
 
-      const draggedMatch = notPlacedMatches.find((m) => m._id === matchId);
-      console.log("DRAGGED REMAINING MATCH =", draggedMatch);
+      days.forEach((day, dIndex) => {
+        const index = day.remaining.findIndex((m) => m._id === matchId);
 
-      activePos = {
-        remaining: true,
-        match: draggedMatch,
-      };
+        if (index !== -1) {
+          remainingDayIndex = dIndex;
+          remainingIndex = index;
+
+          activePos = {
+            remaining: true,
+            match: day.remaining[index],
+          };
+        }
+      });
     }
 
     console.log("ACTIVE POS", activePos);
@@ -1744,34 +1756,32 @@ if (sourceError !== true) {
                 ))}
 
                 {/* REMAINING MATCHES CARDS */}
-                {dayIndex === days.length - 1 &&
-                  showRemainingOnly &&
-                  notPlacedMatches.length > 0 && (
-                    <>
-                      <h3 style={{ marginTop: "30px" }}>
-                        Remaining Matches ({notPlacedMatches.length})
-                      </h3>
+                {showRemainingOnly && day.remaining.length > 0 && (
+                  <>
+                    <h3 style={{ marginTop: "30px" }}>
+                      Remaining Matches ({day.remaining.length})
+                    </h3>
 
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: `repeat(${day.courtCount}, 1fr)`,
-                          gap: "20px",
-                          marginBottom: "30px",
-                        }}
-                      >
-                        {notPlacedMatches.map((match) => (
-                          <DraggableMatch
-                            key={match._id}
-                            match={match}
-                            time={"Not Scheduled"}
-                            allMatchesRef={allMatchesRef}
-                            isRemaining={true}
-                          />
-                        ))}
-                      </div>
-                    </>
-                  )}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: `repeat(${day.courtCount}, 1fr)`,
+                        gap: "20px",
+                        marginBottom: "30px",
+                      }}
+                    >
+                      {day.remaining.map((match) => (
+                        <DraggableMatch
+                          key={match._id}
+                          match={match}
+                          time={"Not Scheduled"}
+                          allMatchesRef={allMatchesRef}
+                          isRemaining={true}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </DndContext>
 
               {/* ADD NEXT DAY */}
