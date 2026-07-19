@@ -1199,53 +1199,9 @@ export default function OrderOfPlay() {
     let overPos = null;
     let activeDayIndex = null;
     let overDayIndex = null;
-    const isRemainingMatch = String(activeId).startsWith("remaining-");
-
-    if (isRemainingMatch) {
-      // SAME DAY SWAP ONLY
-      if (remainingDayIndex !== overDayIndex) {
-        toast.error("Remaining match can only be swapped within the same day.");
-        return;
-      }
-
-      const newDays = JSON.parse(JSON.stringify(days));
-
-      const draggedMatch = newDays[remainingDayIndex].remaining[remainingIndex];
-
-      const targetCell = newDays[overDayIndex].grid[overPos.i][overPos.j];
-
-      if (!targetCell.match) {
-        toast.error("Drop on a scheduled match only.");
-        return;
-      }
-
-      // Completed match WILL NOT BE MOVED
-      const completedMatches = JSON.parse(
-        sessionStorage.getItem("completedMatches") || "[]",
-      );
-
-      if (completedMatches.includes(targetCell.match._id)) {
-        toast.error("Completed match cannot be moved.");
-        return;
-      }
-
-      // Swap
-      const scheduledMatch = targetCell.match;
-
-      targetCell.match = draggedMatch;
-
-      newDays[remainingDayIndex].remaining[remainingIndex] = scheduledMatch;
-
-      // also validate the day after swap
-      setDays(newDays);
-
-      toast.success("Match swapped successfully");
-
-      return;
-    }
-
     let remainingDayIndex = null;
     let remainingIndex = null;
+    const isRemainingMatch = String(activeId).startsWith("remaining-");
 
     // 🔍 Find positions
     days.forEach((day, dIndex) => {
@@ -1287,7 +1243,54 @@ export default function OrderOfPlay() {
     if (!activePos || !overPos) return;
 
     if (isRemainingMatch) {
-      console.log("Remaining match drop logic");
+      if (remainingDayIndex !== overDayIndex) {
+        toast.error("Remaining match can only be swapped within same day.");
+        return;
+      }
+
+      const newDays = JSON.parse(JSON.stringify(days));
+
+      const draggedMatch = newDays[remainingDayIndex].remaining[remainingIndex];
+
+      const targetCell = newDays[overDayIndex].grid[overPos.i][overPos.j];
+
+      if (!targetCell.match) {
+        toast.error("Drop on scheduled match only.");
+        return;
+      }
+
+      const completedMatches = JSON.parse(
+        sessionStorage.getItem("completedMatches") || "[]",
+      );
+
+      if (completedMatches.includes(targetCell.match._id)) {
+        toast.error("Completed match cannot be moved.");
+        return;
+      }
+
+      // swap
+      const scheduledMatch = targetCell.match;
+
+      targetCell.match = draggedMatch;
+
+      newDays[remainingDayIndex].remaining[remainingIndex] = scheduledMatch;
+
+      // validation
+      const err = validateLocalMove(
+        newDays[overDayIndex].grid,
+        overPos.i,
+        overPos.j,
+      );
+
+      if (err !== true) {
+        toast.error(err);
+        return;
+      }
+
+      setDays(newDays);
+
+      toast.success("Match swapped successfully");
+
       return;
     }
     /*
