@@ -887,7 +887,6 @@ export default function OrderOfPlay() {
         console.log("NORMAL FAILED =>", match.matchNo);
       }
 
-      /* ================= 🔥 FORCED PLACEMENT ================= */
       /* ================= RELAXED PASS ================= */
       if (!placed) {
         for (let i = maxRows - 1; i >= 0; i--) {
@@ -933,8 +932,13 @@ export default function OrderOfPlay() {
         }
       }
 
-      /* ================= FORCED PLACEMENT ================= */
       if (!placed) {
+        pendingMatches.push(match);
+        placed = true;
+      }
+
+      /* ================= FORCED PLACEMENT ================= */
+      if (false && !placed) {
         console.log(
           "FORCED MATCH =>",
           match.matchNo,
@@ -974,12 +978,118 @@ export default function OrderOfPlay() {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
     });
 
+    pendingMatches.forEach((match) => {
+      for (let i = 0; i < temp.length; i++) {
+        let placed = false;
+
+        for (let j = 0; j < temp[i].length; j++) {
+          if (!temp[i][j].match && canPlaceMatchInSlot(temp, match, i, j)) {
+            temp[i][j].match = match;
+            const players = getPlayers(match);
+            const time = `${getTimeLabel(i)}-${i}`;
+
+            if (!timeSlotPlayers[time]) {
+              timeSlotPlayers[time] = new Set();
+            }
+
+            players.forEach((p) => {
+              timeSlotPlayers[time].add(p);
+              playerLastRow[p] = i;
+              playerLastCourt[p] = j;
+            });
+            placed = true;
+            break;
+          }
+        }
+
+        if (placed) break;
+      }
+    });
+
+    pendingMatches.forEach((match) => {
+      const alreadyPlaced = temp
+        .flat()
+        .some((cell) => cell.match?.matchNo === match.matchNo);
+
+      if (alreadyPlaced) return;
+
+      for (let r = maxRows - 1; r >= 0; r--) {
+        let done = false;
+
+        for (let c = 0; c < courtCount; c++) {
+          if (r >= (matchesPerCourt[c + 1] || 0)) continue;
+
+          if (!temp[r][c].match) {
+            temp[r][c].match = {
+              ...match,
+              forcedPlacement: true,
+            };
+
+            forcedMatches.push(temp[r][c].match);
+
+            done = true;
+            break;
+          }
+        }
+
+        if (done) break;
+      }
+    });
+
+    // ================= OPTIMIZE FORCED MATCHES =================
+
+    for (let i = 0; i < temp.length; i++) {
+      for (let j = 0; j < temp[i].length; j++) {
+        const cell = temp[i][j];
+
+        if (!cell.match?.forcedPlacement) continue;
+
+        for (let r = 0; r < notPlacedMatches.length; r++) {
+          const remainingMatch = notPlacedMatches[r];
+
+          if (canPlaceMatchInSlot(temp, remainingMatch, i, j)) {
+            // swap
+            const forcedMatch = cell.match;
+
+            cell.match = {
+              ...remainingMatch,
+              forcedPlacement: false,
+            };
+
+            notPlacedMatches[r] = {
+              ...forcedMatch,
+              forcedPlacement: false,
+            };
+
+            break;
+          }
+        }
+      }
+    }
+
+    pendingMatches.forEach((match) => {
+      const alreadyPlaced = temp
+        .flat()
+        .some((cell) => cell.match?.matchNo === match.matchNo);
+
+      if (!alreadyPlaced) {
+        const alreadyForced = forcedMatches.some(
+          (m) => m.matchNo === match.matchNo,
+        );
+
+        if (!alreadyForced) {
+          notPlacedMatches.push(match);
+        }
+      }
+    });
+
     return {
       grid: temp,
       remainingMatches: notPlacedMatches,
       forcedMatches, // ✅ useful for later sorting/UI
     };
   };
+
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
     alert("SAVE FUNCTION CALLED");
@@ -1181,6 +1291,62 @@ export default function OrderOfPlay() {
 
     return true;
   };
+
+  /* ================= FIX FORCED MATCHES ================= */
+
+  const canPlaceMatchInSlot = (grid, match, row, court) => {
+    const players = getPlayers(match);
+
+    const time = `${grid[row][court].time}-${row}`;
+
+    // Same Time Check
+    for (let c = 0; c < grid[row].length; c++) {
+      const cell = grid[row][c];
+
+      if (!cell.match) continue;
+      // Ignore the forced match already present in this slot
+      if (c === court) continue;
+
+      const otherPlayers = getPlayers(cell.match);
+
+      if (players.some((p) => otherPlayers.includes(p))) {
+        return false;
+      }
+    }
+
+    // Previous Row
+    if (row > 0) {
+      for (let c = 0; c < grid[row - 1].length; c++) {
+        const cell = grid[row - 1][c];
+
+        if (!cell.match) continue;
+
+        const otherPlayers = getPlayers(cell.match);
+
+        if (players.some((p) => otherPlayers.includes(p)) && c !== court) {
+          return false;
+        }
+      }
+    }
+
+    // Next Row
+    if (row < grid.length - 1) {
+      for (let c = 0; c < grid[row + 1].length; c++) {
+        const cell = grid[row + 1][c];
+
+        if (!cell.match) continue;
+
+        const otherPlayers = getPlayers(cell.match);
+
+        if (players.some((p) => otherPlayers.includes(p)) && c !== court) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
   /* ================= DRAG END ================= */
 
   const handleDragEnd = (event) => {
