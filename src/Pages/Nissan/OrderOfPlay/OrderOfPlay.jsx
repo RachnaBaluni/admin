@@ -932,11 +932,6 @@ export default function OrderOfPlay() {
         }
       }
 
-      if (!placed) {
-        pendingMatches.push(match);
-        placed = true;
-      }
-
       /* ================= FORCED PLACEMENT ================= */
       if (false && !placed) {
         console.log(
@@ -978,64 +973,6 @@ export default function OrderOfPlay() {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
     });
 
-    pendingMatches.forEach((match) => {
-      for (let i = 0; i < temp.length; i++) {
-        let placed = false;
-
-        for (let j = 0; j < temp[i].length; j++) {
-          if (!temp[i][j].match && canPlaceMatchInSlot(temp, match, i, j)) {
-            temp[i][j].match = match;
-            const players = getPlayers(match);
-            const time = `${getTimeLabel(i)}-${i}`;
-
-            if (!timeSlotPlayers[time]) {
-              timeSlotPlayers[time] = new Set();
-            }
-
-            players.forEach((p) => {
-              timeSlotPlayers[time].add(p);
-              playerLastRow[p] = i;
-              playerLastCourt[p] = j;
-            });
-            placed = true;
-            break;
-          }
-        }
-
-        if (placed) break;
-      }
-    });
-
-    pendingMatches.forEach((match) => {
-      const alreadyPlaced = temp
-        .flat()
-        .some((cell) => cell.match?.matchNo === match.matchNo);
-
-      if (alreadyPlaced) return;
-
-      for (let r = maxRows - 1; r >= 0; r--) {
-        let done = false;
-
-        for (let c = 0; c < courtCount; c++) {
-          if (r >= (matchesPerCourt[c + 1] || 0)) continue;
-
-          if (!temp[r][c].match) {
-            temp[r][c].match = {
-              ...match,
-              forcedPlacement: true,
-            };
-
-            forcedMatches.push(temp[r][c].match);
-
-            done = true;
-            break;
-          }
-        }
-
-        if (done) break;
-      }
-    });
-
     // ================= OPTIMIZE FORCED MATCHES =================
 
     for (let i = 0; i < temp.length; i++) {
@@ -1046,7 +983,12 @@ export default function OrderOfPlay() {
 
         for (let r = 0; r < notPlacedMatches.length; r++) {
           const remainingMatch = notPlacedMatches[r];
-
+          console.log(
+            "SWAP =>",
+            cell.match.matchNo,
+            "WITH",
+            remainingMatch.matchNo,
+          );
           if (canPlaceMatchInSlot(temp, remainingMatch, i, j)) {
             // swap
             const forcedMatch = cell.match;
@@ -1066,22 +1008,6 @@ export default function OrderOfPlay() {
         }
       }
     }
-
-    pendingMatches.forEach((match) => {
-      const alreadyPlaced = temp
-        .flat()
-        .some((cell) => cell.match?.matchNo === match.matchNo);
-
-      if (!alreadyPlaced) {
-        const alreadyForced = forcedMatches.some(
-          (m) => m.matchNo === match.matchNo,
-        );
-
-        if (!alreadyForced) {
-          notPlacedMatches.push(match);
-        }
-      }
-    });
 
     return {
       grid: temp,
