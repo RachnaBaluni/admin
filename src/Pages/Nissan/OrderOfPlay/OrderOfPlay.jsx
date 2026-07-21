@@ -342,12 +342,12 @@ export default function OrderOfPlay() {
   }, [events, selectedDate]);
 */
 
-  useEffect(() => {
-    console.log("fetchdata called from useEffect");
-    if (events.length > 0 && selectedDate && days.length === 0) {
-      fetchData();
-    }
-  }, [events, selectedDate]);
+  // useEffect(() => {
+  //   console.log("fetchdata called from useEffect");
+  //   if (events.length > 0 && selectedDate && days.length === 0) {
+  //     fetchData();
+  //   }
+  // }, [events, selectedDate]);
 
   useEffect(() => {
     const savedDays = sessionStorage.getItem("orderPlayDays");
