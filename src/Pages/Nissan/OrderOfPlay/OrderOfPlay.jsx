@@ -767,7 +767,20 @@ export default function OrderOfPlay() {
     });
 
     /* ================= 🔥 PLACE MATCHES ================= */
+    matches.sort((a, b) => {
+      const aPlayers = getPlayers(a);
+      const bPlayers = getPlayers(b);
 
+      const aPlayed = aPlayers.filter(
+        (p) => playerLastRow[p] !== undefined,
+      ).length;
+
+      const bPlayed = bPlayers.filter(
+        (p) => playerLastRow[p] !== undefined,
+      ).length;
+
+      return aPlayed - bPlayed;
+    });
     matches.forEach((match) => {
       console.log(
         "MATCH ORDER",
