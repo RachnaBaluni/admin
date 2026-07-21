@@ -956,18 +956,15 @@ export default function OrderOfPlay() {
 
       /* ================= TRY OTHER MATCHES BEFORE FORCED ================= */
       if (!placed) {
-        /* ================= TRY OTHER MATCHES BEFORE FORCED ================= */
-        if (!placed) {
-          for (let k = m + 1; k < matches.length; k++) {
-            const candidate = matches[k];
+        for (let k = m + 1; k < matches.length; k++) {
+          const candidate = matches[k];
 
-            console.log(
-              "TRYING CANDIDATE =>",
-              candidate.matchNo,
-              "INSTEAD OF",
-              match.matchNo,
-            );
-          }
+          console.log(
+            "TRYING CANDIDATE =>",
+            candidate.matchNo,
+            "INSTEAD OF",
+            match.matchNo,
+          );
         }
       }
 
