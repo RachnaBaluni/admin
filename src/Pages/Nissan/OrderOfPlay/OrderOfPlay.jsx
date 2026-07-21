@@ -771,7 +771,12 @@ export default function OrderOfPlay() {
     matches.forEach((match) => {
       console.log(
         "MATCH ORDER",
-        matches.map((m) => m.matchNo),
+        matches.map((m) => ({
+          matchNo: m.matchNo,
+          forced: m.forcedPlacement,
+          stage: m.Stage,
+          category: m.category,
+        })),
       );
       const players = getPlayers(match);
       let placed = false;
