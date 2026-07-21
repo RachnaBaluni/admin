@@ -1626,7 +1626,7 @@ if (sourceError !== true) {
                 }}
               >
                 <h2 style={{ margin: 0 }}>
-                  Day {dayIndex + 1} - {dayIndex === 0 ? todayDate : day.date}
+                  Day {dayIndex + 1} - {day.date}{" "}
                 </h2>
 
                 {dayIndex > 0 && (
@@ -1855,59 +1855,6 @@ if (sourceError !== true) {
               )}
             </div>
           ))}
-
-          {showRemainingOnly && (
-            <div className={styles.remainingBox}>
-              <h3>Remaining Matches</h3>
-
-              {notPlacedMatches.length === 0 ? (
-                <p style={{ color: "green", fontWeight: "bold" }}>
-                  🎉 All matches scheduled successfully!
-                </p>
-              ) : (
-                notPlacedMatches.map((m, idx) => (
-                  <div key={m._id || idx} className={styles.remainingItem}>
-                    <p>
-                      <b>Category:</b> {m.category}
-                    </p>
-                    <p>
-                      <b>Round:</b> {m.Stage}
-                    </p>
-                    <p>
-                      <b>Match:</b> {getRemainingMatchDisplay(m)}
-                    </p>
-                  </div>
-                ))
-              )}
-
-              <button
-                className={styles.printBtn}
-                onClick={() => setShowRemainingOnly(false)}
-                style={{ marginTop: "10px" }}
-              >
-                Close
-              </button>
-            </div>
-          )}
-
-          {showFilters && (
-            <div style={{ marginTop: "30px" }}>
-              <h3>Remaining Matches: {notPlacedMatches.length}</h3>
-
-              {/* ✅ SUCCESS MESSAGE */}
-              {notPlacedMatches.length === 0 && (
-                <p
-                  style={{
-                    marginTop: "10px",
-                    color: "green",
-                    fontWeight: "bold",
-                  }}
-                >
-                  🎉 All matches scheduled successfully!
-                </p>
-              )}
-            </div>
-          )}
         </>
       )}
     </div>
