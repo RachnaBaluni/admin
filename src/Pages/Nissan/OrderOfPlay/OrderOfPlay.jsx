@@ -132,7 +132,7 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
 
       return null;
     };
-    //console.log(JSON.stringify(match, null, 2));
+    console.log(JSON.stringify(match, null, 2));
 
     const leftPrevMatch = allMatchesRef.current.find(
       (m) =>
@@ -343,6 +343,7 @@ export default function OrderOfPlay() {
 */
 
   useEffect(() => {
+    console.log("fetchdata called from useEffect");
     if (events.length > 0 && selectedDate && days.length === 0) {
       fetchData();
     }
@@ -353,6 +354,7 @@ export default function OrderOfPlay() {
 
     if (savedDays) {
       setDays(JSON.parse(savedDays));
+      return;
     }
 
     if (events.length > 0 && selectedDate) {
@@ -424,18 +426,16 @@ export default function OrderOfPlay() {
     let allMatches = [];
 
     const allowedRounds = rounds.map((r) => r.trim().toLowerCase());
-
-    const completedMatches = JSON.parse(
-      sessionStorage.getItem("completedMatches") || "[]",
-    );
-
-    // alert("SESSION COMPLETED: " + JSON.stringify(completedMatches));
+    console.log("Selected Rounds:", allowedRounds);
+    // 🔥 MATCH BUILD
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
       const matches = res.data.data || [];
+      const completedMatches = JSON.parse(
+        sessionStorage.getItem("completedMatches") || "[]",
+      );
 
       console.log("MATCHES API DATA", matches);
-      const completed = matches.find((m) => m.Winner);
 
       const filteredMatches = matches.filter((m) => {
         const isAllowedRound = allowedRounds.includes(
@@ -444,19 +444,20 @@ export default function OrderOfPlay() {
 
         if (!isAllowedRound) return false;
 
+        // Agar match complete hai
         if (m.Winner) {
-          return completedMatches.includes(String(m._id));
+          // Sirf wahi completed match dikhao jo Manage Results se complete hua
+          return completedMatches.includes(m._id);
         }
 
+        // Upcoming match hamesha dikhega
         return true;
       });
 
       console.table(
-        matches.map((m) => ({
-          id: String(m._id),
-          winner: !!m.Winner,
-          inSession: completedMatches.includes(String(m._id)),
-          stage: m.Stage,
+        filteredMatches.map((m) => ({
+          Stage: m.Stage,
+          Match: m.Match_number,
         })),
       );
 
@@ -726,7 +727,6 @@ export default function OrderOfPlay() {
 
     let notPlacedMatches = [];
     let forcedMatches = []; // ✅ added
-    let pendingMatches = [];
 
     /* ================= GRID CREATE ================= */
 
@@ -887,6 +887,7 @@ export default function OrderOfPlay() {
         console.log("NORMAL FAILED =>", match.matchNo);
       }
 
+      /* ================= 🔥 FORCED PLACEMENT ================= */
       /* ================= RELAXED PASS ================= */
       if (!placed) {
         for (let i = maxRows - 1; i >= 0; i--) {
@@ -933,7 +934,7 @@ export default function OrderOfPlay() {
       }
 
       /* ================= FORCED PLACEMENT ================= */
-      if (false && !placed) {
+      if (!placed) {
         console.log(
           "FORCED MATCH =>",
           match.matchNo,
@@ -973,49 +974,12 @@ export default function OrderOfPlay() {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
     });
 
-    // ================= OPTIMIZE FORCED MATCHES =================
-
-    for (let i = 0; i < temp.length; i++) {
-      for (let j = 0; j < temp[i].length; j++) {
-        const cell = temp[i][j];
-
-        if (!cell.match?.forcedPlacement) continue;
-
-        for (let r = 0; r < notPlacedMatches.length; r++) {
-          const remainingMatch = notPlacedMatches[r];
-          console.log(
-            "SWAP =>",
-            cell.match.matchNo,
-            "WITH",
-            remainingMatch.matchNo,
-          );
-          if (canPlaceMatchInSlot(temp, remainingMatch, i, j)) {
-            // swap
-            const forcedMatch = cell.match;
-
-            cell.match = {
-              ...remainingMatch,
-              forcedPlacement: false,
-            };
-
-            notPlacedMatches[r] = {
-              ...forcedMatch,
-              forcedPlacement: false,
-            };
-
-            break;
-          }
-        }
-      }
-    }
-
     return {
       grid: temp,
       remainingMatches: notPlacedMatches,
       forcedMatches, // ✅ useful for later sorting/UI
     };
   };
-
   /* ================= SAVE DATA ================= */
   const saveOrderOfPlay = async () => {
     alert("SAVE FUNCTION CALLED");
@@ -1217,62 +1181,6 @@ export default function OrderOfPlay() {
 
     return true;
   };
-
-  /* ================= FIX FORCED MATCHES ================= */
-
-  const canPlaceMatchInSlot = (grid, match, row, court) => {
-    const players = getPlayers(match);
-
-    const time = `${grid[row][court].time}-${row}`;
-
-    // Same Time Check
-    for (let c = 0; c < grid[row].length; c++) {
-      const cell = grid[row][c];
-
-      if (!cell.match) continue;
-      // Ignore the forced match already present in this slot
-      if (c === court) continue;
-
-      const otherPlayers = getPlayers(cell.match);
-
-      if (players.some((p) => otherPlayers.includes(p))) {
-        return false;
-      }
-    }
-
-    // Previous Row
-    if (row > 0) {
-      for (let c = 0; c < grid[row - 1].length; c++) {
-        const cell = grid[row - 1][c];
-
-        if (!cell.match) continue;
-
-        const otherPlayers = getPlayers(cell.match);
-
-        if (players.some((p) => otherPlayers.includes(p)) && c !== court) {
-          return false;
-        }
-      }
-    }
-
-    // Next Row
-    if (row < grid.length - 1) {
-      for (let c = 0; c < grid[row + 1].length; c++) {
-        const cell = grid[row + 1][c];
-
-        if (!cell.match) continue;
-
-        const otherPlayers = getPlayers(cell.match);
-
-        if (players.some((p) => otherPlayers.includes(p)) && c !== court) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  };
-
   /* ================= DRAG END ================= */
 
   const handleDragEnd = (event) => {
@@ -1291,9 +1199,6 @@ export default function OrderOfPlay() {
     let overPos = null;
     let activeDayIndex = null;
     let overDayIndex = null;
-    let remainingDayIndex = null;
-    let remainingIndex = null;
-    const isRemainingMatch = String(activeId).startsWith("remaining-");
 
     // 🔍 Find positions
     days.forEach((day, dIndex) => {
@@ -1312,79 +1217,7 @@ export default function OrderOfPlay() {
       });
     });
 
-    if (isRemainingMatch) {
-      const matchId = activeId.replace("remaining-", "");
-
-      days.forEach((day, dIndex) => {
-        const index = day.remaining.findIndex((m) => m._id === matchId);
-
-        if (index !== -1) {
-          remainingDayIndex = dIndex;
-          remainingIndex = index;
-
-          activePos = {
-            remaining: true,
-            match: day.remaining[index],
-          };
-        }
-      });
-    }
-
-    console.log("ACTIVE POS", activePos);
-    console.log("OVER POS", overPos);
     if (!activePos || !overPos) return;
-
-    if (isRemainingMatch) {
-      if (remainingDayIndex !== overDayIndex) {
-        toast.error("Remaining match can only be swapped within same day.");
-        return;
-      }
-
-      const newDays = JSON.parse(JSON.stringify(days));
-
-      const draggedMatch = newDays[remainingDayIndex].remaining[remainingIndex];
-
-      const targetCell = newDays[overDayIndex].grid[overPos.i][overPos.j];
-
-      if (!targetCell.match) {
-        toast.error("Drop on scheduled match only.");
-        return;
-      }
-
-      const completedMatches = JSON.parse(
-        sessionStorage.getItem("completedMatches") || "[]",
-      );
-
-      if (completedMatches.includes(targetCell.match._id)) {
-        toast.error("Completed match cannot be moved.");
-        return;
-      }
-
-      // swap
-      const scheduledMatch = targetCell.match;
-
-      targetCell.match = draggedMatch;
-
-      newDays[remainingDayIndex].remaining[remainingIndex] = scheduledMatch;
-
-      // validation
-      const err = validateLocalMove(
-        newDays[overDayIndex].grid,
-        overPos.i,
-        overPos.j,
-      );
-
-      if (err !== true) {
-        toast.error(err);
-        return;
-      }
-
-      setDays(newDays);
-
-      toast.success("Match swapped successfully");
-
-      return;
-    }
     /*
 if (
   sourceDay === targetDay &&
@@ -1849,36 +1682,7 @@ if (sourceError !== true) {
                     ))}
                   </div>
                 ))}
-
-                {/* REMAINING MATCHES CARDS */}
-                {showRemainingOnly && day.remaining.length > 0 && (
-                  <>
-                    <h3 style={{ marginTop: "30px" }}>
-                      Remaining Matches ({day.remaining.length})
-                    </h3>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: `repeat(${day.courtCount}, 1fr)`,
-                        gap: "20px",
-                        marginBottom: "30px",
-                      }}
-                    >
-                      {day.remaining.map((match) => (
-                        <DraggableMatch
-                          key={match._id}
-                          match={match}
-                          time={"Not Scheduled"}
-                          allMatchesRef={allMatchesRef}
-                          isRemaining={true}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
               </DndContext>
-
               {/* ADD NEXT DAY */}
               {showFilters && dayIndex === days.length - 1 && (
                 <div className={styles.addDayBox}>
@@ -2026,8 +1830,44 @@ if (sourceError !== true) {
             </div>
           ))}
 
+          {showRemainingOnly && (
+            <div className={styles.remainingBox}>
+              <h3>Remaining Matches</h3>
+
+              {notPlacedMatches.length === 0 ? (
+                <p style={{ color: "green", fontWeight: "bold" }}>
+                  🎉 All matches scheduled successfully!
+                </p>
+              ) : (
+                notPlacedMatches.map((m, idx) => (
+                  <div key={m._id || idx} className={styles.remainingItem}>
+                    <p>
+                      <b>Category:</b> {m.category}
+                    </p>
+                    <p>
+                      <b>Round:</b> {m.Stage}
+                    </p>
+                    <p>
+                      <b>Match:</b> {getRemainingMatchDisplay(m)}
+                    </p>
+                  </div>
+                ))
+              )}
+
+              <button
+                className={styles.printBtn}
+                onClick={() => setShowRemainingOnly(false)}
+                style={{ marginTop: "10px" }}
+              >
+                Close
+              </button>
+            </div>
+          )}
+
           {showFilters && (
             <div style={{ marginTop: "30px" }}>
+              <h3>Remaining Matches: {notPlacedMatches.length}</h3>
+
               {/* ✅ SUCCESS MESSAGE */}
               {notPlacedMatches.length === 0 && (
                 <p
