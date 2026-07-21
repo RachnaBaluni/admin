@@ -769,6 +769,10 @@ export default function OrderOfPlay() {
     /* ================= 🔥 PLACE MATCHES ================= */
 
     matches.forEach((match) => {
+      console.log(
+        "MATCH ORDER",
+        matches.map((m) => m.matchNo),
+      );
       const players = getPlayers(match);
       let placed = false;
       let hadConflict = false;
