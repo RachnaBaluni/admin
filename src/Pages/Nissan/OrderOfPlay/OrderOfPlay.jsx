@@ -781,7 +781,8 @@ export default function OrderOfPlay() {
 
       return aPlayed - bPlayed;
     });
-    matches.forEach((match) => {
+    for (let m = 0; m < matches.length; m++) {
+      const match = matches[m];
       console.log(
         "MATCH ORDER",
         matches.map((m) => ({
@@ -908,7 +909,6 @@ export default function OrderOfPlay() {
         console.log("NORMAL FAILED =>", match.matchNo);
       }
 
-      /* ================= 🔥 FORCED PLACEMENT ================= */
       /* ================= RELAXED PASS ================= */
       if (!placed) {
         for (let i = maxRows - 1; i >= 0; i--) {
@@ -954,6 +954,23 @@ export default function OrderOfPlay() {
         }
       }
 
+      /* ================= TRY OTHER MATCHES BEFORE FORCED ================= */
+      if (!placed) {
+        /* ================= TRY OTHER MATCHES BEFORE FORCED ================= */
+        if (!placed) {
+          for (let k = m + 1; k < matches.length; k++) {
+            const candidate = matches[k];
+
+            console.log(
+              "TRYING CANDIDATE =>",
+              candidate.matchNo,
+              "INSTEAD OF",
+              match.matchNo,
+            );
+          }
+        }
+      }
+
       /* ================= FORCED PLACEMENT ================= */
       if (!placed) {
         console.log(
@@ -989,7 +1006,7 @@ export default function OrderOfPlay() {
       if (!placed) {
         notPlacedMatches.push(match);
       }
-    });
+    }
 
     temp.forEach((row, idx) => {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
