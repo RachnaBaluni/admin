@@ -1688,7 +1688,14 @@ if (sourceError !== true) {
                 <div className={styles.remainingSection}>
                   <h3>Remaining Matches</h3>
 
-                  <div className={styles.remainingCards}>
+                  <div
+                    className={styles.row}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
+                      gap: "20px",
+                    }}
+                  >
                     {day.remaining.map((match) => (
                       <DraggableMatch
                         key={match._id}
