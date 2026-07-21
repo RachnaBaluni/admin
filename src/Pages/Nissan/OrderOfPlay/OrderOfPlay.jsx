@@ -1638,10 +1638,12 @@ if (sourceError !== true) {
 
             <button
               className={styles.generateBtn}
-              onClick={() => setShowRemainingOnly(true)}
+              onClick={() => setShowRemainingOnly(!showRemainingOnly)}
               style={{ marginTop: "10px" }}
             >
-              Show Remaining Matches ({notPlacedMatches.length})
+              {showRemainingOnly
+                ? "Hide Remaining Matches"
+                : `Show Remaining Matches (${notPlacedMatches.length})`}
             </button>
           </div>
         </div>
@@ -1720,30 +1722,32 @@ if (sourceError !== true) {
               </DndContext>
 
               {/* 👇 Remaining Matches of this Day */}
-              {day.remaining && day.remaining.length > 0 && (
-                <div className={styles.remainingSection}>
-                  <h3>Remaining Matches</h3>
+              {showRemainingOnly &&
+                day.remaining &&
+                day.remaining.length > 0 && (
+                  <div className={styles.remainingSection}>
+                    <h3>Remaining Matches</h3>
 
-                  <div
-                    className={styles.row}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
-                      gap: "20px",
-                    }}
-                  >
-                    {day.remaining.map((match) => (
-                      <DraggableMatch
-                        key={match._id}
-                        match={match}
-                        time="Remaining"
-                        allMatchesRef={allMatchesRef}
-                        isRemaining={true}
-                      />
-                    ))}
+                    <div
+                      className={styles.row}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
+                        gap: "20px",
+                      }}
+                    >
+                      {day.remaining.map((match) => (
+                        <DraggableMatch
+                          key={match._id}
+                          match={match}
+                          time="Remaining"
+                          allMatchesRef={allMatchesRef}
+                          isRemaining={true}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* ADD NEXT DAY */}
               {showFilters && dayIndex === days.length - 1 && (
