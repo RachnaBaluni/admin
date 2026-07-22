@@ -249,7 +249,7 @@ export default function OrderOfPlay() {
     return d.toISOString().split("T")[0];
   };
 
-  const [showRemainingOnly, setShowRemainingOnly] = useState(null);
+  const [showRemainingDay, setShowRemainingOnly] = useState(null);
 
   const [selectedCategories, setSelectedCategories] = useState([
     "Cat.A(65+ combined)",
