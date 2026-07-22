@@ -249,8 +249,7 @@ export default function OrderOfPlay() {
     return d.toISOString().split("T")[0];
   };
 
-  const [showRemainingOnly, setShowRemainingOnly] = useState(false);
-
+  const [showRemainingDay, setShowRemainingDay] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([
     "Cat.A(65+ combined)",
   ]);
@@ -1930,13 +1929,54 @@ export default function OrderOfPlay() {
 
                       <button
                         className={styles.generateBtn}
-                        onClick={() => setShowRemainingOnly(!showRemainingOnly)}
+                        onClick={() => setShowRemainingDay(dayIndex)}
                         style={{ marginTop: "10px" }}
                       >
-                        {showRemainingOnly
+                        {showRemainingDay === dayIndex
                           ? "Hide Remaining Matches"
-                          : `Show Remaining Matches (${notPlacedMatches.length})`}
+                          : `Show Remaining Matches (${day.remaining?.length || 0})`}
                       </button>
+
+                      {/* Add Day Button */}
+                      <button
+                        className={styles.generateBtn}
+                        onClick={addNextDay}
+                        style={{ marginTop: "25px" }}
+                      >
+                        + Add Day
+                      </button>
+
+                      {/* Show Remaining Matches Button */}
+                      <button
+                        className={styles.generateBtn}
+                        onClick={() => setShowRemainingDay(dayIndex)}
+                        style={{ marginTop: "10px" }}
+                      >
+                        {showRemainingDay === dayIndex
+                          ? "Hide Remaining Matches"
+                          : `Show Remaining Matches (${day.remaining?.length || 0})`}
+                      </button>
+
+                      {/* YE CODE BUTTON KE TURANT NEECHHE */}
+                      {showRemainingDay === dayIndex &&
+                        day.remaining &&
+                        day.remaining.length > 0 && (
+                          <div className={styles.remainingSection}>
+                            <h3>Remaining Matches - Day {dayIndex + 1}</h3>
+
+                            <div className={styles.row}>
+                              {day.remaining.map((match) => (
+                                <DraggableMatch
+                                  key={match._id}
+                                  match={match}
+                                  time="Remaining"
+                                  allMatchesRef={allMatchesRef}
+                                  isRemaining={true}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
