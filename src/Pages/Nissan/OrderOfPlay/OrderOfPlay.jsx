@@ -343,23 +343,23 @@ export default function OrderOfPlay() {
 */
 
   useEffect(() => {
-    if (events.length > 0 && selectedDate) {
+    if (events.length > 0 && selectedDate && days.length === 0) {
       fetchData();
     }
   }, [events, selectedDate]);
 
-  // useEffect(() => {
-  //   const savedDays = sessionStorage.getItem("orderPlayDays");
+  useEffect(() => {
+    const savedDays = sessionStorage.getItem("orderPlayDays");
 
-  //   if (savedDays) {
-  //     setDays(JSON.parse(savedDays));
-  //     return;
-  //   }
+    if (savedDays) {
+      setDays(JSON.parse(savedDays));
+      return;
+    }
 
-  //   if (events.length > 0 && selectedDate) {
-  //     fetchData();
-  //   }
-  // }, [events, selectedDate]);
+    if (events.length > 0 && selectedDate) {
+      fetchData();
+    }
+  }, [events, selectedDate]);
 
   const fetchEvents = async () => {
     try {
@@ -401,7 +401,7 @@ export default function OrderOfPlay() {
     }
   };
 
-  const getMatches = async (categories, rounds, date) => {
+  const getMatches = async (categories, rounds) => {
     const filteredEvents =
       categories.length > 0
         ? events.filter((ev) => categories.includes(ev.name))
@@ -443,12 +443,13 @@ export default function OrderOfPlay() {
 
         if (!isAllowedRound) return false;
 
-        // Show completed matches only if they were completed in Manage Results
+        // Agar match complete hai
         if (m.Winner) {
+          // Sirf wahi completed match dikhao jo Manage Results se complete hua
           return completedMatches.includes(m._id);
         }
 
-        // Always show upcoming matches
+        // Upcoming match hamesha dikhega
         return true;
       });
 
@@ -566,38 +567,7 @@ export default function OrderOfPlay() {
     }
 
     try {
-      const orderPlayRes = await axios.get(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play/${selectedEventId}`,
-        { withCredentials: true },
-      );
-
-      console.log("ORDER OF PLAY DATA:", orderPlayRes.data.data);
-
-      const selectedDayData = orderPlayRes.data.data.find(
-        (day) => day.playDate === selectedDate,
-      );
-
-      console.log("SELECTED DATE ORDER OF PLAY:", selectedDayData);
-      const savedOrderRes = await axios.get(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play/${selectedEventId}`,
-        { withCredentials: true },
-      );
-
-      const savedOrders = savedOrderRes.data.data || [];
-
-      const currentDateOrder = savedOrders.find(
-        (order) => order.playDate === selectedDate,
-      );
-
-      console.log("SELECTED DATE:", selectedDate);
-      console.log("SAVED ORDERS:", savedOrders);
-      console.log("CURRENT DATE ORDER:", currentDateOrder);
-
-      const allMatches = await getMatches(
-        selectedCategories,
-        selectedRounds,
-        selectedDate,
-      );
+      const allMatches = await getMatches(selectedCategories, selectedRounds);
       console.log(
         "GET MATCHES WINNER CHECK",
         allMatches.filter((m) => m.Status === "Completed"),
