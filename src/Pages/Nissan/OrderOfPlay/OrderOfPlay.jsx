@@ -249,7 +249,8 @@ export default function OrderOfPlay() {
     return d.toISOString().split("T")[0];
   };
 
-  const [showRemainingDay, setShowRemainingDay] = useState(null);
+  const [showRemainingOnly, setShowRemainingOnly] = useState(false);
+
   const [selectedCategories, setSelectedCategories] = useState([
     "Cat.A(65+ combined)",
   ]);
@@ -1676,10 +1677,10 @@ export default function OrderOfPlay() {
 
             <button
               className={styles.generateBtn}
-              onClick={() => setShowRemainingOnly(!showRemainingDay)}
+              onClick={() => setShowRemainingOnly(!showRemainingOnly)}
               style={{ marginTop: "10px" }}
             >
-              {showRemainingDay
+              {showRemainingOnly
                 ? "Hide Remaining Matches"
                 : `Show Remaining Matches (${notPlacedMatches.length})`}
             </button>
@@ -1759,7 +1760,7 @@ export default function OrderOfPlay() {
                 ))}
 
                 {/* 👇 Remaining Matches of this Day */}
-                {showRemainingDay &&
+                {showRemainingOnly &&
                   day.remaining &&
                   day.remaining.length > 0 && (
                     <div className={styles.remainingSection}>
@@ -1929,54 +1930,13 @@ export default function OrderOfPlay() {
 
                       <button
                         className={styles.generateBtn}
-                        onClick={() => setShowRemainingDay(dayIndex)}
+                        onClick={() => setShowRemainingOnly(!showRemainingOnly)}
                         style={{ marginTop: "10px" }}
                       >
-                        {showRemainingDay === dayIndex
+                        {showRemainingOnly
                           ? "Hide Remaining Matches"
-                          : `Show Remaining Matches (${day.remaining?.length || 0})`}
+                          : `Show Remaining Matches (${notPlacedMatches.length})`}
                       </button>
-
-                      {/* Add Day Button */}
-                      <button
-                        className={styles.generateBtn}
-                        onClick={addNextDay}
-                        style={{ marginTop: "25px" }}
-                      >
-                        + Add Day
-                      </button>
-
-                      {/* Show Remaining Matches Button */}
-                      <button
-                        className={styles.generateBtn}
-                        onClick={() => setShowRemainingDay(dayIndex)}
-                        style={{ marginTop: "10px" }}
-                      >
-                        {showRemainingDay === dayIndex
-                          ? "Hide Remaining Matches"
-                          : `Show Remaining Matches (${day.remaining?.length || 0})`}
-                      </button>
-
-                      {/* YE CODE BUTTON KE TURANT NEECHHE */}
-                      {showRemainingDay === dayIndex &&
-                        day.remaining &&
-                        day.remaining.length > 0 && (
-                          <div className={styles.remainingSection}>
-                            <h3>Remaining Matches - Day {dayIndex + 1}</h3>
-
-                            <div className={styles.row}>
-                              {day.remaining.map((match) => (
-                                <DraggableMatch
-                                  key={match._id}
-                                  match={match}
-                                  time="Remaining"
-                                  allMatchesRef={allMatchesRef}
-                                  isRemaining={true}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        )}
                     </div>
                   </div>
                 </div>
