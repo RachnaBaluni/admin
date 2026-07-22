@@ -1222,28 +1222,38 @@ export default function OrderOfPlay() {
     console.log("DRAG END CALLED");
 
     const { active, over } = event;
-    console.log("ACTIVE =", active?.id);
-    console.log("OVER =", over?.id);
-    if (!over) return;
-    if (active.id === over.id) return;
 
-    const activeId = active.id;
-    const overId = over.id;
+    if (!over) return;
+
+    const activeId = String(active.id);
+    const overId = String(over.id);
+
+    const isRemainingMatch = activeId.startsWith("remaining-");
+
+    console.log("ACTIVE ID =", activeId);
+    console.log("OVER ID =", overId);
+    console.log("IS REMAINING MATCH =", isRemainingMatch);
 
     let activePos = null;
     let overPos = null;
     let activeDayIndex = null;
     let overDayIndex = null;
 
-    // 🔍 Find positions
+    // Find the source and target positions
     days.forEach((day, dIndex) => {
       day.grid.forEach((row, i) => {
         row.forEach((cell, j) => {
-          if (cell?.match?._id === activeId) {
+          // Find the dragged scheduled match
+          if (
+            !isRemainingMatch &&
+            cell?.match &&
+            String(cell.match._id) === activeId
+          ) {
             activePos = { i, j };
             activeDayIndex = dIndex;
           }
 
+          // Find the target slot
           if (`slot-${dIndex}-${i}-${j}` === overId) {
             overPos = { i, j };
             overDayIndex = dIndex;
@@ -1252,132 +1262,67 @@ export default function OrderOfPlay() {
       });
     });
 
-    if (!activePos || !overPos) return;
-    /*
-if (
-  sourceDay === targetDay &&
-  activePos.i === overPos.i &&
-  activePos.j === overPos.j
-) {
-  return;
-}
-
-*/
-
-    // ❌ cross day swap allowed? (YES for you)
-    const sourceDay = activeDayIndex;
-    const targetDay = overDayIndex;
-
-    const newDays = JSON.parse(JSON.stringify(days));
-
-    const dragged = newDays[sourceDay].grid[activePos.i][activePos.j];
-    const completedMatches = JSON.parse(
-      sessionStorage.getItem("completedMatches") || "[]",
-    );
-    console.log("completedMatches =", completedMatches);
-    completedMatches.forEach((item, i) => {
-      console.log(i, item, typeof item);
-    });
-
-    if (completedMatches.includes(dragged?.match?._id)) {
-      toast.error("Completed matches cannot be moved.");
+    // Stop if the drop target is not a valid slot
+    if (!overPos || overDayIndex === null) {
       return;
     }
 
-    const target = newDays[targetDay].grid[overPos.i][overPos.j];
-
-    const draggedPlayers = getPlayers(dragged.match || {});
-    const targetPlayers = getPlayers(target.match || {});
-
-    const affectedPlayers = [...new Set([...draggedPlayers, ...targetPlayers])];
-    console.log("DRAGGED MATCH =", dragged?.match?.matchNo);
-    console.log("DRAGGED DATA =", dragged?.match);
-
-    console.log("TARGET MATCH =", target?.match?.matchNo);
-    console.log("TARGET DATA =", target?.match);
-
-    if (!dragged?.match) return;
-
-    // 👉 if same day → swap
-    if (sourceDay === targetDay) {
-      if (!target?.match) return;
-
-      console.log("SOURCE CELL =", activePos);
-      console.log("TARGET CELL =", overPos);
-      console.log("DRAGGED MATCH =", dragged?.match?.matchNo);
-      console.log("TARGET MATCH BEFORE SWAP =", target?.match?.matchNo);
-
-      const temp = dragged.match;
-      dragged.match = target.match;
-      target.match = temp;
-      console.log("TARGET MATCH AFTER SWAP =", target?.match?.matchNo);
-    } else {
-      // 👉 MOVE to next day (shift logic)
-      if (target?.match) {
-        toast.error("❌ Target slot not empty");
-        return;
-      }
-
-      target.match = dragged.match;
-      dragged.match = null;
+    // Scheduled match must have a valid source position
+    if (!isRemainingMatch && !activePos) {
+      return;
     }
 
-    // 🔥 VALIDATION FUNCTION
-    const validateDay = (grid) => {
-      const timeMap = {}; // 🔥 important
+    const sourceDay = activeDayIndex;
+    const targetDay = overDayIndex;
 
+    // Find the selected remaining match
+    let remainingMatch = null;
+
+    if (isRemainingMatch) {
+      const remainingMatchId = activeId.replace("remaining-", "");
+
+      // Only search in the target day's remaining matches
+      remainingMatch = days[targetDay].remaining?.find(
+        (match) => String(match._id) === String(remainingMatchId),
+      );
+
+      console.log("REMAINING MATCH FOUND =", remainingMatch);
+
+      if (!remainingMatch) {
+        toast.error("❌ Remaining match not found");
+        return;
+      }
+    }
+
+    // Create a deep copy so the original state is not modified
+    const newDays = JSON.parse(JSON.stringify(days));
+
+    // Validate the complete day schedule
+    const validateDay = (grid) => {
+      const timeMap = {};
       const playerLastRow = {};
 
       for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[i].length; j++) {
           const cell = grid[i][j];
+
           if (!cell?.match) continue;
 
           const players = getPlayers(cell.match);
           const time = `${cell.time}-${i}`;
 
-          // 🔥 SAME TIME CHECK (STRICT)
           if (!timeMap[time]) {
             timeMap[time] = new Set();
           }
 
+          // Check same player at the same time
           for (const p of players) {
-            console.log(
-              "CONFLICT MATCH NO =",
-              cell.match.matchNo,
-              "TIME =",
-              time,
-            );
-
             if (timeMap[time].has(p)) {
-              console.log("CONFLICT PLAYER =", p);
-              console.log("TIME =", time);
-              console.log("MATCH =", cell.match.matchNo);
-
-              for (let r = 0; r <= i; r++) {
-                for (let c = 0; c < grid[r].length; c++) {
-                  const oldCell = grid[r][c];
-
-                  if (
-                    oldCell?.match &&
-                    oldCell.match._id !== cell.match._id &&
-                    getPlayers(oldCell.match).includes(p)
-                  ) {
-                    console.log(
-                      "PREVIOUS MATCH NO =",
-                      oldCell.match.matchNo,
-                      "ROW =",
-                      r,
-                      "COURT =",
-                      c,
-                    );
-                  }
-                }
-              }
               return "❌ Same player same time";
             }
           }
-          // 🔥 CONSECUTIVE CHECK
+
+          // Check consecutive matches on different courts
           for (const p of players) {
             if (playerLastRow[p] !== undefined) {
               const diff = Math.abs(playerLastRow[p] - i);
@@ -1386,95 +1331,189 @@ if (
                 const lastCourt = grid[playerLastRow[p]].findIndex(
                   (c) => c.match && getPlayers(c.match).includes(p),
                 );
-                console.log("PLAYER =", p);
-                console.log("LAST ROW =", playerLastRow[p]);
-                console.log("CURRENT ROW =", i);
-                console.log("LAST COURT =", lastCourt);
-                console.log("CURRENT COURT =", j);
 
                 if (lastCourt !== j) {
-                  return "❌ Consecutive matches on different courts"; // consecutive matches on different courts
+                  return "❌ Consecutive matches on different courts";
                 }
               }
             }
           }
 
-          // ✅ update trackers
-          players.forEach((p) => timeMap[time].add(p));
-          players.forEach((p) => (playerLastRow[p] = i));
+          // Update validation trackers
+          players.forEach((p) => {
+            timeMap[time].add(p);
+          });
+
+          players.forEach((p) => {
+            playerLastRow[p] = i;
+          });
         }
       }
 
       return true;
     };
-    /*
 
-  // ❌ validate both days
- // 👉 source day validation
-const sourceError = validateDay(newDays[sourceDay].grid);
-//console.log("SOURCE VALIDATION =", sourceError);
+    // Get the dragged match
+    let dragged = null;
 
-if (sourceError !== true) {
-  toast.error(sourceError);
-  return;
-}
-  */
-
-    // 👉 target day validation (sirf agar different day ho)
-    if (sourceDay !== targetDay) {
-      const targetError = validateDay(newDays[targetDay].grid);
-
-      if (targetError !== true) {
-        toast.error(targetError);
-        return;
-      }
+    if (isRemainingMatch) {
+      // Create a temporary dragged object for the remaining match
+      dragged = {
+        match: remainingMatch,
+      };
+    } else {
+      // Get the scheduled match from the source slot
+      dragged = newDays[sourceDay].grid[activePos.i][activePos.j];
     }
-    console.log("BEFORE VALIDATE ALL DAYS");
-    /*
-    const allDaysError = validateAllDays(newDays);
-    console.log("VALIDATION RESULT =", allDaysError);
 
-    if (allDaysError !== true) {
-      toast.error(allDaysError);
-      return;
-    }
-*/
-    // 🔥 Sirf dragged card validate karo
-    const dragError = validateLocalMove(
-      newDays[sourceDay].grid,
-      overPos.i,
-      overPos.j,
+    console.log("DRAGGED MATCH =", dragged?.match?.matchNo);
+
+    // Check completed matches
+    const completedMatches = JSON.parse(
+      sessionStorage.getItem("completedMatches") || "[]",
     );
 
-    if (dragError !== true) {
-      toast.error(dragError);
+    if (completedMatches.includes(dragged?.match?._id)) {
+      toast.error("Completed matches cannot be moved.");
       return;
     }
 
-    // 🔥 Swap hua dusra card bhi validate karo
-    if (sourceDay === targetDay) {
-      const targetError = validateLocalMove(
-        newDays[targetDay].grid,
-        activePos.i,
-        activePos.j,
-      );
+    // Get the target slot
+    const target = newDays[targetDay].grid[overPos.i][overPos.j];
 
-      if (targetError !== true) {
-        toast.error(targetError);
+    console.log("TARGET MATCH =", target?.match?.matchNo);
+
+    if (!dragged?.match) {
+      return;
+    }
+
+    // =====================================================
+    // REMAINING MATCH SWAP
+    // =====================================================
+
+    if (isRemainingMatch) {
+      // Remaining match can only be swapped within the same day
+      if (sourceDay !== targetDay) {
+        // sourceDay is null for remaining matches,
+        // so this condition is not used for remaining matches
+      }
+
+      // Remaining match cannot be dropped on an empty slot
+      if (!target?.match) {
+        toast.error("❌ Remaining match can only replace an existing match");
         return;
       }
+
+      console.log("REMAINING MATCH =", dragged.match?.matchNo);
+
+      console.log("SCHEDULED MATCH TO REPLACE =", target.match?.matchNo);
+
+      // Store the scheduled match before replacing it
+      const oldScheduledMatch = target.match;
+
+      // Temporarily place the remaining match
+      // into the target slot
+      target.match = dragged.match;
+
+      // Validate the complete target day
+      const targetDayError = validateDay(newDays[targetDay].grid);
+
+      // Stop if the new schedule is invalid
+      if (targetDayError !== true) {
+        toast.error(targetDayError);
+        return;
+      }
+
+      // Get the current remaining matches
+      const remainingList = newDays[targetDay].remaining || [];
+
+      // Remove the selected remaining match
+      // and add the replaced scheduled match
+      newDays[targetDay].remaining = [
+        ...remainingList.filter(
+          (match) => String(match._id) !== String(remainingMatch._id),
+        ),
+        oldScheduledMatch,
+      ];
+
+      console.log("AFTER SWAP TARGET =", target.match?.matchNo);
+
+      console.log("AFTER SWAP REMAINING =", oldScheduledMatch?.matchNo);
     }
+
+    // =====================================================
+    // NORMAL SCHEDULED MATCH DRAG
+    // =====================================================
+    else {
+      // Same day scheduled match swap
+      if (sourceDay === targetDay) {
+        // Target must contain a match
+        if (!target?.match) {
+          return;
+        }
+
+        // Validate the scheduled match movement
+        const dragError = validateLocalMove(
+          newDays[sourceDay].grid,
+          overPos.i,
+          overPos.j,
+        );
+
+        if (dragError !== true) {
+          toast.error(dragError);
+          return;
+        }
+
+        // Temporarily swap the two matches
+        const draggedMatch = dragged.match;
+
+        const targetMatch = target.match;
+
+        dragged.match = targetMatch;
+        target.match = draggedMatch;
+
+        // Validate the complete day after the swap
+        const targetDayError = validateDay(newDays[targetDay].grid);
+
+        if (targetDayError !== true) {
+          toast.error(targetDayError);
+          return;
+        }
+      }
+
+      // Move scheduled match to another day
+      else {
+        // Do not allow dropping on an occupied slot
+        if (target?.match) {
+          toast.error("❌ Target slot not empty");
+          return;
+        }
+
+        // Move the match to the target day
+        target.match = dragged.match;
+
+        // Remove the match from the source day
+        dragged.match = null;
+
+        // Validate the target day
+        const targetDayError = validateDay(newDays[targetDay].grid);
+
+        if (targetDayError !== true) {
+          toast.error(targetDayError);
+          return;
+        }
+      }
+    }
+
     console.log("BEFORE SET DAYS");
 
-    // ✅ APPLY
+    // Apply the updated schedule
     setDays(newDays);
+
     console.log("AFTER SET DAYS");
 
     toast.success("✅ Match moved successfully");
-    // ✅ APPLY
   };
-  //console.log("DAYS:", days);
-  //console.log("Remaining:", notPlacedMatches);
 
   /* ================= UI ================= */
 
@@ -1719,36 +1758,35 @@ if (sourceError !== true) {
                     ))}
                   </div>
                 ))}
-              </DndContext>
 
-              {/* 👇 Remaining Matches of this Day */}
-              {showRemainingOnly &&
-                day.remaining &&
-                day.remaining.length > 0 && (
-                  <div className={styles.remainingSection}>
-                    <h3>Remaining Matches</h3>
+                {/* 👇 Remaining Matches of this Day */}
+                {showRemainingOnly &&
+                  day.remaining &&
+                  day.remaining.length > 0 && (
+                    <div className={styles.remainingSection}>
+                      <h3>Remaining Matches</h3>
 
-                    <div
-                      className={styles.row}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
-                        gap: "20px",
-                      }}
-                    >
-                      {day.remaining.map((match) => (
-                        <DraggableMatch
-                          key={match._id}
-                          match={match}
-                          time="Remaining"
-                          allMatchesRef={allMatchesRef}
-                          isRemaining={true}
-                        />
-                      ))}
+                      <div
+                        className={styles.row}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
+                          gap: "20px",
+                        }}
+                      >
+                        {day.remaining.map((match) => (
+                          <DraggableMatch
+                            key={match._id}
+                            match={match}
+                            time="Remaining"
+                            allMatchesRef={allMatchesRef}
+                            isRemaining={true}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-
+                  )}
+              </DndContext>
               {/* ADD NEXT DAY */}
               {showFilters && dayIndex === days.length - 1 && (
                 <div className={styles.addDayBox}>
