@@ -566,6 +566,18 @@ export default function OrderOfPlay() {
     }
 
     try {
+      const orderPlayRes = await axios.get(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play/${selectedEventId}`,
+        { withCredentials: true },
+      );
+
+      console.log("ORDER OF PLAY DATA:", orderPlayRes.data.data);
+
+      const selectedDayData = orderPlayRes.data.data.find(
+        (day) => day.playDate === selectedDate,
+      );
+
+      console.log("SELECTED DATE ORDER OF PLAY:", selectedDayData);
       const savedOrderRes = await axios.get(
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play/${selectedEventId}`,
         { withCredentials: true },
