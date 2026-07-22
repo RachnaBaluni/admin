@@ -1676,10 +1676,10 @@ export default function OrderOfPlay() {
 
             <button
               className={styles.generateBtn}
-              onClick={() => setShowRemainingOnly(!showRemainingOnly)}
+              onClick={() => setShowRemainingOnly(!showRemainingDay)}
               style={{ marginTop: "10px" }}
             >
-              {showRemainingOnly
+              {showRemainingDay
                 ? "Hide Remaining Matches"
                 : `Show Remaining Matches (${notPlacedMatches.length})`}
             </button>
@@ -1759,7 +1759,7 @@ export default function OrderOfPlay() {
                 ))}
 
                 {/* 👇 Remaining Matches of this Day */}
-                {showRemainingOnly &&
+                {showRemainingDay &&
                   day.remaining &&
                   day.remaining.length > 0 && (
                     <div className={styles.remainingSection}>
