@@ -249,7 +249,7 @@ export default function OrderOfPlay() {
     return d.toISOString().split("T")[0];
   };
 
-  const [showRemainingOnly, setShowRemainingOnly] = useState(false);
+  const [showRemainingOnly, setShowRemainingOnly] = useState(null);
 
   const [selectedCategories, setSelectedCategories] = useState([
     "Cat.A(65+ combined)",
@@ -1674,16 +1674,6 @@ export default function OrderOfPlay() {
             >
               Apply Changes
             </button>
-
-            <button
-              className={styles.generateBtn}
-              onClick={() => setShowRemainingOnly(!showRemainingOnly)}
-              style={{ marginTop: "10px" }}
-            >
-              {showRemainingOnly
-                ? "Hide Remaining Matches"
-                : `Show Remaining Matches (${notPlacedMatches.length})`}
-            </button>
           </div>
         </div>
       )}
@@ -1705,6 +1695,20 @@ export default function OrderOfPlay() {
                 <h2 style={{ margin: 0 }}>
                   Day {dayIndex + 1} - {day.date}{" "}
                 </h2>
+
+                <button
+                  className={styles.generateBtn}
+                  onClick={() =>
+                    setShowRemainingDay(
+                      showRemainingDay === dayIndex ? null : dayIndex,
+                    )
+                  }
+                  style={{ marginLeft: "10px" }}
+                >
+                  {showRemainingDay === dayIndex
+                    ? "Hide Remaining Matches"
+                    : `Show Remaining Matches (${day.remaining?.length || 0})`}
+                </button>
 
                 {dayIndex > 0 && (
                   <button
@@ -1760,7 +1764,7 @@ export default function OrderOfPlay() {
                 ))}
 
                 {/* 👇 Remaining Matches of this Day */}
-                {showRemainingOnly &&
+                {showRemainingDay === dayIndex &&
                   day.remaining &&
                   day.remaining.length > 0 && (
                     <div className={styles.remainingSection}>
