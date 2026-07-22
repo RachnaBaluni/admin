@@ -567,6 +567,21 @@ export default function OrderOfPlay() {
     }
 
     try {
+      const savedOrderRes = await axios.get(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play/${selectedEventId}`,
+        { withCredentials: true },
+      );
+
+      const savedOrders = savedOrderRes.data.data || [];
+
+      const currentDateOrder = savedOrders.find(
+        (order) => order.playDate === selectedDate,
+      );
+
+      console.log("SELECTED DATE:", selectedDate);
+      console.log("SAVED ORDERS:", savedOrders);
+      console.log("CURRENT DATE ORDER:", currentDateOrder);
+
       const allMatches = await getMatches(selectedCategories, selectedRounds);
       console.log(
         "GET MATCHES WINNER CHECK",
