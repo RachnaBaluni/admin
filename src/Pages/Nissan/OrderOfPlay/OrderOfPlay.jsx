@@ -36,7 +36,13 @@ const getPlayers = (m) => {
 
 /* ================= DRAG CARD ================= */
 
-function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
+function DraggableMatch({
+  match,
+  time,
+  allMatchesRef,
+  isRemaining = false,
+  remainingDayIndex = null,
+}) {
   const completedMatches = JSON.parse(
     sessionStorage.getItem("completedMatches") || "[]",
   );
@@ -55,8 +61,14 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
   }
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: isRemaining ? `remaining-${match._id}` : match._id,
+    id: isRemaining ? `remaining-${remainingDayIndex}-${match._id}` : match._id,
     disabled: isCompleted,
+  });
+
+  const { setNodeRef: setDropNodeRef } = useDroppable({
+    id: isRemaining
+      ? `remaining-slot-${remainingDayIndex}-${match._id}`
+      : `scheduled-${match._id}`,
   });
 
   console.log("========== MATCH ==========");
@@ -162,7 +174,10 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setNodeRef(node);
+        setDropNodeRef(node);
+      }}
       {...listeners}
       {...attributes}
       style={style}
@@ -1259,7 +1274,7 @@ export default function OrderOfPlay() {
     const overId = String(over.id);
 
     const isRemainingMatch = activeId.startsWith("remaining-");
-
+    const isRemainingTarget = overId.startsWith("remaining-slot-");
     console.log("ACTIVE ID =", activeId);
     console.log("OVER ID =", overId);
     console.log("IS REMAINING MATCH =", isRemainingMatch);
@@ -1268,6 +1283,22 @@ export default function OrderOfPlay() {
     let overPos = null;
     let activeDayIndex = null;
     let overDayIndex = null;
+
+    let remainingTarget = null;
+    let remainingTargetDay = null;
+
+    if (isRemainingTarget) {
+      const parts = overId.split("-");
+
+      remainingTargetDay = Number(parts[2]);
+      const remainingTargetId = parts.slice(3).join("-");
+
+      remainingTarget = days[remainingTargetDay]?.remaining?.find(
+        (match) => String(match._id) === String(remainingTargetId),
+      );
+
+      console.log("REMAINING TARGET =", remainingTarget?.matchNo);
+    }
 
     // Find the source and target positions
     days.forEach((day, dIndex) => {
@@ -1292,8 +1323,9 @@ export default function OrderOfPlay() {
       });
     });
 
-    // Stop if the drop target is not a valid slot
-    if (!overPos || overDayIndex === null) {
+    // Stop if the drop target is not a valid grid slot
+    // Remaining match -> Remaining match ke case me overPos nahi hoga
+    if (!isRemainingTarget && (!overPos || overDayIndex === null)) {
       return;
     }
 
@@ -1309,8 +1341,7 @@ export default function OrderOfPlay() {
     let remainingMatch = null;
 
     if (isRemainingMatch) {
-      const remainingMatchId = activeId.replace("remaining-", "");
-
+      const remainingMatchId = activeId.split("-").slice(2).join("-");
       // Only search in the target day's remaining matches
       remainingMatch = days[targetDay].remaining?.find(
         (match) => String(match._id) === String(remainingMatchId),
@@ -1421,13 +1452,60 @@ export default function OrderOfPlay() {
     // REMAINING MATCH SWAP
     // =====================================================
 
-    if (isRemainingMatch) {
-      // Remaining match can only be swapped within the same day
-      if (sourceDay !== targetDay) {
-        // sourceDay is null for remaining matches,
-        // so this condition is not used for remaining matches
+    // Remaining -> Remaining
+    if (isRemainingMatch && isRemainingTarget) {
+      const remainingDayIndex = Number(activeId.split("-")[1]);
+
+      // Same day ke remaining matches hi swap honge
+      if (remainingDayIndex !== remainingTargetDay) {
+        toast.error("❌ Remaining matches can only be swapped within same day");
+        return;
       }
 
+      const draggedRemainingId = activeId.split("-").slice(2).join("-");
+
+      const remainingList = newDays[remainingDayIndex].remaining || [];
+
+      const draggedIndex = remainingList.findIndex(
+        (match) => String(match._id) === String(draggedRemainingId),
+      );
+
+      const targetIndex = remainingList.findIndex(
+        (match) => String(match._id) === String(remainingTarget._id),
+      );
+
+      if (draggedIndex === -1 || targetIndex === -1) {
+        toast.error("❌ Remaining match not found");
+        return;
+      }
+
+      console.log(
+        "SWAPPING REMAINING MATCHES:",
+        remainingList[draggedIndex]?.matchNo,
+        "<->",
+        remainingList[targetIndex]?.matchNo,
+      );
+
+      // Remaining A <-> Remaining B
+      [
+        newDays[remainingDayIndex].remaining[draggedIndex],
+        newDays[remainingDayIndex].remaining[targetIndex],
+      ] = [
+        newDays[remainingDayIndex].remaining[targetIndex],
+        newDays[remainingDayIndex].remaining[draggedIndex],
+      ];
+
+      setDays(newDays);
+
+      toast.success("✅ Remaining matches swapped successfully");
+      return;
+    }
+
+    // =====================================================
+    // REMAINING MATCH -> GRID MATCH
+    // =====================================================
+
+    if (isRemainingMatch) {
       // Remaining match cannot be dropped on an empty slot
       if (!target?.match) {
         toast.error("❌ Remaining match can only replace an existing match");
@@ -1441,24 +1519,22 @@ export default function OrderOfPlay() {
       // Store the scheduled match before replacing it
       const oldScheduledMatch = target.match;
 
-      // Temporarily place the remaining match
-      // into the target slot
+      // Put remaining match into grid
       target.match = dragged.match;
 
-      // Validate the complete target day
+      // Validate target day
       const targetDayError = validateDay(newDays[targetDay].grid);
 
-      // Stop if the new schedule is invalid
       if (targetDayError !== true) {
         toast.error(targetDayError);
         return;
       }
 
-      // Get the current remaining matches
+      // Get current remaining matches
       const remainingList = newDays[targetDay].remaining || [];
 
-      // Remove the selected remaining match
-      // and add the replaced scheduled match
+      // Remove dragged remaining match
+      // Add old grid match to remaining
       newDays[targetDay].remaining = [
         ...remainingList.filter(
           (match) => String(match._id) !== String(remainingMatch._id),
@@ -1470,7 +1546,6 @@ export default function OrderOfPlay() {
 
       console.log("AFTER SWAP REMAINING =", oldScheduledMatch?.matchNo);
     }
-
     // =====================================================
     // NORMAL SCHEDULED MATCH DRAG
     // =====================================================
@@ -1811,6 +1886,7 @@ export default function OrderOfPlay() {
                             time="Remaining"
                             allMatchesRef={allMatchesRef}
                             isRemaining={true}
+                            remainingDayIndex={dayIndex}
                           />
                         ))}
                       </div>
