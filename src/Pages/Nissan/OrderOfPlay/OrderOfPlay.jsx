@@ -1420,7 +1420,9 @@ export default function OrderOfPlay() {
     if (!dragged?.match) {
       return;
     }
-
+    console.log("isRemainingMatch =", isRemainingMatch);
+    console.log("target.match =", target?.match);
+    console.log("remainingMatch =", remainingMatch);
     // =====================================================
     // REMAINING MATCH SWAP
     // =====================================================
