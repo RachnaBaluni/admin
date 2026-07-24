@@ -758,7 +758,6 @@ export default function OrderOfPlay() {
 
     let notPlacedMatches = [];
     let forcedMatches = []; // ✅ added
-    let retryMatches = [];
 
     /* ================= GRID CREATE ================= */
 
@@ -876,53 +875,84 @@ export default function OrderOfPlay() {
         }
 
         if (!placed) {
-          console.log("NO VALID MATCH FOR SLOT", i, j);
+          // ================= RELAXED PASS =================
+
+          const slotSet = timeSlotPlayers[time];
+
+          for (let m = 0; m < matches.length; m++) {
+            const match = matches[m];
+
+            if (placedMatches.has(match._id)) continue;
+
+            const players = getPlayers(match);
+
+            // Relaxed me sirf same-time validation hogi
+            const sameTimeConflict = players.some((p) => slotSet.has(p));
+
+            if (sameTimeConflict) continue;
+
+            // Place match
+            temp[i][j].match = match;
+
+            placedMatches.add(match._id);
+
+            players.forEach((p) => {
+              slotSet.add(p);
+              playerLastRow[p] = i;
+              playerLastCourt[p] = j;
+            });
+
+            console.log("RELAXED =>", match.matchNo, "ROW", i, "COURT", j);
+
+            placed = true;
+            break;
+          }
         }
       }
     }
 
-    // ================= RELAXED PASS =================
+    // // ================= RELAXED PASS =================
 
-    for (let i = maxRows - 1; i >= 0; i--) {
-      const time = `${getTimeLabel(i)}-${i}`;
+    // for (let i = maxRows - 1; i >= 0; i--) {
+    //   const time = `${getTimeLabel(i)}-${i}`;
 
-      if (!timeSlotPlayers[time]) {
-        timeSlotPlayers[time] = new Set();
-      }
+    //   if (!timeSlotPlayers[time]) {
+    //     timeSlotPlayers[time] = new Set();
+    //   }
 
-      for (let j = 0; j < courtCount; j++) {
-        if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-        if (temp[i][j].match) continue;
+    //   for (let j = 0; j < courtCount; j++) {
+    //     if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+    //     if (temp[i][j].match) continue;
 
-        const slotSet = timeSlotPlayers[time];
+    //     const slotSet = timeSlotPlayers[time];
 
-        for (let m = 0; m < matches.length; m++) {
-          const match = matches[m];
+    //     for (let m = 0; m < matches.length; m++) {
+    //       const match = matches[m];
 
-          if (placedMatches.has(match._id)) continue;
+    //       if (placedMatches.has(match._id)) continue;
 
-          const players = getPlayers(match);
+    //       const players = getPlayers(match);
 
-          const sameTimeConflict = players.some((p) => slotSet.has(p));
+    //       const sameTimeConflict = players.some((p) => slotSet.has(p));
 
-          if (sameTimeConflict) continue;
+    //       if (sameTimeConflict) continue;
 
-          temp[i][j].match = match;
+    //       temp[i][j].match = match;
 
-          placedMatches.add(match._id);
+    //       placedMatches.add(match._id);
 
-          players.forEach((p) => {
-            slotSet.add(p);
-            playerLastRow[p] = i;
-            playerLastCourt[p] = j;
-          });
+    //       players.forEach((p) => {
+    //         slotSet.add(p);
+    //         playerLastRow[p] = i;
+    //         playerLastCourt[p] = j;
+    //       });
 
-          console.log("RELAXED PLACED =>", match.matchNo, "ROW", i, "COURT", j);
+    //       console.log("RELAXED PLACED =>", match.matchNo, "ROW", i, "COURT", j);
 
-          break;
-        }
-      }
-    }
+    //       break;
+    //     }
+    //   }
+    // }
 
     temp.forEach((row, idx) => {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
