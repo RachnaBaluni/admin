@@ -4,15 +4,7 @@ import axios from "axios";
 import styles from "./OrderOfPlay.module.css";
 import { toast } from "sonner";
 
-import {
-  DndContext,
-  closestCenter,
-  useDraggable,
-  useDroppable,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+import { DndContext, pointerWithin } from "@dnd-kit/core";
 /* ================= TIME ================= */
 
 const getTimeLabel = (index) => {
@@ -1778,11 +1770,7 @@ export default function OrderOfPlay() {
               {/* GRID */}
               <DndContext
                 sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragStart={(e) => {
-                  console.log("Drag Started");
-                  console.log(e);
-                }}
+                collisionDetection={pointerWithin}
                 onDragEnd={handleDragEnd}
               >
                 {day.grid.map((row, i) => (
