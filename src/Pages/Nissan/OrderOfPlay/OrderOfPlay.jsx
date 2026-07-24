@@ -839,7 +839,18 @@ export default function OrderOfPlay() {
 
           // SAME TIME
           const sameTimeConflict = players.some((p) => slotSet.has(p));
-          if (sameTimeConflict) continue;
+
+          if (sameTimeConflict) {
+            console.log(
+              "SAME TIME FAIL =>",
+              match.matchNo,
+              "ROW",
+              i,
+              "COURT",
+              j,
+            );
+            continue;
+          }
 
           // CONSECUTIVE
           let consecutiveConflict = false;
@@ -856,8 +867,17 @@ export default function OrderOfPlay() {
             }
           }
 
-          if (consecutiveConflict) continue;
-
+          if (consecutiveConflict) {
+            console.log(
+              "CONSECUTIVE FAIL =>",
+              match.matchNo,
+              "ROW",
+              i,
+              "COURT",
+              j,
+            );
+            continue;
+          }
           // PLACE MATCH
           temp[i][j].match = match;
 
@@ -869,11 +889,20 @@ export default function OrderOfPlay() {
             playerLastCourt[p] = j;
           });
 
-          console.log("PLACED", match.matchNo, "ROW", i, "COURT", j);
-
+          console.log(
+            "PLACED =>",
+            match.matchNo,
+            "ROW",
+            i,
+            "COURT",
+            j,
+            "PLAYERS",
+            getPlayers(match),
+          );
           placed = true;
           break;
         }
+
         if (!placed) {
           console.log("NO VALID MATCH FOUND FOR SLOT", i, j);
 
@@ -890,7 +919,14 @@ export default function OrderOfPlay() {
             placedMatches.add(remainingMatch._id);
             forcedMatches.push(forcedMatch);
 
-            console.log("FORCED =>", remainingMatch.matchNo);
+            console.log(
+              "FORCED =>",
+              remainingMatch.matchNo,
+              "ROW",
+              i,
+              "COURT",
+              j,
+            );
           }
         }
       }
