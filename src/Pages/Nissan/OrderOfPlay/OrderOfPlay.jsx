@@ -1481,6 +1481,9 @@ export default function OrderOfPlay() {
     else {
       // Same day scheduled match swap
       if (sourceDay === targetDay) {
+        console.log("sourceDay =", sourceDay);
+        console.log("targetDay =", targetDay);
+        console.log("isRemainingMatch =", isRemainingMatch);
         // Target must contain a match
         if (!target?.match) {
           return;
