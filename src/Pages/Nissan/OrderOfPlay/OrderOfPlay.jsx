@@ -799,63 +799,6 @@ export default function OrderOfPlay() {
       });
     });
 
-    const tryPlaceMatch = (match, relaxed = false) => {
-      const players = getPlayers(match);
-
-      const startRow = relaxed ? maxRows - 1 : 0;
-      const endRow = relaxed ? -1 : maxRows;
-      const step = relaxed ? -1 : 1;
-
-      for (let i = startRow; i !== endRow; i += step) {
-        const time = `${getTimeLabel(i)}-${i}`;
-
-        if (!timeSlotPlayers[time]) {
-          timeSlotPlayers[time] = new Set();
-        }
-
-        for (let j = 0; j < courtCount; j++) {
-          if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-          if (temp[i][j].match) continue;
-
-          const slotSet = timeSlotPlayers[time];
-
-          // Same time
-          if (players.some((p) => slotSet.has(p))) continue;
-
-          // Normal pass me hi consecutive check
-          if (!relaxed) {
-            let consecutiveConflict = false;
-
-            for (const p of players) {
-              if (playerLastRow[p] !== undefined) {
-                if (
-                  Math.abs(playerLastRow[p] - i) === 1 &&
-                  playerLastCourt[p] !== j
-                ) {
-                  consecutiveConflict = true;
-                  break;
-                }
-              }
-            }
-
-            if (consecutiveConflict) continue;
-          }
-
-          temp[i][j].match = match;
-
-          players.forEach((p) => {
-            slotSet.add(p);
-            playerLastRow[p] = i;
-            playerLastCourt[p] = j;
-          });
-
-          return true;
-        }
-      }
-
-      return false;
-    };
-
     /* ================= 🔥 PLACE MATCHES ================= */
     matches.sort((a, b) => {
       const aPlayers = getPlayers(a);
@@ -978,40 +921,6 @@ export default function OrderOfPlay() {
 
           break;
         }
-      }
-    }
-
-    for (const match of retryMatches) {
-      let placed = tryPlaceMatch(match);
-
-      if (!placed) {
-        placed = tryPlaceMatch(match, true);
-      }
-
-      if (!placed) {
-        console.log("FORCED AFTER RETRY =>", match.matchNo);
-
-        for (let r = maxRows - 1; r >= 0; r--) {
-          for (let c = 0; c < courtCount; c++) {
-            if (r < (matchesPerCourt[c + 1] || 0) && !temp[r][c].match) {
-              temp[r][c].match = {
-                ...match,
-                forcedPlacement: true,
-              };
-
-              forcedMatches.push(temp[r][c].match);
-
-              placed = true;
-              break;
-            }
-          }
-
-          if (placed) break;
-        }
-      }
-
-      if (!placed) {
-        notPlacedMatches.push(match);
       }
     }
 
