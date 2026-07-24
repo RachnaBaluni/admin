@@ -607,6 +607,7 @@ export default function OrderOfPlay() {
 
       allMatchesRef.current = allMatches;
       console.log("ALL MATCHES REF", allMatchesRef.current);
+
       /* ================= DAY LOGIC ================= */
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
       setDays([
@@ -873,39 +874,23 @@ export default function OrderOfPlay() {
           placed = true;
           break;
         }
-
         if (!placed) {
-          // ================= RELAXED PASS =================
+          console.log("NO VALID MATCH FOUND FOR SLOT", i, j);
 
-          const slotSet = timeSlotPlayers[time];
+          const remainingMatch = matches.find((m) => !placedMatches.has(m._id));
 
-          for (let m = 0; m < matches.length; m++) {
-            const match = matches[m];
+          if (remainingMatch) {
+            const forcedMatch = {
+              ...remainingMatch,
+              forcedPlacement: true,
+            };
 
-            if (placedMatches.has(match._id)) continue;
+            temp[i][j].match = forcedMatch;
 
-            const players = getPlayers(match);
+            placedMatches.add(remainingMatch._id);
+            forcedMatches.push(forcedMatch);
 
-            // Relaxed me sirf same-time validation hogi
-            const sameTimeConflict = players.some((p) => slotSet.has(p));
-
-            if (sameTimeConflict) continue;
-
-            // Place match
-            temp[i][j].match = match;
-
-            placedMatches.add(match._id);
-
-            players.forEach((p) => {
-              slotSet.add(p);
-              playerLastRow[p] = i;
-              playerLastCourt[p] = j;
-            });
-
-            console.log("RELAXED =>", match.matchNo, "ROW", i, "COURT", j);
-
-            placed = true;
-            break;
+            console.log("FORCED =>", remainingMatch.matchNo);
           }
         }
       }
@@ -1001,7 +986,7 @@ export default function OrderOfPlay() {
     setShowFilters((prev) => !prev);
     setHideGrid(false); // ALWAYS show grid
   };
-  //console.log("hideGrid:", hideGrid);
+
   /* ================= PRINT ================= */
 
   const handlePrint = () => {
