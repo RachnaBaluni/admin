@@ -1343,6 +1343,18 @@ export default function OrderOfPlay() {
           if (!cell?.match) continue;
 
           const players = getPlayers(cell.match);
+
+          console.log(
+            "Row:",
+            i,
+            "Court:",
+            j,
+            "Match:",
+            cell.match.matchNo,
+            "Players:",
+            players,
+          );
+
           const time = `${cell.time}-${i}`;
 
           if (!timeMap[time]) {
