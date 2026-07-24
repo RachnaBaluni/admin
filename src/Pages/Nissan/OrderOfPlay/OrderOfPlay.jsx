@@ -1253,7 +1253,9 @@ export default function OrderOfPlay() {
   const handleDragEnd = (event) => {
     console.log("DRAG END CALLED");
 
-    const { active, over } = event;
+    const { active, over, delta } = event;
+
+    console.log("DELTA =", delta);
 
     if (!over) return;
 
