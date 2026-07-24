@@ -9,8 +9,10 @@ import {
   closestCenter,
   useDraggable,
   useDroppable,
+  PointerSensor,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
-
 /* ================= TIME ================= */
 
 const getTimeLabel = (index) => {
@@ -1544,7 +1546,13 @@ export default function OrderOfPlay() {
 
     toast.success("✅ Match moved successfully");
   };
-
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+  );
   /* ================= UI ================= */
 
   return (
@@ -1762,7 +1770,12 @@ export default function OrderOfPlay() {
 
               {/* GRID */}
               <DndContext
+                sensors={sensors}
                 collisionDetection={closestCenter}
+                onDragStart={(e) => {
+                  console.log("Drag Started");
+                  console.log(e);
+                }}
                 onDragEnd={handleDragEnd}
               >
                 {day.grid.map((row, i) => (
