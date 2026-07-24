@@ -1463,15 +1463,18 @@ export default function OrderOfPlay() {
       // Get the current remaining matches
       const remainingList = newDays[targetDay].remaining || [];
 
-      // Remove the selected remaining match
-      // and add the replaced scheduled match
-      newDays[targetDay].remaining = [
-        ...remainingList.filter(
-          (match) => String(match._id) !== String(remainingMatch._id),
-        ),
-        oldScheduledMatch,
-      ];
+      // Find the index of the dragged remaining match
+      const remainingIndex = remainingList.findIndex(
+        (m) => String(m._id) === String(remainingMatch._id),
+      );
 
+      // Replace the dragged remaining match with the scheduled match
+      if (remainingIndex !== -1) {
+        remainingList[remainingIndex] = oldScheduledMatch;
+      }
+
+      // Update the remaining matches list
+      newDays[targetDay].remaining = remainingList;
       console.log("AFTER SWAP TARGET =", target.match?.matchNo);
 
       console.log("AFTER SWAP REMAINING =", oldScheduledMatch?.matchNo);
