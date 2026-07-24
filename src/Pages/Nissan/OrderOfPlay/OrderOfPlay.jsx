@@ -876,7 +876,7 @@ export default function OrderOfPlay() {
         }
 
         if (!placed) {
-          console.log("EMPTY SLOT", i, j);
+          console.log("NO VALID MATCH FOR SLOT", i, j);
         }
       }
     }
@@ -927,6 +927,12 @@ export default function OrderOfPlay() {
     temp.forEach((row, idx) => {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
     });
+
+    for (const match of matches) {
+      if (!placedMatches.has(match._id)) {
+        notPlacedMatches.push(match);
+      }
+    }
 
     return {
       grid: temp,
