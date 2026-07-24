@@ -758,6 +758,7 @@ export default function OrderOfPlay() {
 
     let notPlacedMatches = [];
     let forcedMatches = []; // ✅ added
+    let retryMatches = [];
 
     /* ================= GRID CREATE ================= */
 
@@ -798,6 +799,63 @@ export default function OrderOfPlay() {
       });
     });
 
+    const tryPlaceMatch = (match, relaxed = false) => {
+      const players = getPlayers(match);
+
+      const startRow = relaxed ? maxRows - 1 : 0;
+      const endRow = relaxed ? -1 : maxRows;
+      const step = relaxed ? -1 : 1;
+
+      for (let i = startRow; i !== endRow; i += step) {
+        const time = `${getTimeLabel(i)}-${i}`;
+
+        if (!timeSlotPlayers[time]) {
+          timeSlotPlayers[time] = new Set();
+        }
+
+        for (let j = 0; j < courtCount; j++) {
+          if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+          if (temp[i][j].match) continue;
+
+          const slotSet = timeSlotPlayers[time];
+
+          // Same time
+          if (players.some((p) => slotSet.has(p))) continue;
+
+          // Normal pass me hi consecutive check
+          if (!relaxed) {
+            let consecutiveConflict = false;
+
+            for (const p of players) {
+              if (playerLastRow[p] !== undefined) {
+                if (
+                  Math.abs(playerLastRow[p] - i) === 1 &&
+                  playerLastCourt[p] !== j
+                ) {
+                  consecutiveConflict = true;
+                  break;
+                }
+              }
+            }
+
+            if (consecutiveConflict) continue;
+          }
+
+          temp[i][j].match = match;
+
+          players.forEach((p) => {
+            slotSet.add(p);
+            playerLastRow[p] = i;
+            playerLastCourt[p] = j;
+          });
+
+          return true;
+        }
+      }
+
+      return false;
+    };
+
     /* ================= 🔥 PLACE MATCHES ================= */
     matches.sort((a, b) => {
       const aPlayers = getPlayers(a);
@@ -813,108 +871,54 @@ export default function OrderOfPlay() {
 
       return aPlayed - bPlayed;
     });
-    for (let m = 0; m < matches.length; m++) {
-      const match = matches[m];
-      console.log(
-        "MATCH ORDER",
-        matches.map((m) => ({
-          matchNo: m.matchNo,
-          forced: m.forcedPlacement,
-          stage: m.Stage,
-          category: m.category,
-        })),
-      );
-      const players = getPlayers(match);
-      let placed = false;
-      let hadConflict = false;
+    const placedMatches = new Set();
 
-      for (let i = 0; i < maxRows; i++) {
-        //const time = getTimeLabel(i);
-        const time = `${getTimeLabel(i)}-${i}`;
+    for (let i = 0; i < maxRows; i++) {
+      const time = `${getTimeLabel(i)}-${i}`;
 
-        if (!timeSlotPlayers[time]) {
-          timeSlotPlayers[time] = new Set();
-        }
+      if (!timeSlotPlayers[time]) {
+        timeSlotPlayers[time] = new Set();
+      }
 
-        for (let j = 0; j < courtCount; j++) {
-          if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-          if (temp[i][j].match) continue;
+      for (let j = 0; j < courtCount; j++) {
+        if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+        if (temp[i][j].match) continue;
 
+        let placed = false;
+
+        for (let m = 0; m < matches.length; m++) {
+          const match = matches[m];
+
+          if (placedMatches.has(match._id)) continue;
+
+          const players = getPlayers(match);
           const slotSet = timeSlotPlayers[time];
 
-          // ❌ SAME TIME CONFLICT
+          // SAME TIME
           const sameTimeConflict = players.some((p) => slotSet.has(p));
-          if (sameTimeConflict) {
-            console.log(
-              "CONSECUTIVE CONFLICT =>",
-              match.matchNo,
-              "ROW =",
-              i,
-              "COURT =",
-              j,
-            );
-            hadConflict = true;
-            continue;
-          }
+          if (sameTimeConflict) continue;
 
-          // ❌ CONSECUTIVE CONFLICT
+          // CONSECUTIVE
           let consecutiveConflict = false;
 
-          players.forEach((p) => {
+          for (const p of players) {
             if (playerLastRow[p] !== undefined) {
               const lastRow = playerLastRow[p];
               const lastCourt = playerLastCourt[p];
 
-              if (Math.abs(lastRow - i) === 1) {
-                console.log(
-                  "PLAYER=",
-                  p,
-                  "LASTROW=",
-                  lastRow,
-                  "CURRENTROW=",
-                  i,
-                  "DIFF=",
-                  Math.abs(lastRow - i),
-                  "LASTCOURT=",
-                  lastCourt,
-                  "CURRENTCOURT=",
-                  j,
-                  "MATCH=",
-                  match.matchNo,
-                );
-                if (lastCourt !== j) {
-                  consecutiveConflict = true;
-                }
+              if (Math.abs(lastRow - i) === 1 && lastCourt !== j) {
+                consecutiveConflict = true;
+                break;
               }
             }
-          });
-
-          if (consecutiveConflict) {
-            console.log(
-              "CONSECUTIVE CONFLICT =>",
-              match.matchNo,
-              "ROW =",
-              i,
-              "COURT =",
-              j,
-            );
-            hadConflict = true;
-            continue;
           }
 
-          /* ✅ PLACE NORMAL MATCH */
+          if (consecutiveConflict) continue;
 
-          console.log(
-            "NORMAL PLACED =>",
-            "Match:",
-            match.matchNo,
-            "Row:",
-            i,
-            "Court:",
-            j,
-          );
-
+          // PLACE MATCH
           temp[i][j].match = match;
+
+          placedMatches.add(match._id);
 
           players.forEach((p) => {
             slotSet.add(p);
@@ -922,94 +926,70 @@ export default function OrderOfPlay() {
             playerLastCourt[p] = j;
           });
 
+          console.log("PLACED", match.matchNo, "ROW", i, "COURT", j);
+
           placed = true;
           break;
         }
 
-        if (placed) break;
-      }
-
-      console.log(
-        "MATCH",
-        match.matchNo,
-        "PLACED =",
-        placed,
-        "HAD CONFLICT =",
-        hadConflict,
-      );
-      if (!placed) {
-        console.log("NORMAL FAILED =>", match.matchNo);
-      }
-
-      /* ================= RELAXED PASS ================= */
-      if (!placed) {
-        for (let i = maxRows - 1; i >= 0; i--) {
-          const time = `${getTimeLabel(i)}-${i}`;
-          if (!timeSlotPlayers[time]) {
-            timeSlotPlayers[time] = new Set();
-          }
-
-          for (let j = 0; j < courtCount; j++) {
-            if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-            if (temp[i][j].match) continue;
-
-            const slotSet = timeSlotPlayers[time];
-
-            // ❌ only same time conflict check
-            const sameTimeConflict = players.some((p) => slotSet.has(p));
-
-            if (sameTimeConflict) continue;
-
-            temp[i][j].match = match;
-
-            players.forEach((p) => {
-              slotSet.add(p);
-              playerLastRow[p] = i;
-              playerLastCourt[p] = j;
-            });
-
-            placed = true;
-
-            console.log(
-              "RELAXED PLACEMENT =>",
-              match.matchNo,
-              "ROW =",
-              i,
-              "COURT =",
-              j,
-            );
-
-            break;
-          }
-
-          if (placed) break;
+        if (!placed) {
+          console.log("EMPTY SLOT", i, j);
         }
       }
+    }
 
-      /* ================= TRY OTHER MATCHES BEFORE FORCED ================= */
-      if (!placed) {
-        for (let k = m + 1; k < matches.length; k++) {
-          const candidate = matches[k];
+    // ================= RELAXED PASS =================
 
-          console.log(
-            "TRYING CANDIDATE =>",
-            candidate.matchNo,
-            "INSTEAD OF",
-            match.matchNo,
-          );
-        }
+    for (let i = maxRows - 1; i >= 0; i--) {
+      const time = `${getTimeLabel(i)}-${i}`;
+
+      if (!timeSlotPlayers[time]) {
+        timeSlotPlayers[time] = new Set();
       }
 
-      /* ================= FORCED PLACEMENT ================= */
+      for (let j = 0; j < courtCount; j++) {
+        if (i >= (matchesPerCourt[j + 1] || 0)) continue;
+        if (temp[i][j].match) continue;
+
+        const slotSet = timeSlotPlayers[time];
+
+        for (let m = 0; m < matches.length; m++) {
+          const match = matches[m];
+
+          if (placedMatches.has(match._id)) continue;
+
+          const players = getPlayers(match);
+
+          const sameTimeConflict = players.some((p) => slotSet.has(p));
+
+          if (sameTimeConflict) continue;
+
+          temp[i][j].match = match;
+
+          placedMatches.add(match._id);
+
+          players.forEach((p) => {
+            slotSet.add(p);
+            playerLastRow[p] = i;
+            playerLastCourt[p] = j;
+          });
+
+          console.log("RELAXED PLACED =>", match.matchNo, "ROW", i, "COURT", j);
+
+          break;
+        }
+      }
+    }
+
+    for (const match of retryMatches) {
+      let placed = tryPlaceMatch(match);
+
       if (!placed) {
-        console.log(
-          "FORCED MATCH =>",
-          match.matchNo,
-          match.category,
-          match.Stage,
-          "HAD CONFLICT =",
-          hadConflict,
-        );
+        placed = tryPlaceMatch(match, true);
+      }
+
+      if (!placed) {
+        console.log("FORCED AFTER RETRY =>", match.matchNo);
 
         for (let r = maxRows - 1; r >= 0; r--) {
           for (let c = 0; c < courtCount; c++) {
@@ -1029,8 +1009,6 @@ export default function OrderOfPlay() {
           if (placed) break;
         }
       }
-
-      /* ================= NOT PLACED ================= */
 
       if (!placed) {
         notPlacedMatches.push(match);
