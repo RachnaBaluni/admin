@@ -1405,11 +1405,15 @@ export default function OrderOfPlay() {
 
       // Temporarily place the remaining match
       // into the target slot
+      console.log("VALIDATING REMAINING DROP");
+
       target.match = dragged.match;
+
+      console.log("PLACED MATCH PLAYERS", getPlayers(target.match));
 
       // Validate the complete target day
       const targetDayError = validateDay(newDays[targetDay].grid);
-
+      console.log("VALIDATION RESULT =", targetDayError);
       // Stop if the new schedule is invalid
       if (targetDayError !== true) {
         toast.error(targetDayError);
