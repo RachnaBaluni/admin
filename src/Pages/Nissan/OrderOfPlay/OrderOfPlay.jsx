@@ -783,6 +783,8 @@ export default function OrderOfPlay() {
         row.forEach((cell, j) => {
           if (!cell?.match) return;
 
+          console.log("FULL MATCH", cell.match);
+
           const players = getPlayers(cell.match);
           const time = cell.time;
 
