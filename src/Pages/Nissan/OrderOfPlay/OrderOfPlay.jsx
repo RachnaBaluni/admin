@@ -1289,6 +1289,15 @@ export default function OrderOfPlay() {
           const players = getPlayers(cell.match);
 
           console.log(
+            "MATCH:",
+            cell.match.matchNo,
+            "STAGE:",
+            cell.match.Stage,
+            "PLAYERS:",
+            players,
+          );
+
+          console.log(
             "Row:",
             i,
             "Court:",
