@@ -1323,6 +1323,14 @@ export default function OrderOfPlay() {
 
           // Check same player at the same time
           for (const p of players) {
+            console.log(
+              "Checking Player:",
+              p,
+              "Exists:",
+              timeMap[time].has(p),
+              "Existing:",
+              [...timeMap[time]],
+            );
             if (timeMap[time].has(p)) {
               return "❌ Same player same time";
             }
