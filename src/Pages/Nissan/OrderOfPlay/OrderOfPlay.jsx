@@ -1386,76 +1386,139 @@ export default function OrderOfPlay() {
     // REMAINING MATCH SWAP
     // =====================================================
 
-    if (isRemainingMatch) {
-      // Remaining match can only be swapped within the same day
-      if (sourceDay !== targetDay) {
-        // sourceDay is null for remaining matches,
-        // so this condition is not used for remaining matches
-      }
+    // if (isRemainingMatch) {
+    //   // Remaining match can only be swapped within the same day
+    //   if (sourceDay !== targetDay) {
+    //     // sourceDay is null for remaining matches,
+    //     // so this condition is not used for remaining matches
+    //   }
 
-      // Remaining match cannot be dropped on an empty slot
+    //   // Remaining match cannot be dropped on an empty slot
+    //   if (!target?.match) {
+    //     toast.error("❌ Remaining match can only replace an existing match");
+    //     return;
+    //   }
+
+    //   console.log("REMAINING MATCH =", dragged.match?.matchNo);
+
+    //   console.log("SCHEDULED MATCH TO REPLACE =", target.match?.matchNo);
+
+    //   // Store the scheduled match before replacing it
+    //   const oldScheduledMatch = target.match;
+    //   console.log("OLD MATCH ID =", oldScheduledMatch._id);
+    //   console.log("OLD MATCH NO =", oldScheduledMatch.matchNo);
+
+    //   newDays[targetDay].grid.forEach((row, i) => {
+    //     row.forEach((cell, j) => {
+    //       if (cell?.match?._id === oldScheduledMatch._id) {
+    //         console.log(
+    //           "OLD MATCH FOUND AT:",
+    //           "row",
+    //           i,
+    //           "court",
+    //           j,
+    //           "matchNo",
+    //           cell.match.matchNo,
+    //         );
+    //       }
+    //     });
+    //   });
+
+    //   // Temporarily place the remaining match
+    //   // into the target slot
+    //   console.log("VALIDATING REMAINING DROP");
+
+    //   target.match = dragged.match;
+
+    //   console.log("PLACED MATCH PLAYERS", getPlayers(target.match));
+
+    //   // Validate the complete target day
+    //   const targetDayError = validateDay(newDays[targetDay].grid);
+    //   console.log("VALIDATION RESULT =", targetDayError);
+    //   // Stop if the new schedule is invalid
+    //   if (targetDayError !== true) {
+    //     toast.error(targetDayError);
+    //     return;
+    //   }
+
+    //   // Get the current remaining matches
+    //   const remainingList = newDays[targetDay].remaining || [];
+
+    //   // Find the index of the dragged remaining match
+    //   const remainingIndex = remainingList.findIndex(
+    //     (m) => String(m._id) === String(remainingMatch._id),
+    //   );
+
+    //   // Replace the dragged remaining match with the scheduled match
+    //   if (remainingIndex !== -1) {
+    //     remainingList[remainingIndex] = oldScheduledMatch;
+    //   }
+
+    //   // Update the remaining matches list
+    //   newDays[targetDay].remaining = remainingList;
+    //   console.log("AFTER SWAP TARGET =", target.match?.matchNo);
+
+    //   console.log("AFTER SWAP REMAINING =", oldScheduledMatch?.matchNo);
+    // }
+    if (isRemainingMatch) {
+      // Remaining match cannot be dropped on empty slot
       if (!target?.match) {
         toast.error("❌ Remaining match can only replace an existing match");
         return;
       }
 
       console.log("REMAINING MATCH =", dragged.match?.matchNo);
-
       console.log("SCHEDULED MATCH TO REPLACE =", target.match?.matchNo);
 
-      // Store the scheduled match before replacing it
+      // Store scheduled match before replacing
       const oldScheduledMatch = target.match;
+
       console.log("OLD MATCH ID =", oldScheduledMatch._id);
       console.log("OLD MATCH NO =", oldScheduledMatch.matchNo);
 
-      newDays[targetDay].grid.forEach((row, i) => {
-        row.forEach((cell, j) => {
-          if (cell?.match?._id === oldScheduledMatch._id) {
-            console.log(
-              "OLD MATCH FOUND AT:",
-              "row",
-              i,
-              "court",
-              j,
-              "matchNo",
-              cell.match.matchNo,
-            );
-          }
-        });
-      });
-
-      // Temporarily place the remaining match
-      // into the target slot
-      console.log("VALIDATING REMAINING DROP");
-
+      // Put remaining match in target slot
       target.match = dragged.match;
 
       console.log("PLACED MATCH PLAYERS", getPlayers(target.match));
 
-      // Validate the complete target day
+      // Validate complete day
       const targetDayError = validateDay(newDays[targetDay].grid);
+
       console.log("VALIDATION RESULT =", targetDayError);
-      // Stop if the new schedule is invalid
+
       if (targetDayError !== true) {
         toast.error(targetDayError);
         return;
       }
 
-      // Get the current remaining matches
+      // Remove remaining match from remaining list
       const remainingList = newDays[targetDay].remaining || [];
 
-      // Find the index of the dragged remaining match
       const remainingIndex = remainingList.findIndex(
         (m) => String(m._id) === String(remainingMatch._id),
       );
 
-      // Replace the dragged remaining match with the scheduled match
       if (remainingIndex !== -1) {
+        // Put replaced scheduled match back into remaining
         remainingList[remainingIndex] = oldScheduledMatch;
       }
 
-      // Update the remaining matches list
       newDays[targetDay].remaining = remainingList;
+
+      // IMPORTANT FIX:
+      // Remove old scheduled match if any duplicate reference exists
+      newDays[targetDay].grid.forEach((row) => {
+        row.forEach((cell) => {
+          if (
+            cell?.match &&
+            String(cell.match._id) === String(oldScheduledMatch._id) &&
+            cell !== target
+          ) {
+            cell.match = null;
+          }
+        });
+      });
+
       console.log("AFTER SWAP TARGET =", target.match?.matchNo);
 
       console.log("AFTER SWAP REMAINING =", oldScheduledMatch?.matchNo);
