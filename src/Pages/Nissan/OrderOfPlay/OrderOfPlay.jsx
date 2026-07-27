@@ -1408,6 +1408,22 @@ export default function OrderOfPlay() {
       console.log("OLD MATCH ID =", oldScheduledMatch._id);
       console.log("OLD MATCH NO =", oldScheduledMatch.matchNo);
 
+      newDays[targetDay].grid.forEach((row, i) => {
+        row.forEach((cell, j) => {
+          if (cell?.match?._id === oldScheduledMatch._id) {
+            console.log(
+              "OLD MATCH FOUND AT:",
+              "row",
+              i,
+              "court",
+              j,
+              "matchNo",
+              cell.match.matchNo,
+            );
+          }
+        });
+      });
+
       // Temporarily place the remaining match
       // into the target slot
       console.log("VALIDATING REMAINING DROP");
