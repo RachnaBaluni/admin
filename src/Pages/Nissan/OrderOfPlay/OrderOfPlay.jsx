@@ -134,7 +134,7 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
 
       return null;
     };
-    console.log(JSON.stringify(match, null, 2));
+    //console.log(JSON.stringify(match, null, 2));
 
     const leftPrevMatch = allMatchesRef.current.find(
       (m) =>
@@ -1405,6 +1405,8 @@ export default function OrderOfPlay() {
 
       // Store the scheduled match before replacing it
       const oldScheduledMatch = target.match;
+      console.log("OLD MATCH ID =", oldScheduledMatch._id);
+      console.log("OLD MATCH NO =", oldScheduledMatch.matchNo);
 
       // Temporarily place the remaining match
       // into the target slot
