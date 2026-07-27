@@ -61,23 +61,23 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
     disabled: isCompleted,
   });
 
-  console.log("========== MATCH ==========");
-  console.log("FULL MATCH OBJECT", match);
-  console.log("Match No:", match.matchNo);
-  console.log("Winner:", match.Winner);
-  console.log("TEAM1 =", match.Team1);
-  console.log("TEAM2 =", match.Team2);
-  console.log("Winner ID:", match.Winner?._id || match.Winner);
-  console.log("Team1 ID:", match.Team1?._id);
-  console.log("Team2 ID:", match.Team2?._id);
-  console.log(
-    "Team1 Winner:",
-    String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
-  );
-  console.log(
-    "Team2 Winner:",
-    String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
-  );
+  // console.log("========== MATCH ==========");
+  // console.log("FULL MATCH OBJECT", match);
+  // console.log("Match No:", match.matchNo);
+  // console.log("Winner:", match.Winner);
+  // console.log("TEAM1 =", match.Team1);
+  // console.log("TEAM2 =", match.Team2);
+  // console.log("Winner ID:", match.Winner?._id || match.Winner);
+  // console.log("Team1 ID:", match.Team1?._id);
+  // console.log("Team2 ID:", match.Team2?._id);
+  // console.log(
+  //   "Team1 Winner:",
+  //   String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
+  // );
+  // console.log(
+  //   "Team2 Winner:",
+  //   String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
+  // );
 
   const style = {
     ...(transform
