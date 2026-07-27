@@ -1300,6 +1300,7 @@ export default function OrderOfPlay() {
           );
 
           const time = `${cell.time}-${i}`;
+          console.log("TIME KEY:", time);
 
           if (!timeMap[time]) {
             timeMap[time] = new Set();
@@ -1328,6 +1329,8 @@ export default function OrderOfPlay() {
               }
             }
           }
+
+          console.log("BEFORE ADD", time, [...timeMap[time]]);
 
           // Update validation trackers
           players.forEach((p) => {
