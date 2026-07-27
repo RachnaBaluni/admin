@@ -1317,6 +1317,10 @@ export default function OrderOfPlay() {
             timeMap[time] = new Set();
           }
 
+          console.log("TIME:", time, "CURRENT:", players, "EXISTING:", [
+            ...timeMap[time],
+          ]);
+
           // Check same player at the same time
           for (const p of players) {
             if (timeMap[time].has(p)) {
