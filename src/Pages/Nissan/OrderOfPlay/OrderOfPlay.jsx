@@ -746,6 +746,15 @@ export default function OrderOfPlay() {
     matchesPerCourt,
     existingDays = [],
   ) => {
+    console.log(
+      "MATCHES RECEIVED",
+      matches.map((m) => ({
+        id: m._id,
+        matchNo: m.matchNo,
+        stage: m.Stage,
+      })),
+    );
+
     let temp = [];
     const maxRows = Math.max(...Object.values(matchesPerCourt));
 
