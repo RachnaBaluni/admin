@@ -1534,6 +1534,8 @@ export default function OrderOfPlay() {
       console.log("VALIDATION RESULT =", targetDayError);
 
       if (targetDayError !== true) {
+        // Undo replace
+        target.match = oldScheduledMatch;
         toast.error(targetDayError);
         return;
       }
