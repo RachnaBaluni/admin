@@ -746,6 +746,7 @@ export default function OrderOfPlay() {
     matchesPerCourt,
     existingDays = [],
   ) => {
+    alert("buildGrid called");
     console.log(
       "MATCHES RECEIVED",
       matches.map((m) => ({
