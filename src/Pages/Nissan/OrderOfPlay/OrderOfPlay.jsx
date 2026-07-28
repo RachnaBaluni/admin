@@ -1607,6 +1607,27 @@ export default function OrderOfPlay() {
         dragged.match = targetMatch;
         target.match = draggedMatch;
 
+        console.log("PLACED MATCH PLAYERS", getPlayers(target.match));
+
+        console.log("===== REMAINING DROP VALIDATION =====");
+
+        newDays[targetDay].grid.forEach((row, r) => {
+          row.forEach((cell, c) => {
+            if (cell?.match) {
+              console.log(
+                "ROW:",
+                r,
+                "COURT:",
+                c,
+                "MATCH:",
+                cell.match.matchNo,
+                "PLAYERS:",
+                getPlayers(cell.match),
+              );
+            }
+          });
+        });
+
         // Validate the complete day after the swap
         const targetDayError = validateDay(newDays[targetDay].grid);
 
