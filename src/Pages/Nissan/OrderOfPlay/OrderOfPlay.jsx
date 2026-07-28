@@ -1044,43 +1044,43 @@ export default function OrderOfPlay() {
 
     setSelectedRounds(updated);
   };
-  const validateLocalMove = (grid, i, j) => {
-    const cell = grid[i][j];
-    if (!cell?.match || cell.match.forcedPlacement) return true;
+  // const validateLocalMove = (grid, i, j) => {
+  //   const cell = grid[i][j];
+  //   if (!cell?.match || cell.match.forcedPlacement) return true;
 
-    const players = getPlayers(cell.match);
+  //   const players = getPlayers(cell.match);
 
-    // ONLY check nearby rows
-    const rowsToCheck = [i - 1, i, i + 1].filter(
-      (r) => r >= 0 && r < grid.length,
-    );
+  //   // ONLY check nearby rows
+  //   const rowsToCheck = [i - 1, i, i + 1].filter(
+  //     (r) => r >= 0 && r < grid.length,
+  //   );
 
-    for (const r of rowsToCheck) {
-      for (let c = 0; c < grid[r].length; c++) {
-        const other = grid[r][c];
-        if (!other?.match || other.match._id === cell.match._id) continue;
-        if (other.match.forcedPlacement) continue;
+  //   for (const r of rowsToCheck) {
+  //     for (let c = 0; c < grid[r].length; c++) {
+  //       const other = grid[r][c];
+  //       if (!other?.match || other.match._id === cell.match._id) continue;
+  //       if (other.match.forcedPlacement) continue;
 
-        const otherPlayers = getPlayers(other.match);
+  //       const otherPlayers = getPlayers(other.match);
 
-        // SAME TIME CHECK
-        if (other.time === cell.time) {
-          if (players.some((p) => otherPlayers.includes(p))) {
-            return "❌ Same player same time";
-          }
-        }
+  //       // SAME TIME CHECK
+  //       if (other.time === cell.time) {
+  //         if (players.some((p) => otherPlayers.includes(p))) {
+  //           return "❌ Same player same time";
+  //         }
+  //       }
 
-        // CONSECUTIVE CHECK
-        if (Math.abs(r - i) === 1 && c !== j) {
-          if (players.some((p) => otherPlayers.includes(p))) {
-            return "❌ Consecutive matches on different courts";
-          }
-        }
-      }
-    }
+  //       // CONSECUTIVE CHECK
+  //       if (Math.abs(r - i) === 1 && c !== j) {
+  //         if (players.some((p) => otherPlayers.includes(p))) {
+  //           return "❌ Consecutive matches on different courts";
+  //         }
+  //       }
+  //     }
+  //   }
 
-    return true;
-  };
+  //   return true;
+  // };
 
   const validateAllDays = (daysData) => {
     console.log("VALIDATE ALL DAYS");
@@ -1280,7 +1280,7 @@ export default function OrderOfPlay() {
     // Validate the complete day schedule
     const validateDay = (grid) => {
       const timeMap = {};
-      const playerLastRow = {};
+      const playerLastMatch = {};
 
       for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[i].length; j++) {
@@ -1313,42 +1313,63 @@ export default function OrderOfPlay() {
           const time = `${cell.time}-${i}`;
           console.log("TIME KEY:", time);
 
+          // if (!timeMap[time]) {
+          //   timeMap[time] = new Set();
+          // }
+
+          // console.log("TIME:", time, "CURRENT:", players, "EXISTING:", [
+          //   ...timeMap[time],
+          // ]);
+
+          // // Check same player at the same time
+          // for (const p of players) {
+          //   console.log(
+          //     "Checking Player:",
+          //     p,
+          //     "Exists:",
+          //     timeMap[time].has(p),
+          //     "Existing:",
+          //     [...timeMap[time]],
+          //   );
+          //   if (timeMap[time].has(p)) {
+          //     return "❌ Same player same time";
+          //   }
+          // }
+
           if (!timeMap[time]) {
-            timeMap[time] = new Set();
+            timeMap[time] = {};
           }
 
-          console.log("TIME:", time, "CURRENT:", players, "EXISTING:", [
-            ...timeMap[time],
-          ]);
-
-          // Check same player at the same time
           for (const p of players) {
-            console.log(
-              "Checking Player:",
-              p,
-              "Exists:",
-              timeMap[time].has(p),
-              "Existing:",
-              [...timeMap[time]],
-            );
-            if (timeMap[time].has(p)) {
+            if (timeMap[time][p]) {
               return "❌ Same player same time";
             }
+
+            timeMap[time][p] = true;
           }
 
           // Check consecutive matches on different courts
+          // for (const p of players) {
+          //   if (playerLastRow[p] !== undefined) {
+          //     const diff = Math.abs(playerLastRow[p] - i);
+
+          //     if (diff === 1) {
+          //       const lastCourt = grid[playerLastRow[p]].findIndex(
+          //         (c) => c.match && getPlayers(c.match).includes(p),
+          //       );
+
+          //       if (lastCourt !== j) {
+          //         return "❌ Consecutive matches on different courts";
+          //       }
+          //     }
+          //   }
+          // }
           for (const p of players) {
-            if (playerLastRow[p] !== undefined) {
-              const diff = Math.abs(playerLastRow[p] - i);
+            if (playerLastMatch[p]) {
+              const last = playerLastMatch[p];
 
-              if (diff === 1) {
-                const lastCourt = grid[playerLastRow[p]].findIndex(
-                  (c) => c.match && getPlayers(c.match).includes(p),
-                );
-
-                if (lastCourt !== j) {
-                  return "❌ Consecutive matches on different courts";
-                }
+              if (Math.abs(last.row - i) === 1 && last.court !== j) {
+                return "❌ Consecutive matches on different courts";
               }
             }
           }
@@ -1361,7 +1382,10 @@ export default function OrderOfPlay() {
           });
 
           players.forEach((p) => {
-            playerLastRow[p] = i;
+            playerLastMatch[p] = {
+              row: i,
+              court: j,
+            };
           });
         }
       }
@@ -1561,17 +1585,17 @@ export default function OrderOfPlay() {
           return;
         }
 
-        // Validate the scheduled match movement
-        const dragError = validateLocalMove(
-          newDays[sourceDay].grid,
-          overPos.i,
-          overPos.j,
-        );
+        // // Validate the scheduled match movement
+        // const dragError = validateLocalMove(
+        //   newDays[sourceDay].grid,
+        //   overPos.i,
+        //   overPos.j,
+        // );
 
-        if (dragError !== true) {
-          toast.error(dragError);
-          return;
-        }
+        // if (dragError !== true) {
+        //   toast.error(dragError);
+        //   return;
+        // }
 
         // Temporarily swap the two matches
         const draggedMatch = dragged.match;
@@ -1586,6 +1610,9 @@ export default function OrderOfPlay() {
 
         if (targetDayError !== true) {
           toast.error(targetDayError);
+          // Undo swap
+          target.match = targetMatch;
+          dragged.match = draggedMatch;
           return;
         }
       }
