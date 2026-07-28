@@ -909,7 +909,7 @@ export default function OrderOfPlay() {
           console.log("NO VALID MATCH FOUND FOR SLOT", i, j);
 
           const remainingMatch = matches.find((m) => !placedMatches.has(m._id));
-
+          console.log("REMAINING MATCH =", remainingMatch);
           if (remainingMatch) {
             const forcedMatch = {
               ...remainingMatch,
