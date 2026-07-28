@@ -1299,6 +1299,12 @@ export default function OrderOfPlay() {
             players,
           );
 
+          if (players.length === 0) {
+            console.log("❌ PLAYER ARRAY EMPTY");
+            console.log("MATCH NO =", cell.match.matchNo);
+            console.log("FULL MATCH =", cell.match);
+          }
+
           console.log(
             "Row:",
             i,
