@@ -1390,6 +1390,16 @@ export default function OrderOfPlay() {
         }
       }
 
+      console.log("TOTAL ROWS =", grid.length);
+
+      for (let r = 0; r < grid.length; r++) {
+        console.log(
+          "ROW",
+          r,
+          grid[r].map((c) => c.match?.matchNo || "-"),
+        );
+      }
+
       return true;
     };
 
