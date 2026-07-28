@@ -832,6 +832,14 @@ export default function OrderOfPlay() {
         let placed = false;
 
         for (let m = 0; m < matches.length; m++) {
+          console.log(
+            "MATCH",
+            match.matchNo,
+            "ID",
+            match._id,
+            "STAGE",
+            match.Stage,
+          );
           const match = matches[m];
 
           if (placedMatches.has(match._id)) continue;
