@@ -754,6 +754,9 @@ export default function OrderOfPlay() {
         stage: m.Stage,
       })),
     );
+    console.log("EVENT IDS", [...new Set(matches.map((m) => String(m.Event)))]);
+
+    console.log("TOTAL MATCHES", matches.length);
 
     let temp = [];
     const maxRows = Math.max(...Object.values(matchesPerCourt));
