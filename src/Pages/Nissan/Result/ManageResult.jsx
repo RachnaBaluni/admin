@@ -278,6 +278,7 @@ const ManageResult = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchDraws = useCallback(async () => {
+    console.log(drawsRes.data.data);
     // Wrapped in useCallback
     if (selectedEvent) {
       setLoading(true);
