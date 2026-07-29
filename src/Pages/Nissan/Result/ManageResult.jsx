@@ -482,4 +482,4 @@ const ManageResultsTo = () => {
   );
 };
 
-export default ManageResultsTo;
+export default ManageResult;
