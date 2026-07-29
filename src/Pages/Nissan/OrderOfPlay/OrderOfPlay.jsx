@@ -44,16 +44,16 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
   );
 
   const isCompleted = completedMatches.includes(match._id);
-  // console.log(
-  //   "Match ID:",
-  //   match._id,
-  //   "Completed:",
-  //   isCompleted,
-  //   "Winner:",
-  //   match.Winner,
-  // );
+  console.log(
+    "Match ID:",
+    match._id,
+    "Completed:",
+    isCompleted,
+    "Winner:",
+    match.Winner,
+  );
   if (isCompleted) {
-    //console.log("GREEN MATCH =>", match);
+    console.log("GREEN MATCH =>", match);
   }
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -61,23 +61,23 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
     disabled: isCompleted,
   });
 
-  // console.log("========== MATCH ==========");
-  // console.log("FULL MATCH OBJECT", match);
-  // console.log("Match No:", match.matchNo);
-  // console.log("Winner:", match.Winner);
-  // console.log("TEAM1 =", match.Team1);
-  // console.log("TEAM2 =", match.Team2);
-  // console.log("Winner ID:", match.Winner?._id || match.Winner);
-  // console.log("Team1 ID:", match.Team1?._id);
-  // console.log("Team2 ID:", match.Team2?._id);
-  // console.log(
-  //   "Team1 Winner:",
-  //   String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
-  // );
-  // console.log(
-  //   "Team2 Winner:",
-  //   String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
-  // );
+  console.log("========== MATCH ==========");
+  console.log("FULL MATCH OBJECT", match);
+  console.log("Match No:", match.matchNo);
+  console.log("Winner:", match.Winner);
+  console.log("TEAM1 =", match.Team1);
+  console.log("TEAM2 =", match.Team2);
+  console.log("Winner ID:", match.Winner?._id || match.Winner);
+  console.log("Team1 ID:", match.Team1?._id);
+  console.log("Team2 ID:", match.Team2?._id);
+  console.log(
+    "Team1 Winner:",
+    String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
+  );
+  console.log(
+    "Team2 Winner:",
+    String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
+  );
 
   const style = {
     ...(transform
@@ -134,7 +134,7 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
 
       return null;
     };
-    //console.log(JSON.stringify(match, null, 2));
+    console.log(JSON.stringify(match, null, 2));
 
     const leftPrevMatch = allMatchesRef.current.find(
       (m) =>
@@ -266,19 +266,6 @@ export default function OrderOfPlay() {
     }
   }, [days]);
 
-  useEffect(() => {
-    const savedDays = sessionStorage.getItem("orderPlayDays");
-
-    if (savedDays) {
-      const parsedDays = JSON.parse(savedDays);
-      setDays(parsedDays);
-
-      if (parsedDays.length > 0) {
-        setGrid(parsedDays[0].grid);
-      }
-    }
-  }, []);
-
   const [newDayDate, setNewDayDate] = useState("");
   const [newCourtCount, setNewCourtCount] = useState(4);
   const [newMatchesPerCourt, setNewMatchesPerCourt] = useState({
@@ -358,19 +345,11 @@ export default function OrderOfPlay() {
 */
 
   useEffect(() => {
-    const savedDays = sessionStorage.getItem("orderPlayDays");
-
-    if (savedDays) {
-      const parsedDays = JSON.parse(savedDays);
-      setDays(parsedDays);
-      setGrid(parsedDays[0]?.grid || []);
-      return;
-    }
-
     if (events.length > 0 && selectedDate) {
       fetchData();
     }
   }, [events, selectedDate]);
+
   // useEffect(() => {
   //   const savedDays = sessionStorage.getItem("orderPlayDays");
 
@@ -448,7 +427,7 @@ export default function OrderOfPlay() {
     let allMatches = [];
 
     const allowedRounds = rounds.map((r) => r.trim().toLowerCase());
-    // console.log("Selected Rounds:", allowedRounds);
+    console.log("Selected Rounds:", allowedRounds);
     // 🔥 MATCH BUILD
     allResponses.forEach((res, index) => {
       const ev = filteredEvents[index];
@@ -457,7 +436,7 @@ export default function OrderOfPlay() {
         sessionStorage.getItem("completedMatches") || "[]",
       );
 
-      // console.log("MATCHES API DATA", matches);
+      console.log("MATCHES API DATA", matches);
 
       const filteredMatches = matches.filter((m) => {
         const isAllowedRound = allowedRounds.includes(
@@ -475,12 +454,12 @@ export default function OrderOfPlay() {
         return true;
       });
 
-      // console.table(
-      //   filteredMatches.map((m) => ({
-      //     Stage: m.Stage,
-      //     Match: m.Match_number,
-      //   })),
-      // );
+      console.table(
+        filteredMatches.map((m) => ({
+          Stage: m.Stage,
+          Match: m.Match_number,
+        })),
+      );
 
       const roundWiseMatches = {};
 
@@ -547,42 +526,42 @@ export default function OrderOfPlay() {
       // 🔥 3. match number
       return (a.Match_number || 0) - (b.Match_number || 0);
     });
-    // console.log(
-    //   "Completed Matches:",
-    //   allMatches.filter((m) => m.Status === "Completed")[0],
-    // );
-    // console.table(
-    //   allMatches.map((m) => ({
-    //     Stage: m.Stage,
-    //     Match: m.matchNo,
-    //     Winner: m.Winner
-    //       ? `${m.Winner.partner1?.name}${
-    //           m.Winner.partner2 ? " & " + m.Winner.partner2?.name : ""
-    //         }`
-    //       : "No Winner",
-    //   })),
-    // );
+    console.log(
+      "Completed Matches:",
+      allMatches.filter((m) => m.Status === "Completed")[0],
+    );
+    console.table(
+      allMatches.map((m) => ({
+        Stage: m.Stage,
+        Match: m.matchNo,
+        Winner: m.Winner
+          ? `${m.Winner.partner1?.name}${
+              m.Winner.partner2 ? " & " + m.Winner.partner2?.name : ""
+            }`
+          : "No Winner",
+      })),
+    );
 
-    // console.log("FINAL MATCHES (AFTER SORT):", allMatches);
+    console.log("FINAL MATCHES (AFTER SORT):", allMatches);
 
-    // console.log("ALL MATCHES BEFORE GRID:", allMatches);
-    // console.table(
-    //   allMatches
-    //     .filter((m) => m.category.includes("Cat.B"))
-    //     .map((m) => ({
-    //       Stage: m.Stage,
-    //       Match_number: m.Match_number,
-    //       matchNo: m.matchNo,
-    //       category: m.category,
-    //     })),
-    // );
+    console.log("ALL MATCHES BEFORE GRID:", allMatches);
+    console.table(
+      allMatches
+        .filter((m) => m.category.includes("Cat.B"))
+        .map((m) => ({
+          Stage: m.Stage,
+          Match_number: m.Match_number,
+          matchNo: m.matchNo,
+          category: m.category,
+        })),
+    );
     return allMatches;
   };
 
   /* ================= FETCH DATA ================= */
 
   const fetchData = async () => {
-    //console.log("fetchData called");
+    console.log("fetchData called");
     if (!selectedDate) {
       toast.error("Select date first");
       return;
@@ -594,13 +573,13 @@ export default function OrderOfPlay() {
         { withCredentials: true },
       );
 
-      // console.log("ORDER OF PLAY DATA:", orderPlayRes.data.data);
+      console.log("ORDER OF PLAY DATA:", orderPlayRes.data.data);
 
       const selectedDayData = orderPlayRes.data.data.find(
         (day) => day.playDate === selectedDate,
       );
 
-      // console.log("SELECTED DATE ORDER OF PLAY:", selectedDayData);
+      console.log("SELECTED DATE ORDER OF PLAY:", selectedDayData);
       const savedOrderRes = await axios.get(
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play/${selectedEventId}`,
         { withCredentials: true },
@@ -612,22 +591,22 @@ export default function OrderOfPlay() {
         (order) => order.playDate === selectedDate,
       );
 
-      // console.log("SELECTED DATE:", selectedDate);
-      // console.log("SAVED ORDERS:", savedOrders);
-      // console.log("CURRENT DATE ORDER:", currentDateOrder);
+      console.log("SELECTED DATE:", selectedDate);
+      console.log("SAVED ORDERS:", savedOrders);
+      console.log("CURRENT DATE ORDER:", currentDateOrder);
 
       const allMatches = await getMatches(
         selectedCategories,
         selectedRounds,
         selectedDate,
       );
-      // console.log(
-      //   "GET MATCHES WINNER CHECK",
-      //   allMatches.filter((m) => m.Status === "Completed"),
-      // );
+      console.log(
+        "GET MATCHES WINNER CHECK",
+        allMatches.filter((m) => m.Status === "Completed"),
+      );
 
       allMatchesRef.current = allMatches;
-      // console.log("ALL MATCHES REF", allMatchesRef.current);
+      console.log("ALL MATCHES REF", allMatchesRef.current);
 
       /* ================= DAY LOGIC ================= */
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
@@ -663,7 +642,7 @@ export default function OrderOfPlay() {
         newSelectedCategories,
         newSelectedRounds,
       );
-      // console.log(allNewMatches[0]);
+      console.log(allNewMatches[0]);
       // Already scheduled matches ki ids
       const scheduledIds = new Set();
 
@@ -767,25 +746,12 @@ export default function OrderOfPlay() {
     matchesPerCourt,
     existingDays = [],
   ) => {
-    alert("buildGrid called");
-    console.log(
-      "MATCHES RECEIVED",
-      matches.map((m) => ({
-        id: m._id,
-        matchNo: m.matchNo,
-        stage: m.Stage,
-      })),
-    );
-    console.log("EVENT IDS", [...new Set(matches.map((m) => String(m.Event)))]);
-
-    console.log("TOTAL MATCHES", matches.length);
-
     let temp = [];
     const maxRows = Math.max(...Object.values(matchesPerCourt));
 
-    // console.log("TOTAL SLOTS =", courtCount * maxRows);
+    console.log("TOTAL SLOTS =", courtCount * maxRows);
 
-    // console.log("TOTAL MATCHES =", matches.length);
+    console.log("TOTAL MATCHES =", matches.length);
 
     const timeSlotPlayers = {};
     const playerLastRow = {};
@@ -816,8 +782,6 @@ export default function OrderOfPlay() {
       day.grid.forEach((row, i) => {
         row.forEach((cell, j) => {
           if (!cell?.match) return;
-
-          console.log("FULL MATCH", cell.match);
 
           const players = getPlayers(cell.match);
           const time = cell.time;
@@ -867,14 +831,6 @@ export default function OrderOfPlay() {
 
         for (let m = 0; m < matches.length; m++) {
           const match = matches[m];
-          console.log(
-            "MATCH",
-            match.matchNo,
-            "ID",
-            match._id,
-            "STAGE",
-            match.Stage,
-          );
 
           if (placedMatches.has(match._id)) continue;
 
@@ -951,7 +907,7 @@ export default function OrderOfPlay() {
           console.log("NO VALID MATCH FOUND FOR SLOT", i, j);
 
           const remainingMatch = matches.find((m) => !placedMatches.has(m._id));
-          console.log("REMAINING MATCH =", remainingMatch);
+
           if (remainingMatch) {
             const forcedMatch = {
               ...remainingMatch,
@@ -963,14 +919,14 @@ export default function OrderOfPlay() {
             placedMatches.add(remainingMatch._id);
             forcedMatches.push(forcedMatch);
 
-            // console.log(
-            //   "FORCED =>",
-            //   remainingMatch.matchNo,
-            //   "ROW",
-            //   i,
-            //   "COURT",
-            //   j,
-            // );
+            console.log(
+              "FORCED =>",
+              remainingMatch.matchNo,
+              "ROW",
+              i,
+              "COURT",
+              j,
+            );
           }
         }
       }
@@ -1086,43 +1042,43 @@ export default function OrderOfPlay() {
 
     setSelectedRounds(updated);
   };
-  // const validateLocalMove = (grid, i, j) => {
-  //   const cell = grid[i][j];
-  //   if (!cell?.match || cell.match.forcedPlacement) return true;
+  const validateLocalMove = (grid, i, j) => {
+    const cell = grid[i][j];
+    if (!cell?.match || cell.match.forcedPlacement) return true;
 
-  //   const players = getPlayers(cell.match);
+    const players = getPlayers(cell.match);
 
-  //   // ONLY check nearby rows
-  //   const rowsToCheck = [i - 1, i, i + 1].filter(
-  //     (r) => r >= 0 && r < grid.length,
-  //   );
+    // ONLY check nearby rows
+    const rowsToCheck = [i - 1, i, i + 1].filter(
+      (r) => r >= 0 && r < grid.length,
+    );
 
-  //   for (const r of rowsToCheck) {
-  //     for (let c = 0; c < grid[r].length; c++) {
-  //       const other = grid[r][c];
-  //       if (!other?.match || other.match._id === cell.match._id) continue;
-  //       if (other.match.forcedPlacement) continue;
+    for (const r of rowsToCheck) {
+      for (let c = 0; c < grid[r].length; c++) {
+        const other = grid[r][c];
+        if (!other?.match || other.match._id === cell.match._id) continue;
+        if (other.match.forcedPlacement) continue;
 
-  //       const otherPlayers = getPlayers(other.match);
+        const otherPlayers = getPlayers(other.match);
 
-  //       // SAME TIME CHECK
-  //       if (other.time === cell.time) {
-  //         if (players.some((p) => otherPlayers.includes(p))) {
-  //           return "❌ Same player same time";
-  //         }
-  //       }
+        // SAME TIME CHECK
+        if (other.time === cell.time) {
+          if (players.some((p) => otherPlayers.includes(p))) {
+            return "❌ Same player same time";
+          }
+        }
 
-  //       // CONSECUTIVE CHECK
-  //       if (Math.abs(r - i) === 1 && c !== j) {
-  //         if (players.some((p) => otherPlayers.includes(p))) {
-  //           return "❌ Consecutive matches on different courts";
-  //         }
-  //       }
-  //     }
-  //   }
+        // CONSECUTIVE CHECK
+        if (Math.abs(r - i) === 1 && c !== j) {
+          if (players.some((p) => otherPlayers.includes(p))) {
+            return "❌ Consecutive matches on different courts";
+          }
+        }
+      }
+    }
 
-  //   return true;
-  // };
+    return true;
+  };
 
   const validateAllDays = (daysData) => {
     console.log("VALIDATE ALL DAYS");
@@ -1322,7 +1278,7 @@ export default function OrderOfPlay() {
     // Validate the complete day schedule
     const validateDay = (grid) => {
       const timeMap = {};
-      const playerLastMatch = {};
+      const playerLastRow = {};
 
       for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[i].length; j++) {
@@ -1331,21 +1287,6 @@ export default function OrderOfPlay() {
           if (!cell?.match) continue;
 
           const players = getPlayers(cell.match);
-
-          console.log(
-            "MATCH:",
-            cell.match.matchNo,
-            "STAGE:",
-            cell.match.Stage,
-            "PLAYERS:",
-            players,
-          );
-
-          if (players.length === 0) {
-            console.log("❌ PLAYER ARRAY EMPTY");
-            console.log("MATCH NO =", cell.match.matchNo);
-            console.log("FULL MATCH =", cell.match);
-          }
 
           console.log(
             "Row:",
@@ -1359,93 +1300,44 @@ export default function OrderOfPlay() {
           );
 
           const time = `${cell.time}-${i}`;
-          console.log("TIME KEY:", time);
-
-          // if (!timeMap[time]) {
-          //   timeMap[time] = new Set();
-          // }
-
-          // console.log("TIME:", time, "CURRENT:", players, "EXISTING:", [
-          //   ...timeMap[time],
-          // ]);
-
-          // // Check same player at the same time
-          // for (const p of players) {
-          //   console.log(
-          //     "Checking Player:",
-          //     p,
-          //     "Exists:",
-          //     timeMap[time].has(p),
-          //     "Existing:",
-          //     [...timeMap[time]],
-          //   );
-          //   if (timeMap[time].has(p)) {
-          //     return "❌ Same player same time";
-          //   }
-          // }
 
           if (!timeMap[time]) {
-            timeMap[time] = {};
+            timeMap[time] = new Set();
           }
 
+          // Check same player at the same time
           for (const p of players) {
-            if (timeMap[time][p]) {
+            if (timeMap[time].has(p)) {
               return "❌ Same player same time";
             }
-
-            timeMap[time][p] = true;
           }
 
           // Check consecutive matches on different courts
-          // for (const p of players) {
-          //   if (playerLastRow[p] !== undefined) {
-          //     const diff = Math.abs(playerLastRow[p] - i);
-
-          //     if (diff === 1) {
-          //       const lastCourt = grid[playerLastRow[p]].findIndex(
-          //         (c) => c.match && getPlayers(c.match).includes(p),
-          //       );
-
-          //       if (lastCourt !== j) {
-          //         return "❌ Consecutive matches on different courts";
-          //       }
-          //     }
-          //   }
-          // }
           for (const p of players) {
-            if (playerLastMatch[p]) {
-              const last = playerLastMatch[p];
+            if (playerLastRow[p] !== undefined) {
+              const diff = Math.abs(playerLastRow[p] - i);
 
-              if (Math.abs(last.row - i) === 1 && last.court !== j) {
-                return "❌ Consecutive matches on different courts";
+              if (diff === 1) {
+                const lastCourt = grid[playerLastRow[p]].findIndex(
+                  (c) => c.match && getPlayers(c.match).includes(p),
+                );
+
+                if (lastCourt !== j) {
+                  return "❌ Consecutive matches on different courts";
+                }
               }
             }
           }
 
-          // console.log("BEFORE ADD", time, [...timeMap[time]]);
-
-          // // Update validation trackers
-          // players.forEach((p) => {
-          //   timeMap[time].add(p);
-          // });
+          // Update validation trackers
+          players.forEach((p) => {
+            timeMap[time].add(p);
+          });
 
           players.forEach((p) => {
-            playerLastMatch[p] = {
-              row: i,
-              court: j,
-            };
+            playerLastRow[p] = i;
           });
         }
-      }
-
-      console.log("TOTAL ROWS =", grid.length);
-
-      for (let r = 0; r < grid.length; r++) {
-        console.log(
-          "ROW",
-          r,
-          grid[r].map((c) => c.match?.matchNo || "-"),
-        );
       }
 
       return true;
@@ -1464,7 +1356,7 @@ export default function OrderOfPlay() {
       dragged = newDays[sourceDay].grid[activePos.i][activePos.j];
     }
 
-    // console.log("DRAGGED MATCH =", dragged?.match?.matchNo);
+    console.log("DRAGGED MATCH =", dragged?.match?.matchNo);
 
     // Check completed matches
     const completedMatches = JSON.parse(
@@ -1491,141 +1383,58 @@ export default function OrderOfPlay() {
     // REMAINING MATCH SWAP
     // =====================================================
 
-    // if (isRemainingMatch) {
-    //   // Remaining match can only be swapped within the same day
-    //   if (sourceDay !== targetDay) {
-    //     // sourceDay is null for remaining matches,
-    //     // so this condition is not used for remaining matches
-    //   }
-
-    //   // Remaining match cannot be dropped on an empty slot
-    //   if (!target?.match) {
-    //     toast.error("❌ Remaining match can only replace an existing match");
-    //     return;
-    //   }
-
-    //   console.log("REMAINING MATCH =", dragged.match?.matchNo);
-
-    //   console.log("SCHEDULED MATCH TO REPLACE =", target.match?.matchNo);
-
-    //   // Store the scheduled match before replacing it
-    //   const oldScheduledMatch = target.match;
-    //   console.log("OLD MATCH ID =", oldScheduledMatch._id);
-    //   console.log("OLD MATCH NO =", oldScheduledMatch.matchNo);
-
-    //   newDays[targetDay].grid.forEach((row, i) => {
-    //     row.forEach((cell, j) => {
-    //       if (cell?.match?._id === oldScheduledMatch._id) {
-    //         console.log(
-    //           "OLD MATCH FOUND AT:",
-    //           "row",
-    //           i,
-    //           "court",
-    //           j,
-    //           "matchNo",
-    //           cell.match.matchNo,
-    //         );
-    //       }
-    //     });
-    //   });
-
-    //   // Temporarily place the remaining match
-    //   // into the target slot
-    //   console.log("VALIDATING REMAINING DROP");
-
-    //   target.match = dragged.match;
-
-    //   console.log("PLACED MATCH PLAYERS", getPlayers(target.match));
-
-    //   // Validate the complete target day
-    //   const targetDayError = validateDay(newDays[targetDay].grid);
-    //   console.log("VALIDATION RESULT =", targetDayError);
-    //   // Stop if the new schedule is invalid
-    //   if (targetDayError !== true) {
-    //     toast.error(targetDayError);
-    //     return;
-    //   }
-
-    //   // Get the current remaining matches
-    //   const remainingList = newDays[targetDay].remaining || [];
-
-    //   // Find the index of the dragged remaining match
-    //   const remainingIndex = remainingList.findIndex(
-    //     (m) => String(m._id) === String(remainingMatch._id),
-    //   );
-
-    //   // Replace the dragged remaining match with the scheduled match
-    //   if (remainingIndex !== -1) {
-    //     remainingList[remainingIndex] = oldScheduledMatch;
-    //   }
-
-    //   // Update the remaining matches list
-    //   newDays[targetDay].remaining = remainingList;
-    //   console.log("AFTER SWAP TARGET =", target.match?.matchNo);
-
-    //   console.log("AFTER SWAP REMAINING =", oldScheduledMatch?.matchNo);
-    // }
     if (isRemainingMatch) {
-      // Remaining match cannot be dropped on empty slot
+      // Remaining match can only be swapped within the same day
+      if (sourceDay !== targetDay) {
+        // sourceDay is null for remaining matches,
+        // so this condition is not used for remaining matches
+      }
+
+      // Remaining match cannot be dropped on an empty slot
       if (!target?.match) {
         toast.error("❌ Remaining match can only replace an existing match");
         return;
       }
 
-      // console.log("REMAINING MATCH =", dragged.match?.matchNo);
-      // console.log("SCHEDULED MATCH TO REPLACE =", target.match?.matchNo);
+      console.log("REMAINING MATCH =", dragged.match?.matchNo);
 
-      // Store scheduled match before replacing
+      console.log("SCHEDULED MATCH TO REPLACE =", target.match?.matchNo);
+
+      // Store the scheduled match before replacing it
       const oldScheduledMatch = target.match;
 
-      // console.log("OLD MATCH ID =", oldScheduledMatch._id);
-      // console.log("OLD MATCH NO =", oldScheduledMatch.matchNo);
+      // Temporarily place the remaining match
+      // into the target slot
+      console.log("VALIDATING REMAINING DROP");
 
-      // Put remaining match in target slot
       target.match = dragged.match;
 
       console.log("PLACED MATCH PLAYERS", getPlayers(target.match));
 
-      // Validate complete day
+      // Validate the complete target day
       const targetDayError = validateDay(newDays[targetDay].grid);
-
       console.log("VALIDATION RESULT =", targetDayError);
-
+      // Stop if the new schedule is invalid
       if (targetDayError !== true) {
-        // Undo replace
-        target.match = oldScheduledMatch;
         toast.error(targetDayError);
         return;
       }
 
-      // Remove remaining match from remaining list
+      // Get the current remaining matches
       const remainingList = newDays[targetDay].remaining || [];
 
+      // Find the index of the dragged remaining match
       const remainingIndex = remainingList.findIndex(
         (m) => String(m._id) === String(remainingMatch._id),
       );
 
+      // Replace the dragged remaining match with the scheduled match
       if (remainingIndex !== -1) {
-        // Put replaced scheduled match back into remaining
         remainingList[remainingIndex] = oldScheduledMatch;
       }
 
+      // Update the remaining matches list
       newDays[targetDay].remaining = remainingList;
-
-      // IMPORTANT FIX:
-      // Remove old scheduled match if any duplicate reference exists
-      newDays[targetDay].grid.forEach((row) => {
-        row.forEach((cell) => {
-          if (
-            cell?.match &&
-            String(cell.match._id) === String(oldScheduledMatch._id) &&
-            cell !== target
-          ) {
-            cell.match = null;
-          }
-        });
-      });
-
       console.log("AFTER SWAP TARGET =", target.match?.matchNo);
 
       console.log("AFTER SWAP REMAINING =", oldScheduledMatch?.matchNo);
@@ -1645,17 +1454,17 @@ export default function OrderOfPlay() {
           return;
         }
 
-        // // Validate the scheduled match movement
-        // const dragError = validateLocalMove(
-        //   newDays[sourceDay].grid,
-        //   overPos.i,
-        //   overPos.j,
-        // );
+        // Validate the scheduled match movement
+        const dragError = validateLocalMove(
+          newDays[sourceDay].grid,
+          overPos.i,
+          overPos.j,
+        );
 
-        // if (dragError !== true) {
-        //   toast.error(dragError);
-        //   return;
-        // }
+        if (dragError !== true) {
+          toast.error(dragError);
+          return;
+        }
 
         // Temporarily swap the two matches
         const draggedMatch = dragged.match;
@@ -1665,35 +1474,11 @@ export default function OrderOfPlay() {
         dragged.match = targetMatch;
         target.match = draggedMatch;
 
-        console.log("PLACED MATCH PLAYERS", getPlayers(target.match));
-
-        console.log("===== REMAINING DROP VALIDATION =====");
-
-        newDays[targetDay].grid.forEach((row, r) => {
-          row.forEach((cell, c) => {
-            if (cell?.match) {
-              console.log(
-                "ROW:",
-                r,
-                "COURT:",
-                c,
-                "MATCH:",
-                cell.match.matchNo,
-                "PLAYERS:",
-                getPlayers(cell.match),
-              );
-            }
-          });
-        });
-
         // Validate the complete day after the swap
         const targetDayError = validateDay(newDays[targetDay].grid);
 
         if (targetDayError !== true) {
           toast.error(targetDayError);
-          // Undo swap
-          target.match = targetMatch;
-          dragged.match = draggedMatch;
           return;
         }
       }
@@ -1726,7 +1511,6 @@ export default function OrderOfPlay() {
 
     // Apply the updated schedule
     setDays(newDays);
-    sessionStorage.setItem("orderPlayDays", JSON.stringify(newDays));
 
     console.log("AFTER SET DAYS");
 
