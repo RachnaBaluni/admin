@@ -198,11 +198,21 @@ const Round = memo(
       handleUpdateMatchWithScore(matchId, { Status: newStatus });
     };
 
+    console.log("ROUND:", title);
+    console.log("MATCHES:", matches);
+
     return (
       <div className={styles.roundContainer}>
         <h2 className={styles.roundTitle}>{title}</h2>
         <div className={styles.matchesContainer}>
           {matches.map((match, matchIndex) => {
+            console.log(
+              "Stage:",
+              match.Stage,
+              "Match_number:",
+              match.Match_number,
+            );
+
             // const isByeMatch =
             //   roundIndex === 0 && (!match.Team1 || !match.Team2);
 
