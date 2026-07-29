@@ -278,7 +278,6 @@ const ManageResult = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchDraws = useCallback(async () => {
-    console.log(drawsRes.data.data);
     // Wrapped in useCallback
     if (selectedEvent) {
       setLoading(true);
@@ -289,6 +288,9 @@ const ManageResult = () => {
           }/api/nissan-draws/${selectedEvent}`,
           { withCredentials: true },
         );
+
+        console.log(drawsRes.data.data);
+
         setDraws(drawsRes.data.data);
         console.log("[Frontend] Fetched draws data:", drawsRes.data.data); // Add this log
       } catch (error) {
