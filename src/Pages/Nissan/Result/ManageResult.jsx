@@ -213,23 +213,24 @@ const Round = memo(
               match.Match_number,
             );
 
-            // const isByeMatch =
-            //   roundIndex === 0 && (!match.Team1 || !match.Team2);
+            const isByeMatch =
+              roundIndex === 0 && (!match.Team1 || !match.Team2);
 
-            // const visibleMatchNumber = isByeMatch
-            //   ? "-"
-            //   : matches
-            //       .filter((m) => !(roundIndex === 0 && (!m.Team1 || !m.Team2)))
-            //       .findIndex((m) => m._id === match._id) + 1;
-            const visibleMatchNumber = match.Match_number;
+            const visibleMatchNumber = isByeMatch
+              ? "-"
+              : matches
+                  .filter((m) => !(roundIndex === 0 && (!m.Team1 || !m.Team2)))
+                  .findIndex((m) => m._id === match._id) + 1;
             return (
               <React.Fragment
                 key={match._id || `match-${roundIndex}-${matchIndex}`}
               >
                 <div className={styles.matchPair}>
-                  <div className={styles.matchNumber}>
-                    Match {visibleMatchNumber}
-                  </div>
+                  {visibleMatchNumber && (
+                    <div className={styles.matchNumber}>
+                      Match {visibleMatchNumber}
+                    </div>
+                  )}
                   {/* Status Dropdown */}
                   <select
                     value={match.Status} // Default to current status
