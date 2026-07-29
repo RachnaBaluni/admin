@@ -1,7 +1,10 @@
-/* ManageResult.module.css */
-
-.manageResultContainer { /* Changed class name */
+.manageResultContainer {
   padding: var(--spacing-lg);
+  overflow-x: auto;
+}
+
+.title {
+  margin-bottom: 20px;
 }
 
 .eventFilterButtons {
@@ -18,34 +21,27 @@
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md);
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.filterButton:hover {
-  background-color: var(--hover-light);
 }
 
 .filterButton.active {
   background-color: var(--primary-color);
   color: var(--text-light);
-  border-color: var(--primary-color);
 }
 
-.controls {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-}
+/* =========================
+   BRACKET LAYOUT (RESTORED)
+   ========================= */
 
-/* Bracket Styles */
 .bracketContainer {
   display: flex;
   overflow-x: auto;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  zoom: 0.75; /* 👈 USE THIS instead of transform */
+
+  border-radius: 10px;
 }
 
 .roundContainer {
@@ -53,54 +49,43 @@
   flex-direction: column;
   justify-content: space-around;
   flex-shrink: 0;
-  margin-right: 60px; /* Reduced space between rounds */
+  margin-right: 60px;
   position: relative;
   padding: 10px 0;
 }
 
-.roundContainer:last-child {
-  margin-right: 0;
-}
-
 .roundTitle {
   text-align: center;
-  font-size: 1.3em;
-  font-weight: bold;
+  font-size: 1.2em;
   margin-bottom: 25px;
-  color: var(--text-dark);
-  text-transform: uppercase;
 }
 
 .matchesContainer {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  flex-grow: 1;
+  justify-content: space-evenly;
+  height: 100%;
 }
+
+/* =========================
+   MATCH CARD (FIXED HEIGHT)
+   ========================= */
 
 .matchPair {
+  background: #ffffff;
+  border-radius: 10px;
+  width: 340px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  min-height: 190px;
   display: flex;
   flex-direction: column;
-  position: relative;
-  margin-bottom: 30px; /* Reduced space between match pairs */
-  background-color: #e0e0e029;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  width: 320px; /* Increased width */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  justify-content: space-between;
 }
 
-.matchPair:last-child {
-  margin-bottom: 0;
-}
-
-.matchSlot {
-  padding: 12px 15px;
-  font-size: 0.95em;
-  color: var(--text-dark);
-  /* Removed white-space: nowrap; */
-  overflow: hidden; /* Keep overflow hidden for the slot itself */
-  text-overflow: ellipsis; /* Keep ellipsis for the slot itself */
+/* Header */
+.matchHeader {
   display: flex;
   align-items: center;
   justify-content: center; /* Changed from space-between */
@@ -108,7 +93,10 @@
   background-color: #ffffff; /* Added very light gray background */
   border-radius: var(--border-radius-sm); /* Added border-radius */
   cursor: pointer; /* Added cursor: pointer; */
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out; /* Added transition */
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out,
+    background-color 0.2s ease-in-out; /* Added transition */
 }
 
 .matchSlot:hover {
@@ -116,31 +104,26 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Lift effect */
 }
 
-
 .matchSlot:first-child {
+  justify-content: space-between;
+  padding: 8px 14px;
   border-bottom: 1px solid #eee;
 }
 
-.teamName {
-  font-weight: 700;
-  font-size: 1.1em; /* Reduced slightly */
-  text-align: center;
-  color: var(--text-dark);
-  text-transform: uppercase; /* Added */
-  letter-spacing: 0.05em;
-  /* Removed background-color: #f0f0f0; */
-  padding: 5px 0;
-  border-radius: var(--border-radius-sm, 4px);
-  white-space: normal; /* Allow wrapping */
-  transition: background-color 0.2s ease-in-out; /* Smooth transition */
+.matchNumber {
+  font-size: 0.75em;
+  color: #666;
+  font-weight: 600;
 }
 
-.matchSlot.winner { /* Changed from .teamName.winner */
+.matchSlot.winner {
+  /* Changed from .teamName.winner */
   background-color: #e6ffe6; /* Very light green */
   border: 1px solid #8cff8c; /* Subtle green border */
 }
 
-.matchSlot.loser { /* Changed from .teamName.loser */
+.matchSlot.loser {
+  /* Changed from .teamName.loser */
   background-color: #ffe6e6; /* Very light red */
   border: 1px solid #ff8c8c; /* Subtle red border */
 }
@@ -209,7 +192,7 @@
   appearance: none; /* Remove default browser styling */
   -webkit-appearance: none; /* For Webkit browsers */
   -moz-appearance: none; /* For Firefox */
-  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23555%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-5.4H18.6c-5%200-9.3%201.8-13.2%205.4A17.6%2017.6%200%200%200%200%2082.2c0%204.8%201.8%209.3%205.4%2013.2l128%20128c3.9%203.9%208.4%205.4%2013.2%205.4s9.3-1.8%2013.2-5.4l128-128c3.9-3.9%205.4-8.4%205.4-13.2%200-4.8-1.8-9.3-5.4-13.2z%22%2F%3E%3C%2Fsvg%3E'); /* Custom arrow */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23555%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-5.4H18.6c-5%200-9.3%201.8-13.2%205.4A17.6%2017.6%200%200%200%200%2082.2c0%204.8%201.8%209.3%205.4%2013.2l128%20128c3.9%203.9%208.4%205.4%2013.2%205.4s9.3-1.8%2013.2-5.4l128-128c3.9-3.9%205.4-8.4%205.4-13.2%200-4.8-1.8-9.3-5.4-13.2z%22%2F%3E%3C%2Fsvg%3E"); /* Custom arrow */
   background-repeat: no-repeat;
   background-position: right 5px center;
   background-size: 8px;
@@ -220,10 +203,15 @@
   width: 60px; /* Adjust width as needed */
   padding: 6px 8px;
   border: 1px solid var(--border-color, #ccc); /* Use CSS variable if available, fallback to #ccc */
-  border-radius: var(--border-radius-sm, 4px); /* Use CSS variable if available, fallback to 4px */
+  border-radius: var(
+    --border-radius-sm,
+    4px
+  ); /* Use CSS variable if available, fallback to 4px */
   font-size: 0.85em;
   text-align: center;
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition:
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
   outline: none; /* Remove default outline */
 }
 
@@ -235,11 +223,71 @@
 .teamScoreInput::placeholder {
   color: #aaa;
 }
+.matchStatus {
+  font-size: 0.7em;
+  background: #eef2ff;
+  color: #3b5bdb;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+/* Meta */
+.matchMeta {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.matchChip {
+  background: #f4f6f8;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+/* Teams */
+.matchSlot {
+  margin: 6px 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fafafa;
+  cursor: default;
+}
+
+.teamRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.teamName {
+  font-size: 0.9em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.teamScore {
+  background: #f1f3f5;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85em;
+}
+
+/* States */
+.matchSlot.winner {
+  background: #e9fbe9;
+  border: 1px solid #9be59b;
+}
+
+.matchSlot.loser {
+  background: #fdeaea;
+  border: 1px solid #f5a3a3;
+}
 
 .vsSeparator {
   text-align: center;
   font-weight: bold;
-  margin: 8px 0; /* Adjusted vertical spacing */
-  color: var(--text-dark);
-  font-size: 0.9em;
+  margin: 6px 0;
+  color: #555;
 }
