@@ -271,7 +271,7 @@ const Round = memo(
   },
 );
 
-const ManageResultsTo = () => {
+const ManageResult = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState("");
   const [draws, setDraws] = useState([]);
