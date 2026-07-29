@@ -264,6 +264,49 @@ const ManageDraw = () => {
     }
   };
 
+  // =====================
+  // UPDATE MATCH TIME
+  // =====================
+  const updateMatchTime = async (drawId, matchTime) => {
+    // optimistic UI update
+    setDraws((prev) =>
+      prev.map((draw) =>
+        draw._id === drawId ? { ...draw, MatchTime: matchTime } : draw,
+      ),
+    );
+
+    try {
+      await api.post(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/updateTime/${drawId}`,
+        { matchTime },
+        { withCredentials: true },
+      );
+    } catch (error) {
+      toast.error("Failed to update match time");
+    }
+  };
+
+  // =====================
+  // UPDATE COURT NUMBER
+  // =====================
+  const updateMatchCourt = async (drawId, matchCourt) => {
+    setDraws((prev) =>
+      prev.map((draw) =>
+        draw._id === drawId ? { ...draw, CourtNumber: matchCourt } : draw,
+      ),
+    );
+
+    try {
+      await api.post(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/nissan-draws/updateCourt/${drawId}`,
+        { matchCourt },
+        { withCredentials: true },
+      );
+    } catch (error) {
+      toast.error("Failed to update court number");
+    }
+  };
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {

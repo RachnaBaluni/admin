@@ -266,6 +266,19 @@ export default function OrderOfPlay() {
     }
   }, [days]);
 
+  useEffect(() => {
+    const savedDays = sessionStorage.getItem("orderPlayDays");
+
+    if (savedDays) {
+      const parsedDays = JSON.parse(savedDays);
+      setDays(parsedDays);
+
+      if (parsedDays.length > 0) {
+        setGrid(parsedDays[0].grid);
+      }
+    }
+  }, []);
+
   const [newDayDate, setNewDayDate] = useState("");
   const [newCourtCount, setNewCourtCount] = useState(4);
   const [newMatchesPerCourt, setNewMatchesPerCourt] = useState({
@@ -345,11 +358,19 @@ export default function OrderOfPlay() {
 */
 
   useEffect(() => {
+    const savedDays = sessionStorage.getItem("orderPlayDays");
+
+    if (savedDays) {
+      const parsedDays = JSON.parse(savedDays);
+      setDays(parsedDays);
+      setGrid(parsedDays[0]?.grid || []);
+      return;
+    }
+
     if (events.length > 0 && selectedDate) {
       fetchData();
     }
   }, [events, selectedDate]);
-
   // useEffect(() => {
   //   const savedDays = sessionStorage.getItem("orderPlayDays");
 
@@ -1705,6 +1726,7 @@ export default function OrderOfPlay() {
 
     // Apply the updated schedule
     setDays(newDays);
+    sessionStorage.setItem("orderPlayDays", JSON.stringify(newDays));
 
     console.log("AFTER SET DAYS");
 
