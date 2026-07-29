@@ -151,13 +151,20 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
     );
 
     if (side === 1) {
+      console.log("LEFT PREV MATCH", leftPrevMatch);
+
       const autoWinner = getWinnerName(leftPrevMatch);
+      console.log("AUTO WINNER LEFT", autoWinner);
+
       if (autoWinner) return autoWinner;
       return `R${prevRound} M${leftMatch} Winner`;
     }
 
     const autoWinner = getWinnerName(rightPrevMatch);
+    console.log("RIGHT PREV MATCH", rightPrevMatch);
+
     if (autoWinner) return autoWinner;
+    console.log("AUTO WINNER RIGHT", autoWinner);
 
     return `R${prevRound} M${rightMatch} Winner`;
   };
