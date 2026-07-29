@@ -468,8 +468,7 @@ export default function OrderOfPlay() {
 
         // Show completed matches only if they were completed in Manage Results
         if (m.Winner) {
-          //return completedMatches.includes(m._id);
-          return true;
+          return completedMatches.includes(m._id);
         }
 
         // Always show upcoming matches
