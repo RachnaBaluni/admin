@@ -203,15 +203,15 @@ const Round = memo(
         <h2 className={styles.roundTitle}>{title}</h2>
         <div className={styles.matchesContainer}>
           {matches.map((match, matchIndex) => {
-            const isByeMatch =
-              roundIndex === 0 && (!match.Team1 || !match.Team2);
+            // const isByeMatch =
+            //   roundIndex === 0 && (!match.Team1 || !match.Team2);
 
-            const visibleMatchNumber = isByeMatch
-              ? "-"
-              : matches
-                  .filter((m) => !(roundIndex === 0 && (!m.Team1 || !m.Team2)))
-                  .findIndex((m) => m._id === match._id) + 1;
-
+            // const visibleMatchNumber = isByeMatch
+            //   ? "-"
+            //   : matches
+            //       .filter((m) => !(roundIndex === 0 && (!m.Team1 || !m.Team2)))
+            //       .findIndex((m) => m._id === match._id) + 1;
+            const visibleMatchNumber = match.Match_number;
             return (
               <React.Fragment
                 key={match._id || `match-${roundIndex}-${matchIndex}`}
