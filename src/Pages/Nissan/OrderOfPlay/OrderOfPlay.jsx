@@ -362,7 +362,6 @@ export default function OrderOfPlay() {
 
     if (savedDays) {
       setDays(JSON.parse(savedDays));
-      return;
     }
 
     if (events.length > 0 && selectedDate) {
