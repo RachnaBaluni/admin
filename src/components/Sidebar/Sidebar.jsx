@@ -124,7 +124,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
               <li>
                 <NavLink
-                  to="/nissan/manage-result-compact"
+                  to="/nissan/manage-result"
                   className={({ isActive }) => (isActive ? styles.active : "")}
                   onClick={toggleSidebar}
                 >
