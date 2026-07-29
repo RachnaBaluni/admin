@@ -351,24 +351,24 @@ export default function OrderOfPlay() {
   }, [events, selectedDate]);
 */
 
-  useEffect(() => {
-    if (events.length > 0 && selectedDate) {
-      fetchData();
-    }
-  }, [events, selectedDate]);
-
   // useEffect(() => {
-  //   const savedDays = sessionStorage.getItem("orderPlayDays");
-
-  //   if (savedDays) {
-  //     setDays(JSON.parse(savedDays));
-  //     return;
-  //   }
-
   //   if (events.length > 0 && selectedDate) {
   //     fetchData();
   //   }
   // }, [events, selectedDate]);
+
+  useEffect(() => {
+    const savedDays = sessionStorage.getItem("orderPlayDays");
+
+    if (savedDays) {
+      setDays(JSON.parse(savedDays));
+      return;
+    }
+
+    if (events.length > 0 && selectedDate) {
+      fetchData();
+    }
+  }, [events, selectedDate]);
 
   const fetchEvents = async () => {
     try {
