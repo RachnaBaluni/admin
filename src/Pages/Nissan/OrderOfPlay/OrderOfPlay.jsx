@@ -120,13 +120,13 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
       const team1Exists = m.Team1?.partner1?.name;
       const team2Exists = m.Team2?.partner1?.name;
 
-      if (team1Exists && !team2Exists) {
+      if (m.Stage === "Round 1" && team1Exists && !team2Exists) {
         return `${m.Team1.partner1?.name}${
           m.Team1.partner2 ? " & " + m.Team1.partner2?.name : ""
         }`;
       }
 
-      if (!team1Exists && team2Exists) {
+      if (m.Stage === "Round 1" && !team1Exists && team2Exists) {
         return `${m.Team2.partner1?.name}${
           m.Team2.partner2 ? " & " + m.Team2.partner2?.name : ""
         }`;
