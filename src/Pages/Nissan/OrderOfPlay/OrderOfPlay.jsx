@@ -1734,6 +1734,8 @@ export default function OrderOfPlay() {
                     <button
                       className={styles.generateBtn}
                       onClick={() => {
+                        setShowFilters(true); // 👈 ye line add karo
+
                         setEditingDayIndex(dayIndex);
 
                         setEditDayDate(day.date);
