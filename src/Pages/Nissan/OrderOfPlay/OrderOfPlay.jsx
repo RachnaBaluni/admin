@@ -724,6 +724,56 @@ export default function OrderOfPlay() {
       toast.error("Error adding next day");
     }
   };
+
+  const updateDay = async () => {
+    const allMatches = await getMatches(
+      editCategories,
+      editRounds,
+      editDayDate,
+    );
+
+    const scheduledIds = new Set();
+
+    days.forEach((day, index) => {
+      if (index === editingDayIndex) return;
+
+      day.grid.forEach((row) => {
+        row.forEach((cell) => {
+          if (cell?.match?._id) {
+            scheduledIds.add(cell.match._id);
+          }
+        });
+      });
+    });
+
+    const availableMatches = allMatches.filter((m) => !scheduledIds.has(m._id));
+
+    const updatedGrid = buildGrid(
+      availableMatches,
+      editCourtCount,
+      editMatchesPerCourt,
+      [],
+    );
+
+    const updatedDays = [...days];
+
+    updatedDays[editingDayIndex] = {
+      ...updatedDays[editingDayIndex],
+      date: editDayDate,
+      courtCount: editCourtCount,
+      matchesPerCourt: editMatchesPerCourt,
+      categories: editCategories,
+      rounds: editRounds,
+      grid: updatedGrid.grid,
+      remaining: updatedGrid.remainingMatches,
+    };
+
+    setDays(updatedDays);
+    setEditingDayIndex(null);
+
+    toast.success("Day updated successfully ✅");
+  };
+
   /* ================= REMOVE NEXT DAY ================= */
 
   const deleteDay = (dayIndex) => {
@@ -1734,7 +1784,7 @@ export default function OrderOfPlay() {
                     <button
                       className={styles.generateBtn}
                       onClick={() => {
-                        setShowFilters(true); // 👈 ye line add karo
+                        setShowFilters(true);
 
                         setEditingDayIndex(dayIndex);
 
@@ -1981,10 +2031,16 @@ export default function OrderOfPlay() {
 
                         <button
                           className={styles.generateBtn}
-                          onClick={addNextDay}
+                          onClick={
+                            editingDayIndex === dayIndex
+                              ? updateDay
+                              : addNextDay
+                          }
                           style={{ marginTop: "25px" }}
                         >
-                          + Add Day
+                          {editingDayIndex === dayIndex
+                            ? "Update Day"
+                            : "+ Add Day"}
                         </button>
 
                         <button
