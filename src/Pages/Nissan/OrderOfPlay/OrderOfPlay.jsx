@@ -61,23 +61,23 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
     disabled: isCompleted,
   });
 
-  // console.log("========== MATCH ==========");
-  // console.log("FULL MATCH OBJECT", match);
-  // console.log("Match No:", match.matchNo);
-  // console.log("Winner:", match.Winner);
-  // console.log("TEAM1 =", match.Team1);
-  // console.log("TEAM2 =", match.Team2);
-  // console.log("Winner ID:", match.Winner?._id || match.Winner);
-  // console.log("Team1 ID:", match.Team1?._id);
-  // console.log("Team2 ID:", match.Team2?._id);
-  // console.log(
-  //   "Team1 Winner:",
-  //   String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
-  // );
-  // console.log(
-  //   "Team2 Winner:",
-  //   String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
-  // );
+  console.log("========== MATCH ==========");
+  console.log("FULL MATCH OBJECT", match);
+  console.log("Match No:", match.matchNo);
+  console.log("Winner:", match.Winner);
+  console.log("TEAM1 =", match.Team1);
+  console.log("TEAM2 =", match.Team2);
+  console.log("Winner ID:", match.Winner?._id || match.Winner);
+  console.log("Team1 ID:", match.Team1?._id);
+  console.log("Team2 ID:", match.Team2?._id);
+  console.log(
+    "Team1 Winner:",
+    String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
+  );
+  console.log(
+    "Team2 Winner:",
+    String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
+  );
 
   const style = {
     ...(transform
@@ -301,15 +301,6 @@ export default function OrderOfPlay() {
     3: 4,
     4: 4,
   });
-
-  const [editingDayIndex, setEditingDayIndex] = useState(null);
-
-  const [editDayDate, setEditDayDate] = useState("");
-  const [editCourtCount, setEditCourtCount] = useState(4);
-  const [editMatchesPerCourt, setEditMatchesPerCourt] = useState({});
-  const [editCategories, setEditCategories] = useState([]);
-  const [editRounds, setEditRounds] = useState([]);
-
   useEffect(() => {
     let updated = {};
 
@@ -724,56 +715,6 @@ export default function OrderOfPlay() {
       toast.error("Error adding next day");
     }
   };
-
-  const updateDay = async () => {
-    const allMatches = await getMatches(
-      editCategories,
-      editRounds,
-      editDayDate,
-    );
-
-    const scheduledIds = new Set();
-
-    days.forEach((day, index) => {
-      if (index === editingDayIndex) return;
-
-      day.grid.forEach((row) => {
-        row.forEach((cell) => {
-          if (cell?.match?._id) {
-            scheduledIds.add(cell.match._id);
-          }
-        });
-      });
-    });
-
-    const availableMatches = allMatches.filter((m) => !scheduledIds.has(m._id));
-
-    const updatedGrid = buildGrid(
-      availableMatches,
-      editCourtCount,
-      editMatchesPerCourt,
-      [],
-    );
-
-    const updatedDays = [...days];
-
-    updatedDays[editingDayIndex] = {
-      ...updatedDays[editingDayIndex],
-      date: editDayDate,
-      courtCount: editCourtCount,
-      matchesPerCourt: editMatchesPerCourt,
-      categories: editCategories,
-      rounds: editRounds,
-      grid: updatedGrid.grid,
-      remaining: updatedGrid.remainingMatches,
-    };
-
-    setDays(updatedDays);
-    setEditingDayIndex(null);
-
-    toast.success("Day updated successfully ✅");
-  };
-
   /* ================= REMOVE NEXT DAY ================= */
 
   const deleteDay = (dayIndex) => {
@@ -1638,31 +1579,14 @@ export default function OrderOfPlay() {
               <label key={ev._id} className={styles.checkboxLabel}>
                 <input
                   type="checkbox"
-                  checked={
-                    editingDayIndex !== null
-                      ? editCategories.includes(ev.name)
-                      : newSelectedCategories.includes(ev.name)
-                  }
+                  checked={selectedCategories.includes(ev.name)}
                   onChange={(e) => {
-                    if (editingDayIndex !== null) {
-                      if (e.target.checked) {
-                        setEditCategories([...editCategories, ev.name]);
-                      } else {
-                        setEditCategories(
-                          editCategories.filter((c) => c !== ev.name),
-                        );
-                      }
+                    if (e.target.checked) {
+                      setSelectedCategories([...selectedCategories, ev.name]);
                     } else {
-                      if (e.target.checked) {
-                        setNewSelectedCategories([
-                          ...newSelectedCategories,
-                          ev.name,
-                        ]);
-                      } else {
-                        setNewSelectedCategories(
-                          newSelectedCategories.filter((c) => c !== ev.name),
-                        );
-                      }
+                      setSelectedCategories(
+                        selectedCategories.filter((c) => c !== ev.name),
+                      );
                     }
                   }}
                 />
@@ -1797,32 +1721,12 @@ export default function OrderOfPlay() {
                 </h2>
 
                 {dayIndex > 0 && (
-                  <>
-                    <button
-                      className={styles.generateBtn}
-                      onClick={() => {
-                        setShowFilters(true);
-
-                        setEditingDayIndex(dayIndex);
-
-                        setEditDayDate(day.date);
-                        setEditCourtCount(day.courtCount);
-                        setEditMatchesPerCourt(day.matchesPerCourt);
-
-                        setEditCategories(day.categories || []);
-                        setEditRounds(day.rounds || []);
-                      }}
-                    >
-                      Edit Day
-                    </button>
-
-                    <button
-                      onClick={() => deleteDay(dayIndex)}
-                      className={styles.deleteDayBtn}
-                    >
-                      Delete Day
-                    </button>
-                  </>
+                  <button
+                    onClick={() => deleteDay(dayIndex)}
+                    className={styles.deleteDayBtn}
+                  >
+                    Delete Day
+                  </button>
                 )}
               </div>
 
@@ -1898,158 +1802,117 @@ export default function OrderOfPlay() {
                     </div>
                   )}
               </DndContext>
-              {/* ADD / EDIT DAY */}
-              {showFilters &&
-                (dayIndex === days.length - 1 ||
-                  editingDayIndex === dayIndex) && (
-                  <div className={styles.addDayBox}>
-                    <h3 className={styles.addDayTitle}>
-                      {editingDayIndex === dayIndex
-                        ? "✏️ Edit Day"
-                        : "📅 Add Next Day"}
-                    </h3>
-                    <div className={styles.filterBox}>
-                      {/* DATE */}
+              {/* ADD NEXT DAY */}
+              {showFilters && dayIndex === days.length - 1 && (
+                <div className={styles.addDayBox}>
+                  <h3 className={styles.addDayTitle}>📅 Add Next Day</h3>
+
+                  <div className={styles.filterBox}>
+                    {/* DATE */}
+                    <div>
+                      <h3>Select Date</h3>
+
+                      <input
+                        type="date"
+                        value={newDayDate}
+                        onChange={(e) => setNewDayDate(e.target.value)}
+                        className={styles.courtInput}
+                      />
+                    </div>
+
+                    {/* CATEGORY */}
+                    <div>
+                      <h3>Categories</h3>
+
+                      {events.map((ev) => (
+                        <label key={ev._id} className={styles.checkboxLabel}>
+                          <input
+                            type="checkbox"
+                            checked={newSelectedCategories.includes(ev.name)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setNewSelectedCategories([
+                                  ...newSelectedCategories,
+                                  ev.name,
+                                ]);
+                              } else {
+                                setNewSelectedCategories(
+                                  newSelectedCategories.filter(
+                                    (c) => c !== ev.name,
+                                  ),
+                                );
+                              }
+                            }}
+                          />
+                          {ev.name}
+                        </label>
+                      ))}
+                    </div>
+
+                    {/* ROUNDS */}
+                    <div className={styles.roundSelector}>
+                      <h3>Select Rounds</h3>
+
+                      <div className={styles.roundButtons}>
+                        {roundsList.map((round) => (
+                          <button
+                            key={round}
+                            type="button"
+                            onClick={() => {
+                              if (newSelectedRounds.includes(round)) {
+                                setNewSelectedRounds(
+                                  newSelectedRounds.filter((r) => r !== round),
+                                );
+                              } else {
+                                setNewSelectedRounds([
+                                  ...newSelectedRounds,
+                                  round,
+                                ]);
+                              }
+                            }}
+                            className={
+                              newSelectedRounds.includes(round)
+                                ? styles.activeRoundBtn
+                                : styles.roundBtn
+                            }
+                          >
+                            {round}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* COURT SETTINGS */}
+                    <div className={styles.settingsBox}>
+                      <h3>Court Settings</h3>
+
                       <div>
-                        <h3>Select Date</h3>
+                        <label>Number Of Courts</label>
 
                         <input
-                          type="date"
-                          value={
-                            editingDayIndex === dayIndex
-                              ? editDayDate
-                              : newDayDate
-                          }
+                          type="number"
+                          min="1"
+                          value={newCourtCount}
                           onChange={(e) =>
-                            editingDayIndex === dayIndex
-                              ? setEditDayDate(e.target.value)
-                              : setNewDayDate(e.target.value)
+                            setNewCourtCount(Number(e.target.value))
                           }
                           className={styles.courtInput}
                         />
                       </div>
 
-                      {/* CATEGORY */}
-                      <div>
-                        <h3>Categories</h3>
+                      <div style={{ marginTop: "20px" }}>
+                        <label>Matches Per Court</label>
 
-                        {events.map((ev) => (
-                          <label key={ev._id} className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={newSelectedCategories.includes(ev.name)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setNewSelectedCategories([
-                                    ...newSelectedCategories,
-                                    ev.name,
-                                  ]);
-                                } else {
-                                  setNewSelectedCategories(
-                                    newSelectedCategories.filter(
-                                      (c) => c !== ev.name,
-                                    ),
-                                  );
-                                }
-                              }}
-                            />
-                            {ev.name}
-                          </label>
-                        ))}
-                      </div>
-
-                      {/* ROUNDS */}
-                      <div className={styles.roundSelector}>
-                        <h3>Select Rounds</h3>
-
-                        <div className={styles.roundButtons}>
-                          {roundsList.map((round) => (
-                            <button
-                              key={round}
-                              type="button"
-                              onClick={() => {
-                                if (editingDayIndex === dayIndex) {
-                                  if (editRounds.includes(round)) {
-                                    setEditRounds(
-                                      editRounds.filter((r) => r !== round),
-                                    );
-                                  } else {
-                                    setEditRounds([...editRounds, round]);
-                                  }
-                                } else {
-                                  if (newSelectedRounds.includes(round)) {
-                                    setNewSelectedRounds(
-                                      newSelectedRounds.filter(
-                                        (r) => r !== round,
-                                      ),
-                                    );
-                                  } else {
-                                    setNewSelectedRounds([
-                                      ...newSelectedRounds,
-                                      round,
-                                    ]);
-                                  }
-                                }
-                              }}
-                              className={
-                                editingDayIndex === dayIndex
-                                  ? editRounds.includes(round)
-                                    ? styles.activeRoundBtn
-                                    : styles.roundBtn
-                                  : newSelectedRounds.includes(round)
-                                    ? styles.activeRoundBtn
-                                    : styles.roundBtn
-                              }
-                            >
-                              {round}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* COURT SETTINGS */}
-                      <div className={styles.settingsBox}>
-                        <h3>Court Settings</h3>
-
-                        <div>
-                          <label>Number Of Courts</label>
-
-                          <input
-                            type="number"
-                            min="1"
-                            value={
-                              editingDayIndex === dayIndex
-                                ? editCourtCount
-                                : newCourtCount
-                            }
-                            onChange={(e) => {
-                              if (editingDayIndex === dayIndex) {
-                                setEditCourtCount(Number(e.target.value));
-                              } else {
-                                setNewCourtCount(Number(e.target.value));
-                              }
-                            }}
-                            className={styles.courtInput}
-                          />
-                        </div>
-
-                        <div style={{ marginTop: "20px" }}>
-                          <label>Matches Per Court</label>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "20px",
-                              flexWrap: "wrap",
-                              marginTop: "10px",
-                            }}
-                          >
-                            {Array.from({
-                              length:
-                                editingDayIndex === dayIndex
-                                  ? editCourtCount
-                                  : newCourtCount,
-                            }).map((_, index) => (
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "20px",
+                            flexWrap: "wrap",
+                            marginTop: "10px",
+                          }}
+                        >
+                          {Array.from({ length: newCourtCount }).map(
+                            (_, index) => (
                               <div key={index}>
                                 <p>Court {index + 1}</p>
 
@@ -2057,62 +1920,42 @@ export default function OrderOfPlay() {
                                   type="number"
                                   min="1"
                                   max="10"
-                                  value={
-                                    editingDayIndex === dayIndex
-                                      ? editMatchesPerCourt[index + 1] || 4
-                                      : newMatchesPerCourt[index + 1] || 4
+                                  value={newMatchesPerCourt[index + 1] || 4}
+                                  onChange={(e) =>
+                                    setNewMatchesPerCourt({
+                                      ...newMatchesPerCourt,
+                                      [index + 1]: Number(e.target.value),
+                                    })
                                   }
-                                  onChange={(e) => {
-                                    const value = Number(e.target.value);
-
-                                    if (editingDayIndex === dayIndex) {
-                                      setEditMatchesPerCourt({
-                                        ...editMatchesPerCourt,
-                                        [index + 1]: value,
-                                      });
-                                    } else {
-                                      setNewMatchesPerCourt({
-                                        ...newMatchesPerCourt,
-                                        [index + 1]: value,
-                                      });
-                                    }
-                                  }}
                                   className={styles.courtInput}
                                 />
                               </div>
-                            ))}
-                          </div>
+                            ),
+                          )}
                         </div>
-
-                        <button
-                          className={styles.generateBtn}
-                          onClick={
-                            editingDayIndex === dayIndex
-                              ? updateDay
-                              : addNextDay
-                          }
-                          style={{ marginTop: "25px" }}
-                        >
-                          {editingDayIndex === dayIndex
-                            ? "Update Day"
-                            : "+ Add Day"}
-                        </button>
-
-                        <button
-                          className={styles.generateBtn}
-                          onClick={() =>
-                            setShowRemainingOnly(!showRemainingOnly)
-                          }
-                          style={{ marginTop: "10px" }}
-                        >
-                          {showRemainingOnly
-                            ? "Hide Remaining Matches"
-                            : `Show Remaining Matches (${notPlacedMatches.length})`}
-                        </button>
                       </div>
+
+                      <button
+                        className={styles.generateBtn}
+                        onClick={addNextDay}
+                        style={{ marginTop: "25px" }}
+                      >
+                        + Add Day
+                      </button>
+
+                      <button
+                        className={styles.generateBtn}
+                        onClick={() => setShowRemainingOnly(!showRemainingOnly)}
+                        style={{ marginTop: "10px" }}
+                      >
+                        {showRemainingOnly
+                          ? "Hide Remaining Matches"
+                          : `Show Remaining Matches (${notPlacedMatches.length})`}
+                      </button>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
             </div>
           ))}
         </>
