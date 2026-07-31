@@ -61,23 +61,23 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
     disabled: isCompleted,
   });
 
-  console.log("========== MATCH ==========");
-  console.log("FULL MATCH OBJECT", match);
-  console.log("Match No:", match.matchNo);
-  console.log("Winner:", match.Winner);
-  console.log("TEAM1 =", match.Team1);
-  console.log("TEAM2 =", match.Team2);
-  console.log("Winner ID:", match.Winner?._id || match.Winner);
-  console.log("Team1 ID:", match.Team1?._id);
-  console.log("Team2 ID:", match.Team2?._id);
-  console.log(
-    "Team1 Winner:",
-    String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
-  );
-  console.log(
-    "Team2 Winner:",
-    String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
-  );
+  // console.log("========== MATCH ==========");
+  // console.log("FULL MATCH OBJECT", match);
+  // console.log("Match No:", match.matchNo);
+  // console.log("Winner:", match.Winner);
+  // console.log("TEAM1 =", match.Team1);
+  // console.log("TEAM2 =", match.Team2);
+  // console.log("Winner ID:", match.Winner?._id || match.Winner);
+  // console.log("Team1 ID:", match.Team1?._id);
+  // console.log("Team2 ID:", match.Team2?._id);
+  // console.log(
+  //   "Team1 Winner:",
+  //   String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
+  // );
+  // console.log(
+  //   "Team2 Winner:",
+  //   String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
+  // );
 
   const style = {
     ...(transform
@@ -301,6 +301,15 @@ export default function OrderOfPlay() {
     3: 4,
     4: 4,
   });
+
+  const [editingDayIndex, setEditingDayIndex] = useState(null);
+
+  const [editDayDate, setEditDayDate] = useState("");
+  const [editCourtCount, setEditCourtCount] = useState(4);
+  const [editMatchesPerCourt, setEditMatchesPerCourt] = useState({});
+  const [editCategories, setEditCategories] = useState([]);
+  const [editRounds, setEditRounds] = useState([]);
+
   useEffect(() => {
     let updated = {};
 
@@ -1721,12 +1730,30 @@ export default function OrderOfPlay() {
                 </h2>
 
                 {dayIndex > 0 && (
-                  <button
-                    onClick={() => deleteDay(dayIndex)}
-                    className={styles.deleteDayBtn}
-                  >
-                    Delete Day
-                  </button>
+                  <>
+                    <button
+                      className={styles.generateBtn}
+                      onClick={() => {
+                        setEditingDayIndex(dayIndex);
+
+                        setEditDayDate(day.date);
+                        setEditCourtCount(day.courtCount);
+                        setEditMatchesPerCourt(day.matchesPerCourt);
+
+                        setEditCategories(day.categories || []);
+                        setEditRounds(day.rounds || []);
+                      }}
+                    >
+                      Edit Day
+                    </button>
+
+                    <button
+                      onClick={() => deleteDay(dayIndex)}
+                      className={styles.deleteDayBtn}
+                    >
+                      Delete Day
+                    </button>
+                  </>
                 )}
               </div>
 
@@ -1959,6 +1986,15 @@ export default function OrderOfPlay() {
             </div>
           ))}
         </>
+      )}
+      {editingDayIndex !== null && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h2>Edit Day {editingDayIndex + 1}</h2>
+
+            <button onClick={() => setEditingDayIndex(null)}>Close</button>
+          </div>
+        </div>
       )}
     </div>
   );
