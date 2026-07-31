@@ -2004,15 +2004,6 @@ export default function OrderOfPlay() {
           ))}
         </>
       )}
-      {editingDayIndex !== null && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <h2>Edit Day {editingDayIndex + 1}</h2>
-
-            <button onClick={() => setEditingDayIndex(null)}>Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
