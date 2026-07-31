@@ -15,7 +15,7 @@ const ViewPlayerList = () => {
       setLoading(true);
       const res = await api.get(
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/player/journey/${playerId}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setModalData(res.data.data);
       setSelectedPlayer(playerName);
@@ -31,7 +31,7 @@ const ViewPlayerList = () => {
     try {
       const res = await api.get(
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/player/details`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setPlayers(res.data.data);
     } catch (error) {
@@ -46,7 +46,7 @@ const ViewPlayerList = () => {
   }, []);
 
   const filteredPlayers = players.filter((player) =>
-    player.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    player.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (loading) return <div>Loading...</div>;
@@ -92,9 +92,7 @@ const ViewPlayerList = () => {
                   <td>
                     <button
                       className={styles.viewButton}
-                      onClick={() =>
-                        viewPlayerJourney(player._id, player.name)
-                      }
+                      onClick={() => viewPlayerJourney(player._id, player.name)}
                     >
                       View Journey
                     </button>
@@ -142,10 +140,15 @@ const ViewPlayerList = () => {
                       <td>{match.Stage || "N/A"}</td>
                       <td>{match.Match_number || "N/A"}</td>
                       <td>
-                        {match.Team1?.partner1?.name}
-                        {match.Team1?.partner2
-                          ? " & " + match.Team1.partner2.name
-                          : ""}
+                        {match.Team2
+                          ? `${match.Team2.partner1?.name || ""}${
+                              match.Team2.partner2
+                                ? " & " + match.Team2.partner2.name
+                                : ""
+                            }`
+                          : match.Status === "Completed"
+                            ? "BYE"
+                            : "TBD"}
                       </td>
                       <td>
                         {match.Team2?.partner1?.name}
@@ -153,9 +156,7 @@ const ViewPlayerList = () => {
                           ? " & " + match.Team2.partner2.name
                           : ""}
                       </td>
-                      <td>
-                        {match.Winner?.partner1?.name || "N/A"}
-                      </td>
+                      <td>{match.Winner?.partner1?.name || "N/A"}</td>
                       <td>{match.Status || "N/A"}</td>
                     </tr>
                   ))}
