@@ -17,7 +17,8 @@ const ViewPlayerList = () => {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/player/journey/${playerId}`,
         { withCredentials: true },
       );
-      console.log(res.data.data);
+
+      console.log(JSON.stringify(res.data.data[0], null, 2));
       setModalData(res.data.data);
       setSelectedPlayer(playerName);
       setShowModal(true);
