@@ -1638,14 +1638,31 @@ export default function OrderOfPlay() {
               <label key={ev._id} className={styles.checkboxLabel}>
                 <input
                   type="checkbox"
-                  checked={selectedCategories.includes(ev.name)}
+                  checked={
+                    editingDayIndex === dayIndex
+                      ? editCategories.includes(ev.name)
+                      : newSelectedCategories.includes(ev.name)
+                  }
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedCategories([...selectedCategories, ev.name]);
+                    if (editingDayIndex === dayIndex) {
+                      if (e.target.checked) {
+                        setEditCategories([...editCategories, ev.name]);
+                      } else {
+                        setEditCategories(
+                          editCategories.filter((c) => c !== ev.name),
+                        );
+                      }
                     } else {
-                      setSelectedCategories(
-                        selectedCategories.filter((c) => c !== ev.name),
-                      );
+                      if (e.target.checked) {
+                        setNewSelectedCategories([
+                          ...newSelectedCategories,
+                          ev.name,
+                        ]);
+                      } else {
+                        setNewSelectedCategories(
+                          newSelectedCategories.filter((c) => c !== ev.name),
+                        );
+                      }
                     }
                   }}
                 />
@@ -1951,23 +1968,37 @@ export default function OrderOfPlay() {
                               key={round}
                               type="button"
                               onClick={() => {
-                                if (newSelectedRounds.includes(round)) {
-                                  setNewSelectedRounds(
-                                    newSelectedRounds.filter(
-                                      (r) => r !== round,
-                                    ),
-                                  );
+                                if (editingDayIndex === dayIndex) {
+                                  if (editRounds.includes(round)) {
+                                    setEditRounds(
+                                      editRounds.filter((r) => r !== round),
+                                    );
+                                  } else {
+                                    setEditRounds([...editRounds, round]);
+                                  }
                                 } else {
-                                  setNewSelectedRounds([
-                                    ...newSelectedRounds,
-                                    round,
-                                  ]);
+                                  if (newSelectedRounds.includes(round)) {
+                                    setNewSelectedRounds(
+                                      newSelectedRounds.filter(
+                                        (r) => r !== round,
+                                      ),
+                                    );
+                                  } else {
+                                    setNewSelectedRounds([
+                                      ...newSelectedRounds,
+                                      round,
+                                    ]);
+                                  }
                                 }
                               }}
                               className={
-                                newSelectedRounds.includes(round)
-                                  ? styles.activeRoundBtn
-                                  : styles.roundBtn
+                                editingDayIndex === dayIndex
+                                  ? editRounds.includes(round)
+                                    ? styles.activeRoundBtn
+                                    : styles.roundBtn
+                                  : newSelectedRounds.includes(round)
+                                    ? styles.activeRoundBtn
+                                    : styles.roundBtn
                               }
                             >
                               {round}
@@ -1986,10 +2017,18 @@ export default function OrderOfPlay() {
                           <input
                             type="number"
                             min="1"
-                            value={newCourtCount}
-                            onChange={(e) =>
-                              setNewCourtCount(Number(e.target.value))
+                            value={
+                              editingDayIndex === dayIndex
+                                ? editCourtCount
+                                : newCourtCount
                             }
+                            onChange={(e) => {
+                              if (editingDayIndex === dayIndex) {
+                                setEditCourtCount(Number(e.target.value));
+                              } else {
+                                setNewCourtCount(Number(e.target.value));
+                              }
+                            }}
                             className={styles.courtInput}
                           />
                         </div>
@@ -2005,27 +2044,43 @@ export default function OrderOfPlay() {
                               marginTop: "10px",
                             }}
                           >
-                            {Array.from({ length: newCourtCount }).map(
-                              (_, index) => (
-                                <div key={index}>
-                                  <p>Court {index + 1}</p>
+                            {Array.from({
+                              length:
+                                editingDayIndex === dayIndex
+                                  ? editCourtCount
+                                  : newCourtCount,
+                            }).map((_, index) => (
+                              <div key={index}>
+                                <p>Court {index + 1}</p>
 
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="10"
-                                    value={newMatchesPerCourt[index + 1] || 4}
-                                    onChange={(e) =>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="10"
+                                  value={
+                                    editingDayIndex === dayIndex
+                                      ? editMatchesPerCourt[index + 1] || 4
+                                      : newMatchesPerCourt[index + 1] || 4
+                                  }
+                                  onChange={(e) => {
+                                    const value = Number(e.target.value);
+
+                                    if (editingDayIndex === dayIndex) {
+                                      setEditMatchesPerCourt({
+                                        ...editMatchesPerCourt,
+                                        [index + 1]: value,
+                                      });
+                                    } else {
                                       setNewMatchesPerCourt({
                                         ...newMatchesPerCourt,
-                                        [index + 1]: Number(e.target.value),
-                                      })
+                                        [index + 1]: value,
+                                      });
                                     }
-                                    className={styles.courtInput}
-                                  />
-                                </div>
-                              ),
-                            )}
+                                  }}
+                                  className={styles.courtInput}
+                                />
+                              </div>
+                            ))}
                           </div>
                         </div>
 
