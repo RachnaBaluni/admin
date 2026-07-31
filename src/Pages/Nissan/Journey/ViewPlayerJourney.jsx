@@ -9,6 +9,7 @@ const ViewPlayerList = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState(null);
 
   const viewPlayerJourney = async (playerId, playerName) => {
     try {
@@ -21,6 +22,8 @@ const ViewPlayerList = () => {
       console.log(JSON.stringify(res.data.data[0], null, 2));
       setModalData(res.data.data);
       setSelectedPlayer(playerName);
+      setSelectedPlayerId(playerId);
+
       setShowModal(true);
     } catch (error) {
       console.error("Error fetching journey:", error);
@@ -142,16 +145,50 @@ const ViewPlayerList = () => {
                       <td>{match.Stage || "N/A"}</td>
                       <td>{match.Match_number || "N/A"}</td>
                       <td>
-                        {match.Team1?.partner1?.name}
-                        {match.Team1?.partner2
-                          ? " & " + match.Team1.partner2.name
-                          : ""}
+                        {(() => {
+                          const isPlayerInTeam1 =
+                            match.Team1?.partner1?._id === selectedPlayerId ||
+                            match.Team1?.partner2?._id === selectedPlayerId;
+
+                          const team = isPlayerInTeam1
+                            ? match.Team1
+                            : match.Team2;
+
+                          if (!team) {
+                            return match.Status === "Completed" ? "BYE" : "TBD";
+                          }
+
+                          return (
+                            <>
+                              {team.partner1?.name}
+                              {team.partner2 ? ` & ${team.partner2.name}` : ""}
+                            </>
+                          );
+                        })()}
                       </td>
                       <td>
-                        {match.Team2?.partner1?.name}
-                        {match.Team2?.partner2
-                          ? " & " + match.Team2.partner2.name
-                          : ""}
+                        {(() => {
+                          const isPlayerInTeam1 =
+                            match.Team1?.partner1?._id === selectedPlayerId ||
+                            match.Team1?.partner2?._id === selectedPlayerId;
+
+                          const opponent = isPlayerInTeam1
+                            ? match.Team2
+                            : match.Team1;
+
+                          if (!opponent) {
+                            return match.Status === "Completed" ? "BYE" : "TBD";
+                          }
+
+                          return (
+                            <>
+                              {opponent.partner1?.name}
+                              {opponent.partner2
+                                ? ` & ${opponent.partner2.name}`
+                                : ""}
+                            </>
+                          );
+                        })()}
                       </td>
                       <td>{match.Winner?.partner1?.name || "N/A"}</td>
                       <td>{match.Status || "N/A"}</td>
