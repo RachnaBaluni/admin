@@ -12,10 +12,6 @@ import {
 } from "@dnd-kit/core";
 import { TouchSensor, PointerSensor } from "@dnd-kit/core";
 
-const isByeMatch = !match.Team1 || !match.Team2;
-
-const canDrag = isByeMatch || match.Status !== "Completed";
-
 const Match = ({
   team,
   match,
@@ -26,6 +22,9 @@ const Match = ({
   onByeClick,
 }) => {
   console.log("TEAM CHECK:", team, roundIndex, matchId, slotType);
+  const isByeMatch = !match.Team1 || !match.Team2;
+
+  const canDrag = isByeMatch || match.Status !== "Completed";
 
   let teamDisplayName;
   if (isWinnerSlot) {
