@@ -1639,12 +1639,12 @@ export default function OrderOfPlay() {
                 <input
                   type="checkbox"
                   checked={
-                    editingDayIndex === dayIndex
+                    editingDayIndex !== null
                       ? editCategories.includes(ev.name)
                       : newSelectedCategories.includes(ev.name)
                   }
                   onChange={(e) => {
-                    if (editingDayIndex === dayIndex) {
+                    if (editingDayIndex !== null) {
                       if (e.target.checked) {
                         setEditCategories([...editCategories, ev.name]);
                       } else {
