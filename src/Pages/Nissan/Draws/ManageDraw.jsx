@@ -12,8 +12,13 @@ import {
 } from "@dnd-kit/core";
 import { TouchSensor, PointerSensor } from "@dnd-kit/core";
 
+const isByeMatch = !match.Team1 || !match.Team2;
+
+const canDrag = isByeMatch || match.Status !== "Completed";
+
 const Match = ({
   team,
+  match,
   isWinnerSlot = false,
   roundIndex,
   matchId,
@@ -39,7 +44,7 @@ const Match = ({
     useDraggable({
       id: id,
       data: { team, matchId, roundIndex, slotType },
-      disabled: !team, // Disable dragging for TBD slots (except BYE in Stage 1)
+      disabled: !canDrag, // Disable dragging for TBD slots (except BYE in Stage 1)
     });
 
   const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
@@ -147,6 +152,7 @@ const Round = ({
 
                 <Match
                   team={match.Team1}
+                  match={match}
                   roundIndex={roundIndex}
                   matchId={match._id}
                   slotType="Team1"
@@ -154,6 +160,7 @@ const Round = ({
                 />
                 <Match
                   team={match.Team2}
+                  match={match}
                   roundIndex={roundIndex}
                   matchId={match._id}
                   slotType="Team2"
@@ -336,6 +343,11 @@ const ManageDraw = () => {
     }
   };
   const handleDeleteDraws = async () => {
+    const confirmDelete = window.confirm(
+      "Deleting this draw will also delete the Manage Result data for this category.\n\nAre you sure you want to delete this draw?",
+    );
+
+    if (!confirmDelete) return;
     if (selectedEvent && draws.length > 0) {
       setLoading(true);
       try {
@@ -513,7 +525,7 @@ const ManageDraw = () => {
         ))}
       </div>
       <div className={styles.controls}>
-        <button
+        {/* <button
           onClick={handleCreateDraws}
           className={styles.drawButton}
           disabled={loading || !selectedEvent}
@@ -523,14 +535,25 @@ const ManageDraw = () => {
             : draws.length > 0
               ? "Reset Draws"
               : "Create Draws"}
-        </button>
+        </button> */}
+
+        {draws.length === 0 && (
+          <button
+            onClick={handleCreateDraws}
+            className={styles.drawButton}
+            disabled={loading || !selectedEvent}
+          >
+            {loading ? "Loading..." : "Create Draws"}
+          </button>
+        )}
+
         {draws.length > 0 && (
           <button
             onClick={handleDeleteDraws}
             className={styles.deleteDrawButton}
             disabled={loading || !selectedEvent}
           >
-            Delete All Draws
+            Delete Selected Draw
           </button>
         )}
       </div>
