@@ -17,6 +17,7 @@ const ViewPlayerList = () => {
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/player/journey/${playerId}`,
         { withCredentials: true },
       );
+      console.log(res.data.data);
       setModalData(res.data.data);
       setSelectedPlayer(playerName);
       setShowModal(true);
@@ -140,15 +141,10 @@ const ViewPlayerList = () => {
                       <td>{match.Stage || "N/A"}</td>
                       <td>{match.Match_number || "N/A"}</td>
                       <td>
-                        {match.Team2
-                          ? `${match.Team2.partner1?.name || ""}${
-                              match.Team2.partner2
-                                ? " & " + match.Team2.partner2.name
-                                : ""
-                            }`
-                          : match.Status === "Completed"
-                            ? "BYE"
-                            : "TBD"}
+                        {match.Team1?.partner1?.name}
+                        {match.Team1?.partner2
+                          ? " & " + match.Team1.partner2.name
+                          : ""}
                       </td>
                       <td>
                         {match.Team2?.partner1?.name}
