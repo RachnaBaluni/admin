@@ -1762,12 +1762,9 @@ export default function OrderOfPlay() {
 
             <button
               className={styles.generateBtn}
-              onClick={() => setShowRemainingOnly(!showRemainingOnly)}
               style={{ marginTop: "10px" }}
             >
-              {showRemainingOnly
-                ? "Hide Remaining Matches"
-                : `Show Remaining Matches (${day.remaining?.length || 0})`}
+              Remaining Matches
             </button>
           </div>
         </div>
