@@ -696,6 +696,8 @@ export default function OrderOfPlay() {
           date: newDayDate,
           courtCount: newCourtCount,
           matchesPerCourt: newMatchesPerCourt,
+          categories: newSelectedCategories,
+          rounds: newSelectedRounds,
           grid: newDay.grid,
           remaining: newDay.remainingMatches,
         },
@@ -744,10 +746,11 @@ export default function OrderOfPlay() {
         date: newDayDate,
         courtCount: newCourtCount,
         matchesPerCourt: newMatchesPerCourt,
+        categories: newSelectedCategories,
+        rounds: newSelectedRounds,
         grid: newDay.grid,
         remaining: newDay.remainingMatches,
       };
-
       setDays(updatedDays);
       setEditingDayIndex(null);
 
@@ -770,6 +773,7 @@ export default function OrderOfPlay() {
     // Agar ye data day object me save ho raha hai to:
     setNewSelectedCategories(day.categories || []);
     setNewSelectedRounds(day.rounds || []);
+    setShowFilters(true);
   };
 
   /* ================= REMOVE NEXT DAY ================= */
