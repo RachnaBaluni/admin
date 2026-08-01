@@ -61,23 +61,23 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
     disabled: isCompleted,
   });
 
-  console.log("========== MATCH ==========");
-  console.log("FULL MATCH OBJECT", match);
-  console.log("Match No:", match.matchNo);
-  console.log("Winner:", match.Winner);
-  console.log("TEAM1 =", match.Team1);
-  console.log("TEAM2 =", match.Team2);
-  console.log("Winner ID:", match.Winner?._id || match.Winner);
-  console.log("Team1 ID:", match.Team1?._id);
-  console.log("Team2 ID:", match.Team2?._id);
-  console.log(
-    "Team1 Winner:",
-    String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
-  );
-  console.log(
-    "Team2 Winner:",
-    String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
-  );
+  // console.log("========== MATCH ==========");
+  // console.log("FULL MATCH OBJECT", match);
+  // console.log("Match No:", match.matchNo);
+  // console.log("Winner:", match.Winner);
+  // console.log("TEAM1 =", match.Team1);
+  // console.log("TEAM2 =", match.Team2);
+  // console.log("Winner ID:", match.Winner?._id || match.Winner);
+  // console.log("Team1 ID:", match.Team1?._id);
+  // console.log("Team2 ID:", match.Team2?._id);
+  // console.log(
+  //   "Team1 Winner:",
+  //   String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
+  // );
+  // console.log(
+  //   "Team2 Winner:",
+  //   String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
+  // );
 
   const style = {
     ...(transform
@@ -301,6 +301,8 @@ export default function OrderOfPlay() {
     3: 4,
     4: 4,
   });
+
+  const [editingDayIndex, setEditingDayIndex] = useState(null);
   useEffect(() => {
     let updated = {};
 
@@ -715,6 +717,61 @@ export default function OrderOfPlay() {
       toast.error("Error adding next day");
     }
   };
+
+  const updateDay = async () => {
+    if (!newDayDate) {
+      toast.error("Select date");
+      return;
+    }
+
+    try {
+      const allNewMatches = await getMatches(
+        newSelectedCategories,
+        newSelectedRounds,
+      );
+
+      const newDay = buildGrid(
+        allNewMatches,
+        newCourtCount,
+        newMatchesPerCourt,
+        [],
+      );
+
+      const updatedDays = [...days];
+
+      updatedDays[editingDayIndex] = {
+        ...updatedDays[editingDayIndex],
+        date: newDayDate,
+        courtCount: newCourtCount,
+        matchesPerCourt: newMatchesPerCourt,
+        grid: newDay.grid,
+        remaining: newDay.remainingMatches,
+      };
+
+      setDays(updatedDays);
+      setEditingDayIndex(null);
+
+      toast.success("Day updated successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating day");
+    }
+  };
+
+  const editDay = (dayIndex) => {
+    const day = days[dayIndex];
+
+    setEditingDayIndex(dayIndex);
+
+    setNewDayDate(day.date);
+    setNewCourtCount(day.courtCount);
+    setNewMatchesPerCourt(day.matchesPerCourt);
+
+    // Agar ye data day object me save ho raha hai to:
+    setNewSelectedCategories(day.categories || []);
+    setNewSelectedRounds(day.rounds || []);
+  };
+
   /* ================= REMOVE NEXT DAY ================= */
 
   const deleteDay = (dayIndex) => {
@@ -1721,12 +1778,21 @@ export default function OrderOfPlay() {
                 </h2>
 
                 {dayIndex > 0 && (
-                  <button
-                    onClick={() => deleteDay(dayIndex)}
-                    className={styles.deleteDayBtn}
-                  >
-                    Delete Day
-                  </button>
+                  <>
+                    <button
+                      onClick={() => editDay(dayIndex)}
+                      className={styles.generateBtn}
+                    >
+                      Edit Day
+                    </button>
+
+                    <button
+                      onClick={() => deleteDay(dayIndex)}
+                      className={styles.deleteDayBtn}
+                    >
+                      Delete Day
+                    </button>
+                  </>
                 )}
               </div>
 
@@ -1937,10 +2003,12 @@ export default function OrderOfPlay() {
 
                       <button
                         className={styles.generateBtn}
-                        onClick={addNextDay}
+                        onClick={
+                          editingDayIndex !== null ? updateDay : addNextDay
+                        }
                         style={{ marginTop: "25px" }}
                       >
-                        + Add Day
+                        {editingDayIndex !== null ? "Update Day" : "+ Add Day"}
                       </button>
 
                       <button
