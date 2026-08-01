@@ -258,8 +258,7 @@ export default function OrderOfPlay() {
     return d.toISOString().split("T")[0];
   };
 
-  const [showRemainingOnly, setShowRemainingOnly] = useState(false);
-
+  const [showRemainingOnly, setShowRemainingOnly] = useState({});
   const [selectedCategories, setSelectedCategories] = useState([
     "Cat.A(65+ combined)",
   ]);
@@ -710,7 +709,7 @@ export default function OrderOfPlay() {
       }
       // Update state
       setDays(updatedDays);
-      setNotPlacedMatches(newDay.remainingMatches);
+      // setNotPlacedMatches(newDay.remainingMatches);
       setNewDayDate("");
 
       toast.success("Day added successfully ✅");
@@ -753,6 +752,16 @@ export default function OrderOfPlay() {
       };
       setDays(updatedDays);
       setEditingDayIndex(null);
+      setNewDayDate("");
+      setNewCourtCount(4);
+      setNewMatchesPerCourt({
+        1: 4,
+        2: 4,
+        3: 4,
+        4: 4,
+      });
+      setNewSelectedCategories([]);
+      setNewSelectedRounds([]);
 
       toast.success("Day updated successfully");
     } catch (err) {
@@ -1757,7 +1766,7 @@ export default function OrderOfPlay() {
             >
               {showRemainingOnly
                 ? "Hide Remaining Matches"
-                : `Show Remaining Matches (${notPlacedMatches.length})`}
+                : `Show Remaining Matches (${day.remaining?.length || 0})`}
             </button>
           </div>
         </div>
