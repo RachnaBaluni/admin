@@ -1758,16 +1758,6 @@ export default function OrderOfPlay() {
             >
               Apply Changes
             </button>
-
-            <button
-              className={styles.generateBtn}
-              onClick={() => setShowRemainingOnly(!showRemainingOnly)}
-              style={{ marginTop: "10px" }}
-            >
-              {showRemainingOnly
-                ? "Hide Remaining Matches"
-                : `Show Remaining Matches (${day.remaining?.length || 0})`}
-            </button>
           </div>
         </div>
       )}
@@ -1854,7 +1844,7 @@ export default function OrderOfPlay() {
                 ))}
 
                 {/* 👇 Remaining Matches of this Day */}
-                {showRemainingOnly &&
+                {showRemainingOnly[dayIndex] &&
                   day.remaining &&
                   day.remaining.length > 0 && (
                     <div className={styles.remainingSection}>
@@ -2026,9 +2016,17 @@ export default function OrderOfPlay() {
 
                       <button
                         className={styles.generateBtn}
+                        onClick={() =>
+                          setShowRemainingOnly((prev) => ({
+                            ...prev,
+                            [dayIndex]: !prev[dayIndex],
+                          }))
+                        }
                         style={{ marginTop: "10px" }}
                       >
-                        Remaining Matches
+                        {showRemainingOnly[dayIndex]
+                          ? "Hide Remaining Matches"
+                          : `Show Remaining Matches (${day.remaining?.length || 0})`}
                       </button>
                     </div>
                   </div>
