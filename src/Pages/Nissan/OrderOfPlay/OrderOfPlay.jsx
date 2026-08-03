@@ -712,8 +712,14 @@ export default function OrderOfPlay() {
         toast.error("❌ Same player same time");
         return;
       }
+
+      console.log("NEW DAY OBJECT:", {
+        grid: newDay.grid,
+        remaining: newDay.remainingMatches,
+      });
       // Update state
       setDays(updatedDays);
+      console.log(updatedDays);
       // setNotPlacedMatches(newDay.remainingMatches);
       setNewDayDate("");
 
@@ -1771,7 +1777,7 @@ export default function OrderOfPlay() {
             >
               {showRemainingOnly
                 ? "Hide Remaining Matches"
-                : `Show Remaining Matches (${day.remaining?.length || 0})`}{" "}
+                : `Show Remaining Matches (${notPlacedMatches.length})`}
             </button>
           </div>
         </div>
