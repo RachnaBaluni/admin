@@ -426,10 +426,10 @@ export default function OrderOfPlay() {
       ),
     );
     allResponses.forEach((res) => {
-      console.log("DRAW RESPONSE");
-      res.data.data.forEach((m) => {
-        console.log(m._id, "Winner:", m.Winner, "Status:", m.Status);
-      });
+      //   console.log("DRAW RESPONSE");
+      //   res.data.data.forEach((m) => {
+      //     console.log(m._id, "Winner:", m.Winner, "Status:", m.Status);
+      //   });
     });
 
     let allMatches = [];
@@ -719,6 +719,7 @@ export default function OrderOfPlay() {
       });
       // Update state
       setDays(updatedDays);
+      setNotPlacedMatches([]);
       console.log(updatedDays);
       // setNotPlacedMatches(newDay.remainingMatches);
       setNewDayDate("");
