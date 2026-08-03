@@ -2036,7 +2036,7 @@ export default function OrderOfPlay() {
                         {editingDayIndex !== null ? "Update Day" : "+ Add Day"}
                       </button>
 
-                      <button
+                      {/* <button
                         className={styles.generateBtn}
                         onClick={() => setShowRemainingOnly(!showRemainingOnly)}
                         style={{ marginTop: "10px" }}
@@ -2044,7 +2044,7 @@ export default function OrderOfPlay() {
                         {showRemainingOnly
                           ? "Hide Remaining Matches"
                           : `Show Remaining Matches (0)`}
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </div>
