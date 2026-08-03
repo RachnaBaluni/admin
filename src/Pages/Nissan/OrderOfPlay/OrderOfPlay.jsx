@@ -2042,7 +2042,7 @@ export default function OrderOfPlay() {
                       >
                         {showRemainingOnly
                           ? "Hide Remaining Matches"
-                          : `Show Remaining Matches (${day.remaining?.length || 0})`}
+                          : `Show Remaining Matches (0)`}
                       </button>
                     </div>
                   </div>
