@@ -1801,6 +1801,14 @@ export default function OrderOfPlay() {
                 <h2 style={{ margin: 0 }}>
                   Day {dayIndex + 1} - {day.date}{" "}
                 </h2>
+                <button
+                  className={styles.generateBtn}
+                  onClick={() => setShowRemainingOnly(!showRemainingOnly)}
+                >
+                  {showRemainingOnly
+                    ? "Hide Remaining Matches"
+                    : `Show Remaining Matches (${day.remaining?.length || 0})`}
+                </button>
 
                 {dayIndex > 0 && (
                   <>
