@@ -707,6 +707,7 @@ export default function OrderOfPlay() {
         },
       ];
 
+      console.log("UPDATED DAYS:", updatedDays);
       // Validation
       if (!validateAllDays([updatedDays[updatedDays.length - 1]])) {
         toast.error("❌ Same player same time");
@@ -1787,281 +1788,269 @@ export default function OrderOfPlay() {
 
       {!hideGrid && (
         <>
-          {days.map((day, dayIndex) => {
-            console.log("DAY DATA:", dayIndex + 1, day.remaining);
-            return (
-              <div key={dayIndex} style={{ marginBottom: "50px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <h2 style={{ margin: 0 }}>
-                    Day {dayIndex + 1} - {day.date}{" "}
-                  </h2>
+          {days.map((day, dayIndex) => (
+            <div key={dayIndex} style={{ marginBottom: "50px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "10px",
+                }}
+              >
+                <h2 style={{ margin: 0 }}>
+                  Day {dayIndex + 1} - {day.date}{" "}
+                </h2>
 
-                  {dayIndex > 0 && (
-                    <>
-                      <button
-                        onClick={() => editDay(dayIndex)}
-                        className={styles.generateBtn}
-                      >
-                        Edit Day
-                      </button>
-
-                      <button
-                        onClick={() => deleteDay(dayIndex)}
-                        className={styles.deleteDayBtn}
-                      >
-                        Delete Day
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* HEADER */}
-                <div
-                  className={styles.header}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
-                    gap: "20px",
-                  }}
-                >
-                  {Array.from({ length: day.courtCount }).map((_, index) => (
-                    <div key={index}>COURT {index + 1}</div>
-                  ))}
-                </div>
-
-                {/* GRID */}
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={pointerWithin}
-                  onDragEnd={handleDragEnd}
-                >
-                  {day.grid.map((row, i) => (
-                    <div
-                      key={i}
-                      className={styles.row}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
-                        gap: "20px",
-                      }}
+                {dayIndex > 0 && (
+                  <>
+                    <button
+                      onClick={() => editDay(dayIndex)}
+                      className={styles.generateBtn}
                     >
-                      {row.map((cell, j) => (
-                        <DroppableSlot
-                          key={j}
-                          id={`slot-${dayIndex}-${i}-${j}`}
-                        >
-                          {cell?.match && (
-                            <DraggableMatch
-                              match={cell.match}
-                              time={cell.time}
-                              allMatchesRef={allMatchesRef}
-                            />
-                          )}
-                        </DroppableSlot>
+                      Edit Day
+                    </button>
+
+                    <button
+                      onClick={() => deleteDay(dayIndex)}
+                      className={styles.deleteDayBtn}
+                    >
+                      Delete Day
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* HEADER */}
+              <div
+                className={styles.header}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
+                  gap: "20px",
+                }}
+              >
+                {Array.from({ length: day.courtCount }).map((_, index) => (
+                  <div key={index}>COURT {index + 1}</div>
+                ))}
+              </div>
+
+              {/* GRID */}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={pointerWithin}
+                onDragEnd={handleDragEnd}
+              >
+                {day.grid.map((row, i) => (
+                  <div
+                    key={i}
+                    className={styles.row}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
+                      gap: "20px",
+                    }}
+                  >
+                    {row.map((cell, j) => (
+                      <DroppableSlot key={j} id={`slot-${dayIndex}-${i}-${j}`}>
+                        {cell?.match && (
+                          <DraggableMatch
+                            match={cell.match}
+                            time={cell.time}
+                            allMatchesRef={allMatchesRef}
+                          />
+                        )}
+                      </DroppableSlot>
+                    ))}
+                  </div>
+                ))}
+
+                {/* 👇 Remaining Matches of this Day */}
+                {showRemainingOnly &&
+                  day.remaining &&
+                  day.remaining.length > 0 && (
+                    <div className={styles.remainingSection}>
+                      <h3>Remaining Matches</h3>
+
+                      <div
+                        className={styles.row}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
+                          gap: "20px",
+                        }}
+                      >
+                        {day.remaining.map((match) => (
+                          <DraggableMatch
+                            key={match._id}
+                            match={match}
+                            time="Remaining"
+                            allMatchesRef={allMatchesRef}
+                            isRemaining={true}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+              </DndContext>
+              {/* ADD NEXT DAY */}
+              {showFilters && dayIndex === days.length - 1 && (
+                <div className={styles.addDayBox}>
+                  <h3 className={styles.addDayTitle}>📅 Add Next Day</h3>
+
+                  <div className={styles.filterBox}>
+                    {/* DATE */}
+                    <div>
+                      <h3>Select Date</h3>
+
+                      <input
+                        type="date"
+                        value={newDayDate}
+                        onChange={(e) => setNewDayDate(e.target.value)}
+                        className={styles.courtInput}
+                      />
+                    </div>
+
+                    {/* CATEGORY */}
+                    <div>
+                      <h3>Categories</h3>
+
+                      {events.map((ev) => (
+                        <label key={ev._id} className={styles.checkboxLabel}>
+                          <input
+                            type="checkbox"
+                            checked={newSelectedCategories.includes(ev.name)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setNewSelectedCategories([
+                                  ...newSelectedCategories,
+                                  ev.name,
+                                ]);
+                              } else {
+                                setNewSelectedCategories(
+                                  newSelectedCategories.filter(
+                                    (c) => c !== ev.name,
+                                  ),
+                                );
+                              }
+                            }}
+                          />
+                          {ev.name}
+                        </label>
                       ))}
                     </div>
-                  ))}
 
-                  {/* 👇 Remaining Matches of this Day */}
-                  {showRemainingOnly &&
-                    day.remaining &&
-                    day.remaining.length > 0 && (
-                      <div className={styles.remainingSection}>
-                        <h3>Remaining Matches</h3>
+                    {/* ROUNDS */}
+                    <div className={styles.roundSelector}>
+                      <h3>Select Rounds</h3>
 
-                        <div
-                          className={styles.row}
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns: `repeat(${day.courtCount},1fr)`,
-                            gap: "20px",
-                          }}
-                        >
-                          {day.remaining.map((match) => (
-                            <DraggableMatch
-                              key={match._id}
-                              match={match}
-                              time="Remaining"
-                              allMatchesRef={allMatchesRef}
-                              isRemaining={true}
-                            />
-                          ))}
-                        </div>
+                      <div className={styles.roundButtons}>
+                        {roundsList.map((round) => (
+                          <button
+                            key={round}
+                            type="button"
+                            onClick={() => {
+                              if (newSelectedRounds.includes(round)) {
+                                setNewSelectedRounds(
+                                  newSelectedRounds.filter((r) => r !== round),
+                                );
+                              } else {
+                                setNewSelectedRounds([
+                                  ...newSelectedRounds,
+                                  round,
+                                ]);
+                              }
+                            }}
+                            className={
+                              newSelectedRounds.includes(round)
+                                ? styles.activeRoundBtn
+                                : styles.roundBtn
+                            }
+                          >
+                            {round}
+                          </button>
+                        ))}
                       </div>
-                    )}
-                </DndContext>
-                {/* ADD NEXT DAY */}
-                {showFilters && dayIndex === days.length - 1 && (
-                  <div className={styles.addDayBox}>
-                    <h3 className={styles.addDayTitle}>📅 Add Next Day</h3>
+                    </div>
 
-                    <div className={styles.filterBox}>
-                      {/* DATE */}
+                    {/* COURT SETTINGS */}
+                    <div className={styles.settingsBox}>
+                      <h3>Court Settings</h3>
+
                       <div>
-                        <h3>Select Date</h3>
+                        <label>Number Of Courts</label>
 
                         <input
-                          type="date"
-                          value={newDayDate}
-                          onChange={(e) => setNewDayDate(e.target.value)}
+                          type="number"
+                          min="1"
+                          value={newCourtCount}
+                          onChange={(e) =>
+                            setNewCourtCount(Number(e.target.value))
+                          }
                           className={styles.courtInput}
                         />
                       </div>
 
-                      {/* CATEGORY */}
-                      <div>
-                        <h3>Categories</h3>
+                      <div style={{ marginTop: "20px" }}>
+                        <label>Matches Per Court</label>
 
-                        {events.map((ev) => (
-                          <label key={ev._id} className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={newSelectedCategories.includes(ev.name)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setNewSelectedCategories([
-                                    ...newSelectedCategories,
-                                    ev.name,
-                                  ]);
-                                } else {
-                                  setNewSelectedCategories(
-                                    newSelectedCategories.filter(
-                                      (c) => c !== ev.name,
-                                    ),
-                                  );
-                                }
-                              }}
-                            />
-                            {ev.name}
-                          </label>
-                        ))}
-                      </div>
-
-                      {/* ROUNDS */}
-                      <div className={styles.roundSelector}>
-                        <h3>Select Rounds</h3>
-
-                        <div className={styles.roundButtons}>
-                          {roundsList.map((round) => (
-                            <button
-                              key={round}
-                              type="button"
-                              onClick={() => {
-                                if (newSelectedRounds.includes(round)) {
-                                  setNewSelectedRounds(
-                                    newSelectedRounds.filter(
-                                      (r) => r !== round,
-                                    ),
-                                  );
-                                } else {
-                                  setNewSelectedRounds([
-                                    ...newSelectedRounds,
-                                    round,
-                                  ]);
-                                }
-                              }}
-                              className={
-                                newSelectedRounds.includes(round)
-                                  ? styles.activeRoundBtn
-                                  : styles.roundBtn
-                              }
-                            >
-                              {round}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* COURT SETTINGS */}
-                      <div className={styles.settingsBox}>
-                        <h3>Court Settings</h3>
-
-                        <div>
-                          <label>Number Of Courts</label>
-
-                          <input
-                            type="number"
-                            min="1"
-                            value={newCourtCount}
-                            onChange={(e) =>
-                              setNewCourtCount(Number(e.target.value))
-                            }
-                            className={styles.courtInput}
-                          />
-                        </div>
-
-                        <div style={{ marginTop: "20px" }}>
-                          <label>Matches Per Court</label>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "20px",
-                              flexWrap: "wrap",
-                              marginTop: "10px",
-                            }}
-                          >
-                            {Array.from({ length: newCourtCount }).map(
-                              (_, index) => (
-                                <div key={index}>
-                                  <p>Court {index + 1}</p>
-
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="10"
-                                    value={newMatchesPerCourt[index + 1] || 4}
-                                    onChange={(e) =>
-                                      setNewMatchesPerCourt({
-                                        ...newMatchesPerCourt,
-                                        [index + 1]: Number(e.target.value),
-                                      })
-                                    }
-                                    className={styles.courtInput}
-                                  />
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        </div>
-
-                        <button
-                          className={styles.generateBtn}
-                          onClick={
-                            editingDayIndex !== null ? updateDay : addNextDay
-                          }
-                          style={{ marginTop: "25px" }}
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "20px",
+                            flexWrap: "wrap",
+                            marginTop: "10px",
+                          }}
                         >
-                          {editingDayIndex !== null
-                            ? "Update Day"
-                            : "+ Add Day"}
-                        </button>
+                          {Array.from({ length: newCourtCount }).map(
+                            (_, index) => (
+                              <div key={index}>
+                                <p>Court {index + 1}</p>
 
-                        <button
-                          className={styles.generateBtn}
-                          onClick={() =>
-                            setShowRemainingOnly(!showRemainingOnly)
-                          }
-                          style={{ marginTop: "10px" }}
-                        >
-                          {showRemainingOnly
-                            ? "Hide Remaining Matches"
-                            : `Show Remaining Matches (0)`}
-                        </button>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="10"
+                                  value={newMatchesPerCourt[index + 1] || 4}
+                                  onChange={(e) =>
+                                    setNewMatchesPerCourt({
+                                      ...newMatchesPerCourt,
+                                      [index + 1]: Number(e.target.value),
+                                    })
+                                  }
+                                  className={styles.courtInput}
+                                />
+                              </div>
+                            ),
+                          )}
+                        </div>
                       </div>
+
+                      <button
+                        className={styles.generateBtn}
+                        onClick={
+                          editingDayIndex !== null ? updateDay : addNextDay
+                        }
+                        style={{ marginTop: "25px" }}
+                      >
+                        {editingDayIndex !== null ? "Update Day" : "+ Add Day"}
+                      </button>
+
+                      <button
+                        className={styles.generateBtn}
+                        onClick={() => setShowRemainingOnly(!showRemainingOnly)}
+                        style={{ marginTop: "10px" }}
+                      >
+                        {showRemainingOnly
+                          ? "Hide Remaining Matches"
+                          : `Show Remaining Matches (0)`}
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                </div>
+              )}
+            </div>
+          ))}
         </>
       )}
     </div>
