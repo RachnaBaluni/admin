@@ -670,17 +670,19 @@ export default function OrderOfPlay() {
       );
 
       // Sirf selected categories ke remaining matches
-      const filteredRemaining = notPlacedMatches.filter((m) =>
-        newSelectedCategories.includes(m.category),
-      );
+      // const filteredRemaining = notPlacedMatches.filter((m) =>
+      //   newSelectedCategories.includes(m.category),
+      // );
 
-      const uniqueMap = new Map();
+      // const uniqueMap = new Map();
 
-      [...filteredRemaining, ...availableMatches].forEach((m) => {
-        uniqueMap.set(m._id, m);
-      });
+      // [...filteredRemaining, ...availableMatches].forEach((m) => {
+      //   uniqueMap.set(m._id, m);
+      // });
 
-      const newMatches = Array.from(uniqueMap.values());
+      // const newMatches = Array.from(uniqueMap.values());
+
+      const newMatches = availableMatches;
 
       // New day ka grid banao
       const newDay = buildGrid(
@@ -689,6 +691,8 @@ export default function OrderOfPlay() {
         newMatchesPerCourt,
         [],
       );
+
+      console.log("Day 2 Remaining:", newDay.remainingMatches);
 
       const updatedDays = [
         ...days,
