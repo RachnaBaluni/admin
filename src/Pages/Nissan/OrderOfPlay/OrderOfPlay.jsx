@@ -744,8 +744,42 @@ export default function OrderOfPlay() {
         newSelectedRounds,
       );
 
+      // Collect matches already scheduled in other days
+      const scheduledIds = new Set();
+
+      days.forEach((day, index) => {
+        // Skip the day currently being edited
+        if (index === editingDayIndex) return;
+
+        day.grid.forEach((row) => {
+          row.forEach((cell) => {
+            if (cell?.match?._id) {
+              scheduledIds.add(cell.match._id);
+            }
+          });
+        });
+      });
+
+      // Keep only matches that are not already scheduled
+      const availableMatches = allNewMatches.filter(
+        (match) => !scheduledIds.has(match._id),
+      );
+
+      // Get the remaining matches of the edited day
+      const previousRemaining = days[editingDayIndex]?.remaining || [];
+
+      // Remove duplicate matches
+      const uniqueMap = new Map();
+
+      [...availableMatches, ...previousRemaining].forEach((match) => {
+        uniqueMap.set(match._id, match);
+      });
+
+      const matchesForEdit = Array.from(uniqueMap.values());
+
+      // Rebuild the edited day's grid
       const newDay = buildGrid(
-        allNewMatches,
+        matchesForEdit,
         newCourtCount,
         newMatchesPerCourt,
         [],
