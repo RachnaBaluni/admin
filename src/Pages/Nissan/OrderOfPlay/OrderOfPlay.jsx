@@ -364,6 +364,8 @@ export default function OrderOfPlay() {
     const savedDays = sessionStorage.getItem("orderPlayDays");
 
     if (savedDays) {
+      console.log("Loading days from sessionStorage");
+
       setDays(JSON.parse(savedDays));
     }
 
@@ -619,6 +621,8 @@ export default function OrderOfPlay() {
 
       /* ================= DAY LOGIC ================= */
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
+
+      console.log("About to overwrite days");
       setDays([
         {
           date: selectedDate,
@@ -719,6 +723,7 @@ export default function OrderOfPlay() {
         grid: newDay.grid,
         remaining: newDay.remainingMatches,
       });
+
       // Update state
       setDays(updatedDays);
       console.log(updatedDays);
