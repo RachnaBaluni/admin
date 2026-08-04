@@ -366,7 +366,17 @@ export default function OrderOfPlay() {
     if (savedDays) {
       console.log("Loading days from sessionStorage");
 
-      setDays(JSON.parse(savedDays));
+      const parsed = JSON.parse(savedDays);
+
+      setDays(parsed);
+
+      // Grid bhi restore karo
+      if (parsed.length > 0) {
+        setGrid(parsed[0].grid);
+        setNotPlacedMatches(parsed[0].remaining || []);
+      }
+
+      return; // <-- IMPORTANT
     }
 
     if (events.length > 0 && selectedDate) {
