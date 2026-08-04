@@ -361,17 +361,13 @@ export default function OrderOfPlay() {
   // }, [events, selectedDate]);
 
   useEffect(() => {
-    if (events.length === 0 || !selectedDate) return;
-
     const savedDays = sessionStorage.getItem("orderPlayDays");
 
     if (savedDays) {
-      const parsed = JSON.parse(savedDays);
+      setDays(JSON.parse(savedDays));
+    }
 
-      setDays(parsed);
-      setGrid(parsed[0]?.grid || []);
-      setNotPlacedMatches(parsed[0]?.remaining || []);
-    } else {
+    if (events.length > 0 && selectedDate) {
       fetchData();
     }
   }, [events, selectedDate]);
@@ -623,8 +619,6 @@ export default function OrderOfPlay() {
 
       /* ================= DAY LOGIC ================= */
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
-
-      console.log("About to overwrite days");
       setDays([
         {
           date: selectedDate,
@@ -725,7 +719,6 @@ export default function OrderOfPlay() {
         grid: newDay.grid,
         remaining: newDay.remainingMatches,
       });
-
       // Update state
       setDays(updatedDays);
       console.log(updatedDays);
@@ -1771,10 +1764,7 @@ export default function OrderOfPlay() {
 
             <button
               className={styles.generateBtn}
-              onClick={() => {
-                sessionStorage.removeItem("orderPlayDays");
-                fetchData();
-              }}
+              onClick={fetchData}
               style={{
                 marginTop: "25px",
               }}
