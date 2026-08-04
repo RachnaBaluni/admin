@@ -873,6 +873,9 @@ export default function OrderOfPlay() {
     matchesPerCourt,
     existingDays = [],
   ) => {
+    console.log("courtCount =", courtCount);
+    console.log("matchesPerCourt =", matchesPerCourt);
+    console.log("maxRows =", Math.max(...Object.values(matchesPerCourt)));
     let temp = [];
     const maxRows = Math.max(...Object.values(matchesPerCourt));
 
@@ -893,6 +896,14 @@ export default function OrderOfPlay() {
       let row = [];
 
       for (let j = 0; j < courtCount; j++) {
+        console.log(
+          "Row:",
+          i,
+          "Court:",
+          j + 1,
+          "Limit:",
+          matchesPerCourt[j + 1],
+        );
         row.push({
           match: null,
           time: getTimeLabel(i),
