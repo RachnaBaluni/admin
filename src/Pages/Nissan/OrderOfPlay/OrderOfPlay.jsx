@@ -361,13 +361,17 @@ export default function OrderOfPlay() {
   // }, [events, selectedDate]);
 
   useEffect(() => {
+    if (events.length === 0 || !selectedDate) return;
+
     const savedDays = sessionStorage.getItem("orderPlayDays");
 
     if (savedDays) {
-      setDays(JSON.parse(savedDays));
-    }
+      const parsed = JSON.parse(savedDays);
 
-    if (events.length > 0 && selectedDate) {
+      setDays(parsed);
+      setGrid(parsed[0]?.grid || []);
+      setNotPlacedMatches(parsed[0]?.remaining || []);
+    } else {
       fetchData();
     }
   }, [events, selectedDate]);
@@ -1798,7 +1802,10 @@ export default function OrderOfPlay() {
 
             <button
               className={styles.generateBtn}
-              onClick={fetchData}
+              onClick={() => {
+                sessionStorage.removeItem("orderPlayDays");
+                fetchData();
+              }}
               style={{
                 marginTop: "25px",
               }}
