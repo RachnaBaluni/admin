@@ -365,9 +365,7 @@ export default function OrderOfPlay() {
 
     if (savedDays) {
       setDays(JSON.parse(savedDays));
-    }
-
-    if (events.length > 0 && selectedDate) {
+    } else if (events.length > 0 && selectedDate) {
       fetchData();
     }
   }, [events, selectedDate]);
@@ -618,19 +616,27 @@ export default function OrderOfPlay() {
       console.log("ALL MATCHES REF", allMatchesRef.current);
 
       /* ================= DAY LOGIC ================= */
-      const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
-      setDays([
-        {
-          date: selectedDate,
-          courtCount,
-          matchesPerCourt,
-          grid: day1.grid,
-          remaining: day1.remainingMatches,
-        },
-      ]);
+      const savedDays = sessionStorage.getItem("orderPlayDays");
 
-      setGrid(day1.grid);
-      setNotPlacedMatches(day1.remainingMatches);
+      if (!savedDays) {
+        const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
+
+        const initialDays = [
+          {
+            date: selectedDate,
+            courtCount,
+            matchesPerCourt,
+            grid: day1.grid,
+            remaining: day1.remainingMatches,
+          },
+        ];
+
+        setDays(initialDays);
+        sessionStorage.setItem("orderPlayDays", JSON.stringify(initialDays));
+
+        setGrid(day1.grid);
+        setNotPlacedMatches(day1.remainingMatches);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Error loading matches");
