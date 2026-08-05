@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import api from "../../../api";
 import styles from "./RegistrationFields.module.css";
 
 const RegistrationFields = () => {
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState("");
+
   const [fields, setFields] = useState({
     shirtSize: false,
     foodPreference: false,
@@ -10,6 +14,42 @@ const RegistrationFields = () => {
     transactionDetails: false,
   });
 
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const res = await api.get(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
+        {
+          withCredentials: true,
+        },
+      );
+
+      setEvents(res.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleEventChange = (e) => {
+    const eventId = e.target.value;
+    setSelectedEvent(eventId);
+
+    const event = events.find((item) => item._id === eventId);
+
+    setFields(
+      event?.registrationFields || {
+        shirtSize: false,
+        foodPreference: false,
+        accommodation: false,
+        feePaid: false,
+        transactionDetails: false,
+      },
+    );
+  };
+
   const handleChange = (key) => {
     setFields((prev) => ({
       ...prev,
@@ -17,9 +57,43 @@ const RegistrationFields = () => {
     }));
   };
 
+  const handleSave = async () => {
+    if (!selectedEvent) {
+      alert("Select Event");
+      return;
+    }
+
+    try {
+      await api.put(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events/${selectedEvent}`,
+        {
+          registrationFields: fields,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      alert("Registration fields updated successfully");
+    } catch (error) {
+      console.log(error);
+      alert("Error saving fields");
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h1>Manage Registration Fields</h1>
+
+      <select value={selectedEvent} onChange={handleEventChange}>
+        <option value="">Select Event</option>
+
+        {events.map((event) => (
+          <option key={event._id} value={event._id}>
+            {event.name}
+          </option>
+        ))}
+      </select>
 
       <div className={styles.fields}>
         {[
@@ -40,7 +114,7 @@ const RegistrationFields = () => {
         ))}
       </div>
 
-      <button>Save</button>
+      <button onClick={handleSave}>Save</button>
     </div>
   );
 };
