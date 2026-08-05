@@ -625,21 +625,38 @@ export default function OrderOfPlay() {
         newMatchesPerCourt,
         [],
       );
+      //  IDs of those matches that have been placed in the new day grid
+      const placedIds = new Set();
+
+      newDay.grid.forEach((row) => {
+        row.forEach((cell) => {
+          if (cell?.match) {
+            placedIds.add(cell.match._id);
+          }
+        });
+      });
 
       console.log("Day 2 Remaining:", newDay.remainingMatches);
 
-      const updatedDays = [
-        ...days,
-        {
-          date: newDayDate,
-          courtCount: newCourtCount,
-          matchesPerCourt: newMatchesPerCourt,
-          categories: newSelectedCategories,
-          rounds: newSelectedRounds,
-          grid: newDay.grid,
-          remaining: newDay.remainingMatches,
-        },
-      ];
+      const updatedDays = [...days];
+
+      // Sirf pichle day ke remaining update karo
+      const updatedDays = days.map((day) => ({
+        ...day,
+        remaining: (day.remaining || []).filter(
+          (match) => !placedIds.has(match._id),
+        ),
+      }));
+
+      updatedDays.push({
+        date: newDayDate,
+        courtCount: newCourtCount,
+        matchesPerCourt: newMatchesPerCourt,
+        categories: newSelectedCategories,
+        rounds: newSelectedRounds,
+        grid: newDay.grid,
+        remaining: newDay.remainingMatches,
+      });
 
       console.log("UPDATED DAYS:", updatedDays);
       // Validation
