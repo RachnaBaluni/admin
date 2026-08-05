@@ -135,7 +135,7 @@ const ViewPlayerList = () => {
             <tr>
               <th>S.no</th>
               <th className={styles.nameHeader}>
-                Name
+                <span>Name</span>
                 <select
                   value={nameSort}
                   onChange={(e) => setNameSort(e.target.value)}
