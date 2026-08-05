@@ -513,7 +513,7 @@ export default function OrderOfPlay() {
 
   /* ================= FETCH DATA ================= */
 
-  const fetchData = async () => {
+  const fetchData = async (shouldSave = false) => {
     console.log("fetchData called");
     if (!selectedDate) {
       toast.error("Select date first");
@@ -577,8 +577,9 @@ export default function OrderOfPlay() {
       ];
 
       setDays(updatedDays);
-
-      await saveOrderOfPlay(updatedDays);
+      if (shouldSave) {
+        await saveOrderOfPlay(updatedDays);
+      }
 
       setGrid(day1.grid);
       setNotPlacedMatches(day1.remainingMatches);
@@ -1703,7 +1704,7 @@ export default function OrderOfPlay() {
               className={styles.generateBtn}
               onClick={() => {
                 sessionStorage.removeItem("orderPlayDays");
-                fetchData();
+                fetchData(true);
               }}
               style={{
                 marginTop: "25px",
