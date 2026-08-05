@@ -43,7 +43,11 @@ const Match = ({
       // Cannot select BYE/TBD or Winner slot
       return;
     }
-
+    // Don't allow winner selection if one side is still TBD
+    if (roundIndex > 0 && (!team || !opponentTeam)) {
+      toast.error("Winner cannot be selected until both teams are decided.");
+      return;
+    }
     let newWinnerId = null;
     let newStatus = "Upcoming"; // Default status if winner is unselected
 
