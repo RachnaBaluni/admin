@@ -61,7 +61,7 @@ const UpdateTeamRanking = () => {
     }),
   );
 
-  const fetchAllTeams = async () => {
+  const fetchAllTeams = async (resetSelection = false) => {
     setLoading(true);
     try {
       const res = await api.get(
@@ -76,7 +76,11 @@ const UpdateTeamRanking = () => {
         ...new Set(teams.map((t) => t.eventId.name)),
       ].sort();
       setEvents(uniqueEvents);
-      if (uniqueEvents.length > 0) {
+      if (resetSelection) {
+        if (uniqueEvents.length > 0) {
+          setSelectedEvent(uniqueEvents[0]);
+        }
+      } else if (!selectedEvent && uniqueEvents.length > 0) {
         setSelectedEvent(uniqueEvents[0]);
       }
     } catch (error) {
@@ -86,7 +90,7 @@ const UpdateTeamRanking = () => {
   };
 
   useEffect(() => {
-    fetchAllTeams();
+    fetchAllTeams(true); // Fetch teams and reset selection on initial load
   }, []);
 
   useEffect(() => {
@@ -123,7 +127,7 @@ const UpdateTeamRanking = () => {
           error.response?.data?.message ||
             "You cannot update the team ranking because the draw has already been created for this category.",
         );
-        fetchAllTeams(); // Re-fetch to revert
+        fetchAllTeams(false); // Re-fetch to revert
       }
     };
 
@@ -171,7 +175,7 @@ const UpdateTeamRanking = () => {
           error.response?.data?.message ||
             "You cannot update the team ranking because the draw has already been created for this category.",
         );
-        fetchAllTeams(); // Re-fetch to revert
+        fetchAllTeams(false); // Re-fetch to revert
       }
     }
   };
