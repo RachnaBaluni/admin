@@ -638,9 +638,6 @@ export default function OrderOfPlay() {
 
       console.log("Day 2 Remaining:", newDay.remainingMatches);
 
-      const updatedDays = [...days];
-
-      // Sirf pichle day ke remaining update karo
       const updatedDays = days.map((day) => ({
         ...day,
         remaining: (day.remaining || []).filter(
