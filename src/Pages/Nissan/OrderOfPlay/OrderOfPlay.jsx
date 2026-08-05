@@ -1564,10 +1564,6 @@ export default function OrderOfPlay() {
             Settings
           </button>
 
-          <button className={styles.generateBtn} onClick={saveOrderOfPlay}>
-            Save Order
-          </button>
-
           <button className={styles.printBtn} onClick={handlePrint}>
             Print PDF
           </button>
