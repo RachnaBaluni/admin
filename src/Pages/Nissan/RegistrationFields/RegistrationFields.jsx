@@ -18,23 +18,8 @@ const RegistrationFields = () => {
     }));
   };
 
-  const handleSave = async () => {
-    try {
-      await api.put(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events/${selectedEvent}`,
-        {
-          registrationFields: fields,
-        },
-        {
-          withCredentials: true,
-        },
-      );
-
-      alert("Registration fields updated successfully");
-    } catch (error) {
-      console.log(error);
-      alert("Error updating registration fields");
-    }
+  const handleSave = () => {
+    console.log(fields);
   };
   return (
     <div className={styles.container}>
