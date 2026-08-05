@@ -8,7 +8,7 @@ import { saveAs } from "file-saver";
 const ViewPlayerList = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [nameSort, setNameSort] = useState("");
   const fetchPlayers = async () => {
     try {
       const start = Date.now();
@@ -99,7 +99,17 @@ const ViewPlayerList = () => {
       }
     }
   };
+  const sortedPlayers = [...players].sort((a, b) => {
+    if (nameSort === "A-Z") {
+      return a.name.localeCompare(b.name);
+    }
 
+    if (nameSort === "Z-A") {
+      return b.name.localeCompare(a.name);
+    }
+
+    return 0;
+  });
   const totalPlayers = players.length;
   const feePaidPlayers = players.filter((p) => p.feePaidAdmin).length;
 
@@ -124,7 +134,18 @@ const ViewPlayerList = () => {
           <thead>
             <tr>
               <th>S.no</th>
-              <th>Name</th>
+              <th>
+                Name
+                <select
+                  value={nameSort}
+                  onChange={(e) => setNameSort(e.target.value)}
+                  className={styles.filterDropdown}
+                >
+                  <option value="">All</option>
+                  <option value="A-Z">A-Z</option>
+                  <option value="Z-A">Z-A</option>
+                </select>
+              </th>{" "}
               <th>Event 1</th>
               <th>Event 1 Partner</th>
               <th>Event 2</th>
