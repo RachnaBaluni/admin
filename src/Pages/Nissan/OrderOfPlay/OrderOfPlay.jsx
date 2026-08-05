@@ -250,42 +250,11 @@ export default function OrderOfPlay() {
   const [selectedRounds, setSelectedRounds] = useState(["Round 1", "Round 2"]);
 
   const [days, setDays] = useState([]);
-  // useEffect(() => {
-  //   if (days.length > 0) {
-  //     sessionStorage.setItem("orderPlayDays", JSON.stringify(days));
-  //   }
-  // }, [days]);
-
   useEffect(() => {
-    sessionStorage.setItem(
-      "orderPlayState",
-      JSON.stringify({
-        days,
-        selectedCategories,
-        selectedRounds,
-        selectedDate,
-        courtCount,
-        matchesPerCourt,
-        newDayDate,
-        newCourtCount,
-        newMatchesPerCourt,
-        newSelectedCategories,
-        newSelectedRounds,
-      }),
-    );
-  }, [
-    days,
-    selectedCategories,
-    selectedRounds,
-    selectedDate,
-    courtCount,
-    matchesPerCourt,
-    newDayDate,
-    newCourtCount,
-    newMatchesPerCourt,
-    newSelectedCategories,
-    newSelectedRounds,
-  ]);
+    if (days.length > 0) {
+      sessionStorage.setItem("orderPlayDays", JSON.stringify(days));
+    }
+  }, [days]);
 
   const [newDayDate, setNewDayDate] = useState("");
   const [newCourtCount, setNewCourtCount] = useState(4);
@@ -349,50 +318,20 @@ export default function OrderOfPlay() {
   }, [selectedDate]);
 
   useEffect(() => {
-    if (events.length === 0) return;
+    if (events.length === 0 || !selectedDate) return;
 
-    const savedState = sessionStorage.getItem("orderPlayState");
+    const savedDays = sessionStorage.getItem("orderPlayDays");
 
-    if (savedState) {
-      const state = JSON.parse(savedState);
+    if (savedDays) {
+      const parsed = JSON.parse(savedDays);
 
-      setDays(state.days || []);
-      setGrid(state.days?.[0]?.grid || []);
-      setNotPlacedMatches(state.days?.[0]?.remaining || []);
-
-      setSelectedCategories(state.selectedCategories || []);
-      setSelectedRounds(state.selectedRounds || []);
-
-      setSelectedDate(state.selectedDate || "");
-
-      setCourtCount(state.courtCount || 4);
-      setMatchesPerCourt(
-        state.matchesPerCourt || {
-          1: 4,
-          2: 4,
-          3: 4,
-          4: 4,
-        },
-      );
-
-      setNewDayDate(state.newDayDate || "");
-      setNewCourtCount(state.newCourtCount || 4);
-
-      setNewMatchesPerCourt(
-        state.newMatchesPerCourt || {
-          1: 4,
-          2: 4,
-          3: 4,
-          4: 4,
-        },
-      );
-
-      setNewSelectedCategories(state.newSelectedCategories || []);
-      setNewSelectedRounds(state.newSelectedRounds || []);
+      setDays(parsed);
+      setGrid(parsed[0]?.grid || []);
+      setNotPlacedMatches(parsed[0]?.remaining || []);
     } else {
       fetchData();
     }
-  }, [events]);
+  }, [events, selectedDate]);
 
   const fetchEvents = async () => {
     try {
@@ -1441,7 +1380,6 @@ export default function OrderOfPlay() {
     console.log("isRemainingMatch =", isRemainingMatch);
     console.log("target.match =", target?.match);
     console.log("remainingMatch =", remainingMatch);
-
     // =====================================================
     // REMAINING MATCH SWAP
     // =====================================================
