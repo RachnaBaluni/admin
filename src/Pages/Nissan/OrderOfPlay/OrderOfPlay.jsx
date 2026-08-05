@@ -788,6 +788,7 @@ export default function OrderOfPlay() {
     setNewSelectedCategories(day.categories || []);
     setNewSelectedRounds(day.rounds || []);
     setShowFilters(true);
+    setShowAddDay(true);
   };
 
   /* ================= REMOVE NEXT DAY ================= */
