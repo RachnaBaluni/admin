@@ -328,6 +328,9 @@ export default function OrderOfPlay() {
       setDays(parsed);
       setGrid(parsed[0]?.grid || []);
       setNotPlacedMatches(parsed[0]?.remaining || []);
+
+      setSelectedCategories(parsed[0]?.categories || []);
+      setSelectedRounds(parsed[0]?.rounds || []);
     } else {
       fetchData();
     }
@@ -565,6 +568,8 @@ export default function OrderOfPlay() {
           date: selectedDate,
           courtCount,
           matchesPerCourt,
+          categories: selectedCategories,
+          rounds: selectedRounds,
           grid: day1.grid,
           remaining: day1.remainingMatches,
         },
