@@ -4,7 +4,6 @@ import styles from "./RegistrationFields.module.css";
 
 const RegistrationFields = () => {
   const [events, setEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState("");
 
   const [fields, setFields] = useState({
     shirtSize: false,
@@ -76,16 +75,6 @@ const RegistrationFields = () => {
   return (
     <div className={styles.container}>
       <h1>Manage Registration Fields</h1>
-
-      <select value={selectedEvent} onChange={handleEventChange}>
-        <option value="">Select Event</option>
-
-        {events.map((event) => (
-          <option key={event._id} value={event._id}>
-            {event.name}
-          </option>
-        ))}
-      </select>
 
       <div className={styles.fields}>
         {[
