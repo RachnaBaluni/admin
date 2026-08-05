@@ -21,8 +21,10 @@ const RegistrationFields = () => {
   const handleSave = async () => {
     try {
       await api.put(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events/registration-fields`,
-        fields,
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events/${selectedEvent}`,
+        {
+          registrationFields: fields,
+        },
         {
           withCredentials: true,
         },
