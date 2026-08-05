@@ -563,7 +563,8 @@ export default function OrderOfPlay() {
 
       /* ================= DAY LOGIC ================= */
       const day1 = buildGrid(allMatches, courtCount, matchesPerCourt);
-      setDays([
+
+      const updatedDays = [
         {
           date: selectedDate,
           courtCount,
@@ -573,7 +574,11 @@ export default function OrderOfPlay() {
           grid: day1.grid,
           remaining: day1.remainingMatches,
         },
-      ]);
+      ];
+
+      setDays(updatedDays);
+
+      await saveOrderOfPlay(updatedDays);
 
       setGrid(day1.grid);
       setNotPlacedMatches(day1.remainingMatches);
@@ -745,6 +750,7 @@ export default function OrderOfPlay() {
         remaining: newDay.remainingMatches,
       };
       setDays(updatedDays);
+
       setEditingDayIndex(null);
       setNewDayDate("");
       setNewCourtCount(4);
@@ -1012,13 +1018,13 @@ export default function OrderOfPlay() {
     };
   };
   /* ================= SAVE DATA ================= */
-  const saveOrderOfPlay = async () => {
+  const saveOrderOfPlay = async (daysToSave) => {
     alert("SAVE FUNCTION CALLED");
     console.log("SAVE CLICKED");
     console.log("DAYS =", days);
-    console.log("DAYS TO SAVE", days);
+    console.log("DAYS TO SAVE", daysToSave);
     try {
-      for (const day of days) {
+      for (const day of daysToSave) {
         await axios.post(
           `${import.meta.env.VITE_APP_BACKEND_URL}/api/order-of-play`,
           {
