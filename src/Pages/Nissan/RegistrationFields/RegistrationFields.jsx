@@ -58,17 +58,10 @@ const RegistrationFields = () => {
   };
 
   const handleSave = async () => {
-    if (!selectedEvent) {
-      alert("Select Event");
-      return;
-    }
-
     try {
       await api.put(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events/${selectedEvent}`,
-        {
-          registrationFields: fields,
-        },
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events/registration-fields`,
+        fields,
         {
           withCredentials: true,
         },
@@ -77,10 +70,9 @@ const RegistrationFields = () => {
       alert("Registration fields updated successfully");
     } catch (error) {
       console.log(error);
-      alert("Error saving fields");
+      alert("Error updating registration fields");
     }
   };
-
   return (
     <div className={styles.container}>
       <h1>Manage Registration Fields</h1>
