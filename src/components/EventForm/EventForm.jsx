@@ -9,6 +9,13 @@ const EventForm = ({ event, onSave, onCancel, isMainEvent }) => {
   const [location, setLocation] = useState("");
   const [organizer, setOrganizer] = useState("");
   const [rules, setRules] = useState("");
+  const [registrationFields, setRegistrationFields] = useState({
+    shirtSize: false,
+    foodPreference: false,
+    accommodation: false,
+    feePaid: false,
+    transactionDetails: false,
+  });
 
   useEffect(() => {
     if (event) {
@@ -19,6 +26,15 @@ const EventForm = ({ event, onSave, onCancel, isMainEvent }) => {
         setDescription(event.description);
         setLocation(event.location);
         setOrganizer(event.organizer);
+        setRegistrationFields(
+          event.registrationFields || {
+            shirtSize: false,
+            foodPreference: false,
+            accommodation: false,
+            feePaid: false,
+            transactionDetails: false,
+          },
+        );
       }
     }
   }, [event, isMainEvent]);
@@ -26,8 +42,16 @@ const EventForm = ({ event, onSave, onCancel, isMainEvent }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const eventData = isMainEvent
-      ? { name, description, date, location, organizer, rules }
-      : { name, date, rules };
+      ? {
+          name,
+          description,
+          date,
+          location,
+          organizer,
+          rules,
+          registrationFields,
+        }
+      : { name, date, rules, registrationFields };
     const url = isMainEvent
       ? `${import.meta.env.VITE_APP_BACKEND_URL}/api/main-events`
       : `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`;
@@ -91,6 +115,78 @@ const EventForm = ({ event, onSave, onCancel, isMainEvent }) => {
           value={rules}
           onChange={(e) => setRules(e.target.value)}
         />
+        <h3>Registration Fields</h3>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={registrationFields.shirtSize}
+            onChange={(e) =>
+              setRegistrationFields({
+                ...registrationFields,
+                shirtSize: e.target.checked,
+              })
+            }
+          />
+          Shirt Size
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={registrationFields.foodPreference}
+            onChange={(e) =>
+              setRegistrationFields({
+                ...registrationFields,
+                foodPreference: e.target.checked,
+              })
+            }
+          />
+          Food Preference
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={registrationFields.accommodation}
+            onChange={(e) =>
+              setRegistrationFields({
+                ...registrationFields,
+                accommodation: e.target.checked,
+              })
+            }
+          />
+          Need Accommodation
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={registrationFields.feePaid}
+            onChange={(e) =>
+              setRegistrationFields({
+                ...registrationFields,
+                feePaid: e.target.checked,
+              })
+            }
+          />
+          Fee Paid
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={registrationFields.transactionDetails}
+            onChange={(e) =>
+              setRegistrationFields({
+                ...registrationFields,
+                transactionDetails: e.target.checked,
+              })
+            }
+          />
+          Transaction Details
+        </label>
+
         <div className={styles.formActions}>
           <button
             type="button"

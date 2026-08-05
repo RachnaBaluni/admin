@@ -14,6 +14,7 @@ import ViewPlayerList from "./Pages/Nissan/Players/ViewPlayerList";
 import ManageDraw from "./Pages/Nissan/Draws/ManageDraw";
 import ManageResult from "./Pages/Nissan/Result/ManageResult";
 import UpdateEvents from "./Pages/Nissan/UpdateEvents/UpdateEvents";
+import RegistrationFields from "./Pages/Nissan/RegistrationFields/RegistrationFields";
 import ViewPlayerJourney from "./Pages/Nissan/Journey/ViewPlayerJourney";
 import OrderOfPlay from "./Pages/Nissan/OrderOfPlay/OrderOfPlay";
 import { Toaster } from "sonner";
@@ -90,6 +91,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <UpdateTeamRanking />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/nissan/registration-fields"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RegistrationFields />
               </Layout>
             </ProtectedRoute>
           }
