@@ -134,7 +134,7 @@ const ViewPlayerList = () => {
           <thead>
             <tr>
               <th>S.no</th>
-              <th>
+              <th className={styles.nameHeader}>
                 Name
                 <select
                   value={nameSort}
@@ -164,7 +164,7 @@ const ViewPlayerList = () => {
             </tr>
           </thead>
           <tbody>
-            {players.map((player, index) => (
+            {sortedPlayers.map((player, index) => (
               <tr key={player._id}>
                 <td data-label="S.no">{index + 1}</td>
                 <td data-label="Name">{player.name}</td>
