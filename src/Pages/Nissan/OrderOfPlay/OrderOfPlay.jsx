@@ -800,31 +800,7 @@ export default function OrderOfPlay() {
       });
     });
 
-    const updatedDays = days.map((day) => ({
-      ...day,
-      remaining: [...(day.remaining || [])],
-    }));
-
-    // Previous day me deleted matches wapas add karo
-    const previousDay = updatedDays[dayIndex - 1];
-
-    const matchMap = new Map();
-
-    // Pehle jo remaining the
-    previousDay.remaining.forEach((match) => {
-      matchMap.set(String(match._id), match);
-    });
-
-    // Ab deleted day ke grid wale matches add karo
-    deletedMatches.forEach((match) => {
-      matchMap.set(String(match._id), match);
-    });
-
-    // Duplicate hata ke remaining update
-    previousDay.remaining = Array.from(matchMap.values());
-
-    // Ab deleted day remove karo
-    updatedDays.splice(dayIndex, 1);
+    const updatedDays = days.filter((_, index) => index !== dayIndex);
 
     setNotPlacedMatches((prev) => [...deletedMatches, ...prev]);
 
