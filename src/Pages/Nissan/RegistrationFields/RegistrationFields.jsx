@@ -3,8 +3,6 @@ import api from "../../../api";
 import styles from "./RegistrationFields.module.css";
 
 const RegistrationFields = () => {
-  const [events, setEvents] = useState([]);
-
   const [fields, setFields] = useState({
     shirtSize: false,
     foodPreference: false,
@@ -12,42 +10,6 @@ const RegistrationFields = () => {
     feePaid: false,
     transactionDetails: false,
   });
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
-    try {
-      const res = await api.get(
-        `${import.meta.env.VITE_APP_BACKEND_URL}/api/events`,
-        {
-          withCredentials: true,
-        },
-      );
-
-      setEvents(res.data.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleEventChange = (e) => {
-    const eventId = e.target.value;
-    setSelectedEvent(eventId);
-
-    const event = events.find((item) => item._id === eventId);
-
-    setFields(
-      event?.registrationFields || {
-        shirtSize: false,
-        foodPreference: false,
-        accommodation: false,
-        feePaid: false,
-        transactionDetails: false,
-      },
-    );
-  };
 
   const handleChange = (key) => {
     setFields((prev) => ({
