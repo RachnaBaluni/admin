@@ -672,10 +672,12 @@ export default function OrderOfPlay() {
         grid: newDay.grid,
         remaining: newDay.remainingMatches,
       });
-      // Update state
       setDays(updatedDays);
+
+      await saveOrderOfPlay(updatedDays);
+
       console.log(updatedDays);
-      // setNotPlacedMatches(newDay.remainingMatches);
+
       setNewDayDate("");
 
       toast.success("Day added successfully ✅");
