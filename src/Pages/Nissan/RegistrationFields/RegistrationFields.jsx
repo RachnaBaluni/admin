@@ -4,22 +4,34 @@ import styles from "./RegistrationFields.module.css";
 
 const RegistrationFields = () => {
   const [fields, setFields] = useState({
-    shirtSize: false,
-    foodPreference: false,
-    accommodation: false,
-    feePaid: false,
-    transactionDetails: false,
+    shirtSize: true,
+    foodPreference: true,
+    accommodation: true,
+    feePaid: true,
+    transactionDetails: true,
   });
-
   const handleChange = (key) => {
     setFields((prev) => ({
       ...prev,
       [key]: !prev[key],
     }));
   };
+  const handleSave = async () => {
+    try {
+      const res = await api.put(
+        `${import.meta.env.VITE_APP_BACKEND_URL}/api/registration-fields`,
+        fields,
+        {
+          withCredentials: true,
+        },
+      );
 
-  const handleSave = () => {
-    console.log(fields);
+      console.log(res.data);
+      alert("Registration fields updated successfully");
+    } catch (error) {
+      console.log(error);
+      alert("Error updating registration fields");
+    }
   };
   return (
     <div className={styles.container}>
