@@ -9,6 +9,11 @@ const ViewPlayerList = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [nameSort, setNameSort] = useState("");
+  const [event1Sort, setEvent1Sort] = useState("");
+  const [event1PartnerSort, setEvent1PartnerSort] = useState("");
+  const [event2Sort, setEvent2Sort] = useState("");
+  const [event2PartnerSort, setEvent2PartnerSort] = useState("");
+  const [citySort, setCitySort] = useState("");
   const fetchPlayers = async () => {
     try {
       const start = Date.now();
@@ -100,15 +105,25 @@ const ViewPlayerList = () => {
     }
   };
   const sortedPlayers = [...players].sort((a, b) => {
-    if (nameSort === "A-Z") {
-      return a.name.localeCompare(b.name);
-    }
+    const sortField = (field, order) => {
+      if (!order) return 0;
 
-    if (nameSort === "Z-A") {
-      return b.name.localeCompare(a.name);
-    }
+      const valA = (a[field] || "").toString();
+      const valB = (b[field] || "").toString();
 
-    return 0;
+      return order === "A-Z"
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    };
+
+    return (
+      sortField("name", nameSort) ||
+      sortField("event1", event1Sort) ||
+      sortField("event1Partner", event1PartnerSort) ||
+      sortField("event2", event2Sort) ||
+      sortField("event2Partner", event2PartnerSort) ||
+      sortField("city", citySort)
+    );
   });
   const totalPlayers = players.length;
   const feePaidPlayers = players.filter((p) => p.feePaidAdmin).length;
@@ -146,13 +161,78 @@ const ViewPlayerList = () => {
                   <option value="Z-A">Z-A</option>
                 </select>
               </th>{" "}
-              <th>Event 1</th>
-              <th>Event 1 Partner</th>
-              <th>Event 2</th>
-              <th>Event 2 Partner</th>
+              <th>
+                <div className={styles.nameHeader}>
+                  <span>Event 1</span>
+                  <select
+                    className={styles.filterDropdown}
+                    value={event1Sort}
+                    onChange={(e) => setEvent1Sort(e.target.value)}
+                  >
+                    <option value="">All</option>
+                    <option value="A-Z">A-Z</option>
+                    <option value="Z-A">Z-A</option>
+                  </select>
+                </div>
+              </th>
+              <th>
+                <div className={styles.nameHeader}>
+                  <span>Event 1 Partner</span>
+                  <select
+                    className={styles.filterDropdown}
+                    value={event1PartnerSort}
+                    onChange={(e) => setEvent1PartnerSort(e.target.value)}
+                  >
+                    <option value="">All</option>
+                    <option value="A-Z">A-Z</option>
+                    <option value="Z-A">Z-A</option>
+                  </select>
+                </div>
+              </th>
+              <th>
+                <div className={styles.nameHeader}>
+                  <span>Event 2</span>
+                  <select
+                    className={styles.filterDropdown}
+                    value={event2Sort}
+                    onChange={(e) => setEvent2Sort(e.target.value)}
+                  >
+                    <option value="">All</option>
+                    <option value="A-Z">A-Z</option>
+                    <option value="Z-A">Z-A</option>
+                  </select>
+                </div>
+              </th>
+              <th>
+                <div className={styles.nameHeader}>
+                  <span>Event 2 Partner</span>
+                  <select
+                    className={styles.filterDropdown}
+                    value={event2PartnerSort}
+                    onChange={(e) => setEvent2PartnerSort(e.target.value)}
+                  >
+                    <option value="">All</option>
+                    <option value="A-Z">A-Z</option>
+                    <option value="Z-A">Z-A</option>
+                  </select>
+                </div>
+              </th>
               <th>Whatsapp Number</th>
               <th>DOB</th>
-              <th>City</th>
+              <th>
+                <div className={styles.nameHeader}>
+                  <span>City</span>
+                  <select
+                    className={styles.filterDropdown}
+                    value={citySort}
+                    onChange={(e) => setCitySort(e.target.value)}
+                  >
+                    <option value="">All</option>
+                    <option value="A-Z">A-Z</option>
+                    <option value="Z-A">Z-A</option>
+                  </select>
+                </div>
+              </th>
               <th>Shirt Size</th>
               {/* <th>Short Size</th> */}
               <th>Food</th>
