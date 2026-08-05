@@ -61,24 +61,6 @@ function DraggableMatch({ match, time, allMatchesRef, isRemaining = false }) {
     disabled: isCompleted,
   });
 
-  // console.log("========== MATCH ==========");
-  // console.log("FULL MATCH OBJECT", match);
-  // console.log("Match No:", match.matchNo);
-  // console.log("Winner:", match.Winner);
-  // console.log("TEAM1 =", match.Team1);
-  // console.log("TEAM2 =", match.Team2);
-  // console.log("Winner ID:", match.Winner?._id || match.Winner);
-  // console.log("Team1 ID:", match.Team1?._id);
-  // console.log("Team2 ID:", match.Team2?._id);
-  // console.log(
-  //   "Team1 Winner:",
-  //   String(match.Winner?._id || match.Winner) === String(match.Team1?._id),
-  // );
-  // console.log(
-  //   "Team2 Winner:",
-  //   String(match.Winner?._id || match.Winner) === String(match.Team2?._id),
-  // );
-
   const style = {
     ...(transform
       ? {
@@ -268,11 +250,42 @@ export default function OrderOfPlay() {
   const [selectedRounds, setSelectedRounds] = useState(["Round 1", "Round 2"]);
 
   const [days, setDays] = useState([]);
+  // useEffect(() => {
+  //   if (days.length > 0) {
+  //     sessionStorage.setItem("orderPlayDays", JSON.stringify(days));
+  //   }
+  // }, [days]);
+
   useEffect(() => {
-    if (days.length > 0) {
-      sessionStorage.setItem("orderPlayDays", JSON.stringify(days));
-    }
-  }, [days]);
+    sessionStorage.setItem(
+      "orderPlayState",
+      JSON.stringify({
+        days,
+        selectedCategories,
+        selectedRounds,
+        selectedDate,
+        courtCount,
+        matchesPerCourt,
+        newDayDate,
+        newCourtCount,
+        newMatchesPerCourt,
+        newSelectedCategories,
+        newSelectedRounds,
+      }),
+    );
+  }, [
+    days,
+    selectedCategories,
+    selectedRounds,
+    selectedDate,
+    courtCount,
+    matchesPerCourt,
+    newDayDate,
+    newCourtCount,
+    newMatchesPerCourt,
+    newSelectedCategories,
+    newSelectedRounds,
+  ]);
 
   const [newDayDate, setNewDayDate] = useState("");
   const [newCourtCount, setNewCourtCount] = useState(4);
@@ -334,47 +347,52 @@ export default function OrderOfPlay() {
       sessionStorage.setItem("selectedDate", selectedDate);
     }
   }, [selectedDate]);
-  /*
-  useEffect(() => {
-    if (!selectedDate || events.length === 0) return;
-
-    const interval = setInterval(() => {
-      console.log("Auto Refresh Order Of Play...");
-      fetchData();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [selectedDate, events, selectedCategories, selectedRounds]);
-
-  /*
-  useEffect(() => {
-    if (events.length > 0 && selectedDate) {
-      fetchData();
-    }
-  }, [events, selectedDate]);
-*/
-
-  // useEffect(() => {
-  //   if (events.length > 0 && selectedDate) {
-  //     fetchData();
-  //   }
-  // }, [events, selectedDate]);
 
   useEffect(() => {
-    if (events.length === 0 || !selectedDate) return;
+    if (events.length === 0) return;
 
-    const savedDays = sessionStorage.getItem("orderPlayDays");
+    const savedState = sessionStorage.getItem("orderPlayState");
 
-    if (savedDays) {
-      const parsed = JSON.parse(savedDays);
+    if (savedState) {
+      const state = JSON.parse(savedState);
 
-      setDays(parsed);
-      setGrid(parsed[0]?.grid || []);
-      setNotPlacedMatches(parsed[0]?.remaining || []);
+      setDays(state.days || []);
+      setGrid(state.days?.[0]?.grid || []);
+      setNotPlacedMatches(state.days?.[0]?.remaining || []);
+
+      setSelectedCategories(state.selectedCategories || []);
+      setSelectedRounds(state.selectedRounds || []);
+
+      setSelectedDate(state.selectedDate || "");
+
+      setCourtCount(state.courtCount || 4);
+      setMatchesPerCourt(
+        state.matchesPerCourt || {
+          1: 4,
+          2: 4,
+          3: 4,
+          4: 4,
+        },
+      );
+
+      setNewDayDate(state.newDayDate || "");
+      setNewCourtCount(state.newCourtCount || 4);
+
+      setNewMatchesPerCourt(
+        state.newMatchesPerCourt || {
+          1: 4,
+          2: 4,
+          3: 4,
+          4: 4,
+        },
+      );
+
+      setNewSelectedCategories(state.newSelectedCategories || []);
+      setNewSelectedRounds(state.newSelectedRounds || []);
     } else {
       fetchData();
     }
-  }, [events, selectedDate]);
+  }, [events]);
 
   const fetchEvents = async () => {
     try {
@@ -543,31 +561,11 @@ export default function OrderOfPlay() {
       "Completed Matches:",
       allMatches.filter((m) => m.Status === "Completed")[0],
     );
-    console.table(
-      allMatches.map((m) => ({
-        Stage: m.Stage,
-        Match: m.matchNo,
-        Winner: m.Winner
-          ? `${m.Winner.partner1?.name}${
-              m.Winner.partner2 ? " & " + m.Winner.partner2?.name : ""
-            }`
-          : "No Winner",
-      })),
-    );
 
     console.log("FINAL MATCHES (AFTER SORT):", allMatches);
 
     console.log("ALL MATCHES BEFORE GRID:", allMatches);
-    console.table(
-      allMatches
-        .filter((m) => m.category.includes("Cat.B"))
-        .map((m) => ({
-          Stage: m.Stage,
-          Match_number: m.Match_number,
-          matchNo: m.matchNo,
-          category: m.category,
-        })),
-    );
+
     return allMatches;
   };
 
@@ -673,19 +671,6 @@ export default function OrderOfPlay() {
       const availableMatches = allNewMatches.filter(
         (m) => !scheduledIds.has(m._id),
       );
-
-      // Sirf selected categories ke remaining matches
-      // const filteredRemaining = notPlacedMatches.filter((m) =>
-      //   newSelectedCategories.includes(m.category),
-      // );
-
-      // const uniqueMap = new Map();
-
-      // [...filteredRemaining, ...availableMatches].forEach((m) => {
-      //   uniqueMap.set(m._id, m);
-      // });
-
-      // const newMatches = Array.from(uniqueMap.values());
 
       const newMatches = availableMatches;
 
@@ -879,9 +864,9 @@ export default function OrderOfPlay() {
     let temp = [];
     const maxRows = Math.max(...Object.values(matchesPerCourt));
 
-    console.log("TOTAL SLOTS =", courtCount * maxRows);
+    // console.log("TOTAL SLOTS =", courtCount * maxRows);
 
-    console.log("TOTAL MATCHES =", matches.length);
+    // console.log("TOTAL MATCHES =", matches.length);
 
     const timeSlotPlayers = {};
     const playerLastRow = {};
@@ -896,14 +881,6 @@ export default function OrderOfPlay() {
       let row = [];
 
       for (let j = 0; j < courtCount; j++) {
-        console.log(
-          "Row:",
-          i,
-          "Court:",
-          j + 1,
-          "Limit:",
-          matchesPerCourt[j + 1],
-        );
         row.push({
           match: null,
           time: getTimeLabel(i),
@@ -1027,22 +1004,12 @@ export default function OrderOfPlay() {
             playerLastCourt[p] = j;
           });
 
-          console.log(
-            "PLACED =>",
-            match.matchNo,
-            "ROW",
-            i,
-            "COURT",
-            j,
-            "PLAYERS",
-            getPlayers(match),
-          );
           placed = true;
           break;
         }
 
         if (!placed) {
-          console.log("NO VALID MATCH FOUND FOR SLOT", i, j);
+          // console.log("NO VALID MATCH FOUND FOR SLOT", i, j);
 
           const remainingMatch = matches.find((m) => !placedMatches.has(m._id));
 
@@ -1069,49 +1036,6 @@ export default function OrderOfPlay() {
         }
       }
     }
-
-    // // ================= RELAXED PASS =================
-
-    // for (let i = maxRows - 1; i >= 0; i--) {
-    //   const time = `${getTimeLabel(i)}-${i}`;
-
-    //   if (!timeSlotPlayers[time]) {
-    //     timeSlotPlayers[time] = new Set();
-    //   }
-
-    //   for (let j = 0; j < courtCount; j++) {
-    //     if (i >= (matchesPerCourt[j + 1] || 0)) continue;
-    //     if (temp[i][j].match) continue;
-
-    //     const slotSet = timeSlotPlayers[time];
-
-    //     for (let m = 0; m < matches.length; m++) {
-    //       const match = matches[m];
-
-    //       if (placedMatches.has(match._id)) continue;
-
-    //       const players = getPlayers(match);
-
-    //       const sameTimeConflict = players.some((p) => slotSet.has(p));
-
-    //       if (sameTimeConflict) continue;
-
-    //       temp[i][j].match = match;
-
-    //       placedMatches.add(match._id);
-
-    //       players.forEach((p) => {
-    //         slotSet.add(p);
-    //         playerLastRow[p] = i;
-    //         playerLastCourt[p] = j;
-    //       });
-
-    //       console.log("RELAXED PLACED =>", match.matchNo, "ROW", i, "COURT", j);
-
-    //       break;
-    //     }
-    //   }
-    // }
 
     temp.forEach((row, idx) => {
       console.log("ROW", idx, "MATCHES =", row.filter((c) => c.match).length);
@@ -1517,6 +1441,7 @@ export default function OrderOfPlay() {
     console.log("isRemainingMatch =", isRemainingMatch);
     console.log("target.match =", target?.match);
     console.log("remainingMatch =", remainingMatch);
+
     // =====================================================
     // REMAINING MATCH SWAP
     // =====================================================
