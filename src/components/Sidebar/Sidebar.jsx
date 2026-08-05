@@ -81,6 +81,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   <FiEdit className={styles.icon} /> Update Events
                 </NavLink>
               </li>
+              <li>
+                <NavLink
+                  to="/nissan/registration-fields"
+                  className={({ isActive }) => (isActive ? styles.active : "")}
+                  onClick={toggleSidebar}
+                >
+                  <FiClipboard className={styles.icon} />
+                  Manage Registration Fields
+                </NavLink>
+              </li>
 
               <li>
                 <NavLink
