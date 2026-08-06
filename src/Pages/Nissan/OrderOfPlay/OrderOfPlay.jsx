@@ -1953,9 +1953,31 @@ export default function OrderOfPlay() {
                               type="number"
                               min="1"
                               value={newCourtCount}
-                              onChange={(e) =>
-                                setNewCourtCount(Number(e.target.value))
-                              }
+                              onChange={(e) => {
+                                const count = Number(e.target.value);
+
+                                setNewCourtCount(count);
+
+                                setNewMatchesPerCourt((prev) => {
+                                  const updated = { ...prev };
+
+                                  // Add default match count for every new court
+                                  for (let i = 1; i <= count; i++) {
+                                    if (updated[i] === undefined) {
+                                      updated[i] = 4;
+                                    }
+                                  }
+
+                                  // Remove settings of courts that no longer exist
+                                  Object.keys(updated).forEach((key) => {
+                                    if (Number(key) > count) {
+                                      delete updated[key];
+                                    }
+                                  });
+
+                                  return updated;
+                                });
+                              }}
                               className={styles.courtInput}
                             />
                           </div>
