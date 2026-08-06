@@ -625,6 +625,14 @@ export default function OrderOfPlay() {
 
       const newMatches = availableMatches;
 
+      console.log("NEW COURT COUNT =", newCourtCount);
+      console.log("NEW MATCHES PER COURT =", newMatchesPerCourt);
+      console.log("AVAILABLE MATCHES =", availableMatches.length);
+      console.log(
+        "AVAILABLE MATCH NOS =",
+        availableMatches.map((m) => m.matchNo),
+      );
+
       // New day ka grid banao
       const newDay = buildGrid(
         newMatches,
