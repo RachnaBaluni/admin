@@ -74,14 +74,21 @@
 
 .filterBox {
   background: #f8fafc;
-  border: 1px solid #ddd;
-  padding: 20px;
-  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
   margin-bottom: 20px;
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
-  align-items: flex-start;
+
+  display: grid;
+  grid-template-columns: 220px 240px 280px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.filterBox h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 /* ================= ROUND SELECTOR ================= */
@@ -130,8 +137,8 @@
 .settingsBox {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  min-width: 220px;
+  gap: 10px;
+  justify-content: flex-start;
 }
 
 .settingItem {
@@ -152,8 +159,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 10px;
+  margin-bottom: 8px;
   font-size: 14px;
+  cursor: pointer;
 }
 
 /* ================= INPUT ================= */
@@ -500,4 +508,53 @@
 .winnerTeam {
   font-weight: bold;
   color: #006400;
+}
+.roundGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.roundGrid .roundBtn,
+.roundGrid .activeRoundBtn {
+  width: 100%;
+}
+.settingRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingRow label {
+  min-width: 130px;
+  font-weight: 600;
+}
+
+.smallInput {
+  width: 60px;
+  height: 34px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
+  outline: none;
+}
+
+.smallInput:focus {
+  border-color: #2563eb;
+}
+.matchesInline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.courtBox {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.courtBox span {
+  font-size: 13px;
+  font-weight: 600;
 }

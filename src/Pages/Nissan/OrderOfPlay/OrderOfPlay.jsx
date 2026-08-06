@@ -1631,7 +1631,7 @@ export default function OrderOfPlay() {
           <div className={styles.roundSelector}>
             <h3>Select Rounds</h3>
 
-            <div className={styles.roundButtons}>
+            <div className={styles.roundGrid}>
               {roundsList.map((round) => (
                 <button
                   key={round}
@@ -1651,40 +1651,27 @@ export default function OrderOfPlay() {
           {/* COURTS */}
 
           <div className={styles.settingsBox}>
-            <h3>Court Settings</h3>
-
             <div>
-              <label>Number Of Courts</label>
+              <div className={styles.settingRow}>
+                <label>Number of Courts</label>
 
-              <input
-                type="number"
-                min="1"
-                value={courtCount}
-                onChange={(e) => setCourtCount(Number(e.target.value))}
-                className={styles.courtInput}
-              />
+                <input
+                  type="number"
+                  min="1"
+                  value={courtCount}
+                  onChange={(e) => setCourtCount(Number(e.target.value))}
+                  className={styles.smallInput}
+                />
+              </div>
             </div>
 
-            <div
-              style={{
-                marginTop: "20px",
-              }}
-            >
-              <label>Matches Per Court</label>
+            <div className={styles.settingRow}>
+              <label>Matches / Court</label>
 
-              <div
-                style={{
-                  display: "flex",
-                  gap: "20px",
-                  flexWrap: "wrap",
-                  marginTop: "10px",
-                }}
-              >
-                {Array.from({
-                  length: courtCount,
-                }).map((_, index) => (
-                  <div key={index}>
-                    <p>Court {index + 1}</p>
+              <div className={styles.matchesInline}>
+                {Array.from({ length: courtCount }).map((_, index) => (
+                  <div key={index} className={styles.courtBox}>
+                    <span>C{index + 1}</span>
 
                     <input
                       type="number"
@@ -1702,13 +1689,12 @@ export default function OrderOfPlay() {
                           [index + 1]: value,
                         });
                       }}
-                      className={styles.courtInput}
+                      className={styles.smallInput}
                     />
                   </div>
                 ))}
               </div>
             </div>
-
             <button
               className={styles.generateBtn}
               onClick={() => {
