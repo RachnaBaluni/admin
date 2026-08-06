@@ -1932,8 +1932,8 @@ export default function OrderOfPlay() {
                         <div className={styles.settingsBox}>
                           <h3>Court Settings</h3>
 
-                          <div>
-                            <label>Number Of Courts</label>
+                          <div className={styles.settingRow}>
+                            <label>Number of Courts</label>
 
                             <input
                               type="number"
@@ -1964,7 +1964,7 @@ export default function OrderOfPlay() {
                                   return updated;
                                 });
                               }}
-                              className={styles.courtInput}
+                              className={styles.smallInput}
                             />
                           </div>
 
