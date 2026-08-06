@@ -1969,13 +1969,13 @@ export default function OrderOfPlay() {
                           </div>
 
                           <div className={styles.settingRow}>
-                            <label>Matches PEr Court</label>
+                            <label>Matches Per Court</label>
 
                             <div className={styles.matchesInline}>
                               {Array.from({ length: newCourtCount }).map(
                                 (_, index) => (
                                   <div key={index} className={styles.courtBox}>
-                                    <span>C{index + 1}</span>
+                                    <span>Court {index + 1}</span>
 
                                     <input
                                       type="number"
