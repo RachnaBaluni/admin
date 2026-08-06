@@ -53,6 +53,7 @@
 /* GENERATE */
 
 .generateBtn {
+  width: fit-content;
   background: #2563eb;
 }
 
