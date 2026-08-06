@@ -1666,7 +1666,7 @@ export default function OrderOfPlay() {
             </div>
 
             <div className={styles.settingRow}>
-              <label>Matches / Court</label>
+              <label>Matches Per Court</label>
 
               <div className={styles.matchesInline}>
                 {Array.from({ length: courtCount }).map((_, index) => (
@@ -1968,21 +1968,14 @@ export default function OrderOfPlay() {
                             />
                           </div>
 
-                          <div style={{ marginTop: "20px" }}>
-                            <label>Matches Per Court</label>
+                          <div className={styles.settingRow}>
+                            <label>Matches PEr Court</label>
 
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "20px",
-                                flexWrap: "wrap",
-                                marginTop: "10px",
-                              }}
-                            >
+                            <div className={styles.matchesInline}>
                               {Array.from({ length: newCourtCount }).map(
                                 (_, index) => (
-                                  <div key={index}>
-                                    <p>Court {index + 1}</p>
+                                  <div key={index} className={styles.courtBox}>
+                                    <span>C{index + 1}</span>
 
                                     <input
                                       type="number"
@@ -1995,14 +1988,13 @@ export default function OrderOfPlay() {
                                           [index + 1]: Number(e.target.value),
                                         })
                                       }
-                                      className={styles.courtInput}
+                                      className={styles.smallInput}
                                     />
                                   </div>
                                 ),
                               )}
                             </div>
                           </div>
-
                           <button
                             className={styles.generateBtn}
                             onClick={
